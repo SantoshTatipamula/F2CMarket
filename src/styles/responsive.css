@@ -1,0 +1,22 @@
+@media (max-width: 1024px) {
+  .section-padding {
+    padding: 60px 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .section-padding {
+    padding: 40px 0;
+  }
+
+  .container-custom {
+    padding: 0 15px;
+  }
+}
+
+@media (max-width: 480px) {
+  .btn-primary,
+  .btn-secondary {
+    width: 100%;
+  }
+}
