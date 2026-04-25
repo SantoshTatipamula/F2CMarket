@@ -1,0 +1,148 @@
+// src/data/reviewsData.js
+
+export const reviewsData = [
+  {
+    id: 1,
+    name: "Ramesh Kumar",
+    rating: 5,
+    review:
+      "Very fresh and premium quality. Delivered quickly and packed neatly. The vegetables were exactly as shown in the photos.",
+    avatar: "https://i.pravatar.cc/100?img=12",
+    location: "Karimnagar",
+    date: "2 days ago",
+    helpful: 12,
+    verified: true,
+  },
+  {
+    id: 2,
+    name: "Priya Sharma",
+    rating: 4,
+    review:
+      "Good taste and nice freshness. Will definitely order again. The farmer was very responsive to my questions.",
+    avatar: "https://i.pravatar.cc/100?img=24",
+    location: "Warangal",
+    date: "5 days ago",
+    helpful: 8,
+    verified: true,
+  },
+  {
+    id: 3,
+    name: "Suresh Reddy",
+    rating: 5,
+    review:
+      "Excellent product. Direct farm freshness is clearly visible. Supporting local farmers feels great.",
+    avatar: "https://i.pravatar.cc/100?img=32",
+    location: "Hyderabad",
+    date: "1 week ago",
+    helpful: 15,
+    verified: true,
+  },
+  {
+    id: 4,
+    name: "Anjali Verma",
+    rating: 5,
+    review:
+      "Ordered tomatoes and spinach. Both were fresh and lasted longer than market vegetables.",
+    avatar: "https://i.pravatar.cc/100?img=45",
+    location: "Nizamabad",
+    date: "1 week ago",
+    helpful: 9,
+    verified: true,
+  },
+  {
+    id: 5,
+    name: "Kiran Patel",
+    rating: 4,
+    review:
+      "Nice experience overall. Delivery was on time and product quality was good.",
+    avatar: "https://i.pravatar.cc/100?img=52",
+    location: "Hanamkonda",
+    date: "8 days ago",
+    helpful: 6,
+    verified: true,
+  },
+  {
+    id: 6,
+    name: "Meena Joshi",
+    rating: 5,
+    review:
+      "Loved the freshness and packaging. You can really feel the farm-to-home quality.",
+    avatar: "https://i.pravatar.cc/100?img=61",
+    location: "Hyderabad",
+    date: "10 days ago",
+    helpful: 11,
+    verified: true,
+  },
+  {
+    id: 7,
+    name: "Vikram Singh",
+    rating: 4,
+    review:
+      "Good product quality. Bananas were ripe and sweet. Will order fruits again.",
+    avatar: "https://i.pravatar.cc/100?img=15",
+    location: "Karimnagar",
+    date: "12 days ago",
+    helpful: 5,
+    verified: true,
+  },
+  {
+    id: 8,
+    name: "Sneha Rani",
+    rating: 5,
+    review:
+      "Best online fresh vegetables service I have used so far. Highly recommended.",
+    avatar: "https://i.pravatar.cc/100?img=22",
+    location: "Warangal",
+    date: "2 weeks ago",
+    helpful: 14,
+    verified: true,
+  },
+  {
+    id: 9,
+    name: "Rahul Naidu",
+    rating: 4,
+    review:
+      "Rice quality was nice and clean. Packaging was strong and delivery was quick.",
+    avatar: "https://i.pravatar.cc/100?img=34",
+    location: "Jagtial",
+    date: "2 weeks ago",
+    helpful: 7,
+    verified: true,
+  },
+  {
+    id: 10,
+    name: "Pooja Reddy",
+    rating: 5,
+    review:
+      "The coriander and chillies were super fresh. Perfect quality for daily cooking.",
+    avatar: "https://i.pravatar.cc/100?img=48",
+    location: "Sircilla",
+    date: "3 weeks ago",
+    helpful: 10,
+    verified: true,
+  },
+  {
+    id: 11,
+    name: "Arun Kumar",
+    rating: 4,
+    review:
+      "Affordable pricing and quality products. Great support for local farmers.",
+    avatar: "https://i.pravatar.cc/100?img=58",
+    location: "Mancherial",
+    date: "3 weeks ago",
+    helpful: 6,
+    verified: true,
+  },
+  {
+    id: 12,
+    name: "Divya Sharma",
+    rating: 5,
+    review:
+      "Everything was fresh, clean, and delivered neatly. Will become a regular customer.",
+    avatar: "https://i.pravatar.cc/100?img=67",
+    location: "Hyderabad",
+    date: "1 month ago",
+    helpful: 13,
+    verified: true,
+  },
+];

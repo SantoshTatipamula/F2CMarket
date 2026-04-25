@@ -37,7 +37,8 @@ export default function ProductCard({
 
           {/* Wishlist */}
           <button
-            onClick={(e) => e.preventDefault()}
+            onClick={(e) => {e.preventDefault();
+            e.stopPropagation();}}
             className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-[var(--surface)] hover:scale-105 transition"
           >
             <Heart

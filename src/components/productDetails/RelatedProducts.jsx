@@ -1,4 +1,4 @@
-// src/components/productDetails/RelatedProducts.jsx
+import { useNavigate } from "react-router-dom";
 
 import { ArrowRight, Sparkles } from "lucide-react";
 import ProductCard from "../product/ProductCard";
@@ -12,6 +12,16 @@ export default function RelatedProducts({ product }) {
         item.category === product?.category
     )
     .slice(0, 4);
+
+
+    const navigate = useNavigate();
+
+const goToProducts = () => {
+  navigate("/products");
+};
+
+
+
 
   if (!relatedProducts.length) return null;
 
@@ -36,7 +46,7 @@ export default function RelatedProducts({ product }) {
           </p>
         </div>
 
-        <button className="group inline-flex items-center gap-2 rounded-full border-2 border-[var(--border)] bg-white px-6 py-3 font-semibold text-[var(--text-primary)] transition-all hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-white hover:scale-105">
+        <button onClick={goToProducts} className="group inline-flex items-center gap-2 rounded-full border-2 border-[var(--border)] bg-white px-6 py-3 font-semibold text-[var(--text-primary)] transition-all hover:border-[var(--primary)] hover:bg-[var(--primary)] hover:text-white hover:scale-105">
           <span>View All</span>
           <ArrowRight 
             size={18} 
@@ -66,7 +76,7 @@ export default function RelatedProducts({ product }) {
           Discover our wide range of farm-fresh vegetables, fruits, and organic products
         </p>
         
-        <button className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--primary)] to-green-600 px-8 py-3.5 font-bold text-white shadow-lg shadow-[var(--primary)]/30 transition-all hover:scale-105 hover:shadow-xl">
+        <button onClick={goToProducts} className="mt-6 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[var(--primary)] to-green-600 px-8 py-3.5 font-bold text-white shadow-lg shadow-[var(--primary)]/30 transition-all hover:scale-105 hover:shadow-xl">
           <span>Browse All Products</span>
           <ArrowRight size={18} />
         </button>

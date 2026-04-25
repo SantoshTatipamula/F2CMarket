@@ -5,12 +5,12 @@ import { Home, ChevronRight, ArrowLeft, Shield, Truck, Leaf } from "lucide-react
 
 import { productsData } from "@/data/productsData";
 
-import ProductGallery from "../../components/productDetails/ProductGallery";
-import ProductInfo from "../../components/productDetails/ProductInfo";
-import FarmerCard from "../../components/productDetails/FarmerCard";
-import TrustIndicators from "../../components/productDetails/TrustIndicators";
-import ProductReviews from "../../components/productDetails/ProductReviews";
-import RelatedProducts from "../../components/productDetails/RelatedProducts";
+import ProductGallery from "@/components/productDetails/ProductGallery";
+import ProductInfo from "@/components/productDetails/ProductInfo";
+import FarmerCard from "@/components/productDetails/FarmerCard";
+
+import ProductReviews from "@/components/productDetails/productReviews/ProductReviews";
+import RelatedProducts from "@/components/productDetails/RelatedProducts";
 
 export default function ProductDetails() {
   const { id } = useParams();
