@@ -8,7 +8,7 @@ export default function IconCard({
   color,
 }) {
   return (
-    <div className="h-full bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div className="h-full bg-[var(--bg)] border border-[var(--border)] rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
       {/* Icon */}
       <div
@@ -18,12 +18,12 @@ export default function IconCard({
       </div>
 
       {/* Title */}
-      <h3 className="text-xl font-semibold text-slate-900">
+      <h3 className="text-xl font-semibold text-[var(--text-primary)]">
         {title}
       </h3>
 
       {/* Description */}
-      <p className="mt-3 text-slate-600 leading-relaxed flex-grow">
+      <p className="mt-3 text-[var(--text-secondary)] leading-relaxed flex-grow">
         {desc}
       </p>
 

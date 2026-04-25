@@ -1,17 +1,36 @@
 :root {
+  /* Brand */
   --primary: #16A34A;
   --primary-hover: #15803D;
   --secondary: #84CC16;
   --accent: #F59E0B;
 
+  /* Backgrounds */
   --bg: #FFFFFF;
   --surface: #F8FAFC;
+  --surface-2: #F1F5F9;
 
+  /* Text */
   --text-primary: #0F172A;
-  --text-secondary: #64748B;
+  --text-secondary: #475569;
+  --text-muted: #64748B;
+  --text-light: #94A3B8;
 
+  /* Borders */
   --border: #E2E8F0;
+  --border-strong: #CBD5E1;
 
+  /* States */
   --success: #22C55E;
   --error: #EF4444;
+  --warning: #F59E0B;
+
+  /* Effects */
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  /* Radius */
+  --radius-sm: 0.75rem;
+  --radius-md: 1rem;
+  --radius-lg: 1.5rem;
 }

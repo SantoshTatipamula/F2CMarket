@@ -2,7 +2,7 @@ import { Star } from "lucide-react";
 
 export default function TestimonialCard({ item }) {
   return (
-    <div className="h-full bg-white border border-slate-200 rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div className="h-full bg-[var(--bg)] border border-[var(--border)] rounded-3xl p-6 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col">
 
       {/* Stars */}
       <div className="flex gap-1 mb-4">
@@ -16,7 +16,7 @@ export default function TestimonialCard({ item }) {
       </div>
 
       {/* Review */}
-      <p className="text-slate-600 leading-relaxed flex-grow">
+      <p className="text-[var(--text-secondary)] leading-relaxed flex-grow">
         "{item.review}"
       </p>
 
@@ -29,10 +29,10 @@ export default function TestimonialCard({ item }) {
         />
 
         <div>
-          <h4 className="font-semibold text-slate-900">
+          <h4 className="font-semibold text-[var(--text-primary)]">
             {item.name}
           </h4>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-[var(--text-muted)]">
             {item.location}
           </p>
         </div>

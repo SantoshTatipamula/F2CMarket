@@ -14,7 +14,7 @@ export const benefits = [
     title: "Fast Delivery",
     desc: "Fresh products are delivered quickly while maintaining quality.",
     bg: "bg-green-100",
-    color: "text-green-600",
+    color: "text-[var(--primary)]",
   },
   {
     id: 2,

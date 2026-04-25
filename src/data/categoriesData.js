@@ -13,7 +13,7 @@ export const categories = [
     title: "Vegetables",
     icon: Leaf,
     bg: "bg-green-100",
-    color: "text-green-600",
+    color: "text-[var(--primary)]",
   },
   {
     id: 2,

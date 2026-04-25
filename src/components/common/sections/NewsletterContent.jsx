@@ -1,3 +1,8 @@
+import delevery from "../../../assets/icons/fast-delivery.png";
+import money from "../../../assets/icons/money.png";
+import herbal from "../../../assets/icons/herbs.png";
+ 
+
 export default function NewsletterContent() {
   return (
     <>
@@ -11,9 +16,21 @@ export default function NewsletterContent() {
       </p>
 
       <div className="mt-6 flex flex-wrap gap-4 text-sm text-white/90 font-medium">
-        <span>🌿 Fresh Updates</span>
-        <span>💰 Special Discounts</span>
-        <span>🚚 Early Access</span>
+        <span className="flex items-center justify-center gap-2">
+          {" "}
+          <img src={herbal} alt="Fast Delivery" className="w-6" />
+          <p>Fresh Updates</p>
+        </span>
+        <span className="flex items-center justify-center gap-2">
+          {" "}
+          <img src={money} alt="Fast Delivery" className="w-6" />
+          <p>Special Discounts</p>
+        </span>
+        <span className="flex items-center justify-center gap-2">
+          {" "}
+          <img src={delevery} alt="Fast Delivery" className="w-6" />
+          <p>Early Access</p>
+        </span>
       </div>
     </>
   );

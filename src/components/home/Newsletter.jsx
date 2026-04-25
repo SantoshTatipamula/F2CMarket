@@ -10,10 +10,12 @@ import {
   fadeRight,
 } from "../../utils/animations";
 
+import email from "../../assets/icons/email.png";
+
 export default function Newsletter() {
   return (
     <motion.section
-      className="py-20 bg-white relative overflow-hidden"
+      className="py-20 bg-[var(--bg)] relative overflow-hidden"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: false, amount: 0.15 }}
@@ -28,7 +30,8 @@ export default function Newsletter() {
         {/* Header */}
         <motion.div variants={fadeUp}>
           <SectionHeader
-            badge="📩 Stay Updated"
+            badge="Stay Updated"
+            icon={email}
             title="Fresh Offers in Your"
             highlight="Inbox"
             description="Get seasonal deals, new arrivals and farm-fresh updates delivered directly to your email."

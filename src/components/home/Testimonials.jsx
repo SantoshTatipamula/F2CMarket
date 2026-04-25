@@ -7,10 +7,12 @@ import {
   staggerContainer,
 } from "../../utils/animations";
 
+import message from "../../assets/icons/message.png";
+
 export default function Testimonials() {
   return (
     <motion.section
-      className="py-20 bg-slate-50 relative overflow-hidden"
+      className="py-20 bg-[var(--surface)] relative overflow-hidden"
       initial="hidden"
       whileInView="visible"
       viewport={{ once: false, amount: 0.15 }}
@@ -25,11 +27,13 @@ export default function Testimonials() {
         {/* Header */}
         <motion.div variants={fadeUp}>
           <SectionHeader
-            badge="💬 Testimonials"
+            badge="Testimonials"
+            icon={message}
             title="What Our Customers"
             highlight="Say"
             description="Real experiences from people who buy fresh products through F2CMARKET."
           />
+          
         </motion.div>
 
         {/* Cards */}

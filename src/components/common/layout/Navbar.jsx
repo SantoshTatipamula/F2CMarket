@@ -1,3 +1,5 @@
+import { NavLink } from "react-router-dom";
+
 import logo from "../../../assets/logos/Logo.png";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -8,7 +10,7 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-50 bg-[var(--bg)]/95 backdrop-blur-2xl border-b border-[var(--border)] shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 lg:px-8 h-[60px] flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
@@ -20,24 +22,24 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Menu */}
-          <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-slate-700">
+          <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[var(--text-secondary)]">
             <li>
-              <Link to="/" className="hover:text-green-600 transition">
+              <NavLink to="/" className="hover:text-[var(--primary)] transition">
                 Home
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/products" className="hover:text-green-600 transition">
+              <NavLink to="/products" className="hover:text-[var(--primary)] transition">
                 Products
-              </Link>
+              </NavLink>
             </li>
             <li>
-              <Link to="/farmers" className="hover:text-green-600 transition">
+              <Link to="/farmers" className="hover:text-[var(--primary)] transition">
                 Farmers
               </Link>
             </li>
             <li>
-              <Link to="/about" className="hover:text-green-600 transition">
+              <Link to="/about" className="hover:text-[var(--primary)] transition">
                 About
               </Link>
             </li>
@@ -45,11 +47,11 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button className="p-2 rounded-xl hover:bg-slate-100 transition">
+            <button className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition">
               <Search size={20} />
             </button>
 
-            <button className="p-2 rounded-xl hover:bg-slate-100 transition relative">
+            <button className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
               <ShoppingCart size={20} />
               <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 rounded-full">
                 0
@@ -58,7 +60,7 @@ export default function Navbar() {
 
             <Link
               to="/login"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
             >
               <User size={18} />
               Login
@@ -85,7 +87,7 @@ export default function Navbar() {
 
       {/* Slide Drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-[280px] bg-white z-50 shadow-xl transform transition-transform duration-300 ${
+        className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-xl transform transition-transform duration-300 ${
           menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -99,7 +101,7 @@ export default function Navbar() {
         </div>
 
         {/* Links */}
-        <div className="flex flex-col p-5 gap-5 text-[16px] font-medium text-slate-700">
+        <div className="flex flex-col p-5 gap-5 text-[16px] font-medium text-[var(--text-secondary)]">
           <Link to="/" onClick={() => setMenuOpen(false)}>
             Home
           </Link>
@@ -115,7 +117,7 @@ export default function Navbar() {
           <Link
             to="/login"
             onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 transition"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
           >
             <User size={18} />
             Login

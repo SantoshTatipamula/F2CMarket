@@ -5,25 +5,35 @@
 @tailwind utilities;
 
 /* Reset */
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  /* border: 1px solid red; */
 }
 
-/* Body */
+/* Root Defaults */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Poppins', sans-serif;
   background: var(--bg);
   color: var(--text-primary);
-  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* Images */
-img {
-  max-width: 100%;
+/* Media */
+img,
+picture,
+video,
+canvas,
+svg {
   display: block;
+  max-width: 100%;
 }
 
 /* Links */
@@ -36,27 +46,52 @@ a {
 button {
   cursor: pointer;
   border: none;
-  outline: none;
+  background: none;
+  font: inherit;
 }
 
-/* Inputs */
+/* Forms */
 input,
 textarea,
 select {
+  font: inherit;
   outline: none;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+textarea:focus,
+select:focus,
+input:not([type="checkbox"]):not([type="radio"]):focus,
+button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Text Selection */
+::selection {
+  background: var(--primary);
+  color: white;
 }
 
 /* Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: var(--surface-2);
 }
 
 ::-webkit-scrollbar-thumb {
   background: var(--primary);
-  border-radius: 20px;
+  border-radius: 999px;
 }
 
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover);
+}

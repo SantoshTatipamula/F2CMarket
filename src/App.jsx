@@ -1,14 +1,11 @@
-import Footer from "./components/common/layout/Footer";
-import Navbar from "./components/common/layout/Navbar";
-import Home from "./pages/consumer/Home";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 
 function App() {
   return (
-    <>
-      <Navbar />
-      <Home />
-      <Footer/>
-    </>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
   );
 }
 
