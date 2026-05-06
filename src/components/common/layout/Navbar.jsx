@@ -2,10 +2,28 @@ import { NavLink } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import logo from "../../../assets/logos/Logo.png";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
+import {
+  Menu,
+  X,
+  Search,
+  ShoppingCart,
+  User,
+  Package,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -80,40 +98,65 @@ export default function Navbar() {
               )}
             </Link>
 
-            {user ? (
-  <div className="flex items-center gap-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 hover:bg-[var(--surface-2)] transition">
+                  <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-semibold">
+                    {user.email?.charAt(0).toUpperCase()}
+                  </div>
+                </button>
+              </DropdownMenuTrigger>
 
-    {/* Orders */}
-    <Link
-      to="/orders"
-      className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
-    >
-      Orders
-    </Link>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl"
+              >
+                {/* User */}
+                <DropdownMenuLabel className="space-y-1">
+                  <p className="text-sm font-medium">My Account</p>
 
-    {/* User */}
-    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
-      <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-semibold">
-        {user.email?.charAt(0).toUpperCase()}
-      </div>
+                  <p className="text-xs text-[var(--text-secondary)] truncate">
+                    {user.email}
+                  </p>
+                </DropdownMenuLabel>
 
-      <button
-        onClick={logout}
-        className="text-sm text-[var(--text-secondary)] hover:text-red-500 transition"
-      >
-        Logout
-      </button>
-    </div>
-  </div>
-) : (
-  <Link
-    to="/login"
-    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
-  >
-    <User size={18} />
-    Login
-  </Link>
-)}
+                <DropdownMenuSeparator />
+
+                {/* Orders */}
+                <DropdownMenuItem asChild>
+                  <Link
+                    to="/orders"
+                    className="flex items-center gap-2 cursor-pointer"
+                  >
+                    <Package size={16} />
+                    My Orders
+                  </Link>
+                </DropdownMenuItem>
+
+                {/* Profile */}
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                  <User size={16} />
+                  Profile
+                </DropdownMenuItem>
+
+                {/* Settings */}
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                  <Settings size={16} />
+                  Settings
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Logout */}
+                <DropdownMenuItem
+                  onClick={logout}
+                  className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Mobile Toggle */}
@@ -164,36 +207,68 @@ export default function Navbar() {
             About
           </Link>
           {user ? (
-  <>
-    <Link
-      to="/orders"
-      onClick={() => setMenuOpen(false)}
-      className="hover:text-[var(--primary)] transition"
-    >
-      My Orders
-    </Link>
+            <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-3">
+              {/* User Info */}
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-semibold">
+                  {user.email?.charAt(0).toUpperCase()}
+                </div>
 
-    <button
-      onClick={() => {
-        logout();
-        setMenuOpen(false);
-      }}
-      className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition text-left"
-    >
-      <User size={18} />
-      Logout
-    </button>
-  </>
-) : (
-  <Link
-    to="/login"
-    onClick={() => setMenuOpen(false)}
-    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
-  >
-    <User size={18} />
-    Login
-  </Link>
-)}
+                <div>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    My Account
+                  </p>
+
+                  <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">
+                    {user.email}
+                  </p>
+                </div>
+              </div>
+
+              {/* Orders */}
+              <Link
+                to="/orders"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+              >
+                <Package size={18} />
+                My Orders
+              </Link>
+
+              {/* Profile */}
+              <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+                <User size={18} />
+                Profile
+              </button>
+
+              {/* Settings */}
+              <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+                <Settings size={18} />
+                Settings
+              </button>
+
+              {/* Logout */}
+              <button
+                onClick={() => {
+                  logout();
+                  setMenuOpen(false);
+                }}
+                className="flex items-center gap-2 text-red-500"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMenuOpen(false)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
+            >
+              <User size={18} />
+              Login
+            </Link>
+          )}
         </div>
       </div>
     </>

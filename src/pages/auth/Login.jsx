@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import google from "@/assets/icons/google.png";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
 
   const [form, setForm] = useState({
@@ -20,6 +21,7 @@ export default function Login() {
 
   const [showPassword, setShowPassword] = useState(false);
 
+  const from = location.state?.from?.pathname || "/";
   const isValid = form.email.trim() && form.password.trim();
 
   const handleChange = (e) => {
@@ -31,7 +33,7 @@ export default function Login() {
     if (!isValid) return;
 
     login({ email: form.email });
-    navigate("/");
+    navigate(from, { replace: true });
   };
 
   return (
