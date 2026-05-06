@@ -2,23 +2,33 @@
 
 import { Star, MapPin } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "@/context/CartContext";
+import { toast } from "sonner";
 
 import QuantitySelector from "./QuantitySelector";
 import ProductPricing from "./ProductPricing";
 import ProductActions from "./ProductActions";
 
 export default function ProductInfo({ product }) {
+
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  
   const [quantity, setQuantity] = useState(1);
 
   const price = Number(String(product?.price).replace(/[^\d.]/g, "")) || 0;
 
   const handleAddToCart = () => {
-    console.log("Added to cart:", { product, quantity });
-  };
+  addToCart(product, quantity);
+
+  toast.success(`${product.name} added to cart`);
+};
 
   const handleBuyNow = () => {
-    console.log("Buy now:", { product, quantity });
-  };
+  addToCart(product, quantity);
+  navigate("/checkout");
+};
 
   return (
     <div className="space-y-6">

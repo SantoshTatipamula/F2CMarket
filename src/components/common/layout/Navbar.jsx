@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { useCart } from "@/context/CartContext";
 
 import logo from "../../../assets/logos/Logo.png";
 import { useState } from "react";
@@ -6,6 +7,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 
 export default function Navbar() {
+  const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -24,22 +26,34 @@ export default function Navbar() {
           {/* Desktop Menu */}
           <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[var(--text-secondary)]">
             <li>
-              <NavLink to="/" className="hover:text-[var(--primary)] transition">
+              <NavLink
+                to="/"
+                className="hover:text-[var(--primary)] transition"
+              >
                 Home
               </NavLink>
             </li>
             <li>
-              <NavLink to="/products" className="hover:text-[var(--primary)] transition">
+              <NavLink
+                to="/products"
+                className="hover:text-[var(--primary)] transition"
+              >
                 Products
               </NavLink>
             </li>
             <li>
-              <Link to="/farmers" className="hover:text-[var(--primary)] transition">
+              <Link
+                to="/farmers"
+                className="hover:text-[var(--primary)] transition"
+              >
                 Farmers
               </Link>
             </li>
             <li>
-              <Link to="/about" className="hover:text-[var(--primary)] transition">
+              <Link
+                to="/about"
+                className="hover:text-[var(--primary)] transition"
+              >
                 About
               </Link>
             </li>
@@ -51,12 +65,18 @@ export default function Navbar() {
               <Search size={20} />
             </button>
 
-            <button className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
+            <Link
+              to="/cart"
+              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+            >
               <ShoppingCart size={20} />
-              <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 rounded-full">
-                0
-              </span>
-            </button>
+
+              {cartCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
 
             <Link
               to="/login"
