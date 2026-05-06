@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 import logo from "../../../assets/logos/Logo.png";
 import { useState } from "react";
@@ -7,6 +8,7 @@ import { Link } from "react-router-dom";
 import { Menu, X, Search, ShoppingCart, User } from "lucide-react";
 
 export default function Navbar() {
+  const { user, logout } = useAuth();
   const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -78,13 +80,40 @@ export default function Navbar() {
               )}
             </Link>
 
-            <Link
-              to="/login"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
-            >
-              <User size={18} />
-              Login
-            </Link>
+            {user ? (
+  <div className="flex items-center gap-3">
+
+    {/* Orders */}
+    <Link
+      to="/orders"
+      className="text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+    >
+      Orders
+    </Link>
+
+    {/* User */}
+    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[var(--border)] bg-[var(--surface)]">
+      <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-semibold">
+        {user.email?.charAt(0).toUpperCase()}
+      </div>
+
+      <button
+        onClick={logout}
+        className="text-sm text-[var(--text-secondary)] hover:text-red-500 transition"
+      >
+        Logout
+      </button>
+    </div>
+  </div>
+) : (
+  <Link
+    to="/login"
+    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
+  >
+    <User size={18} />
+    Login
+  </Link>
+)}
           </div>
 
           {/* Mobile Toggle */}
@@ -134,14 +163,37 @@ export default function Navbar() {
           <Link to="/about" onClick={() => setMenuOpen(false)}>
             About
           </Link>
-          <Link
-            to="/login"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
-          >
-            <User size={18} />
-            Login
-          </Link>
+          {user ? (
+  <>
+    <Link
+      to="/orders"
+      onClick={() => setMenuOpen(false)}
+      className="hover:text-[var(--primary)] transition"
+    >
+      My Orders
+    </Link>
+
+    <button
+      onClick={() => {
+        logout();
+        setMenuOpen(false);
+      }}
+      className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition text-left"
+    >
+      <User size={18} />
+      Logout
+    </button>
+  </>
+) : (
+  <Link
+    to="/login"
+    onClick={() => setMenuOpen(false)}
+    className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
+  >
+    <User size={18} />
+    Login
+  </Link>
+)}
         </div>
       </div>
     </>

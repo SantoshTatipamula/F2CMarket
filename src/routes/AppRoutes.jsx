@@ -1,9 +1,9 @@
 import { Routes, Route } from "react-router-dom";
+
 import AppLayout from "../components/common/layout/AppLayout";
 import ScrollToTop from "@/components/common/layout/ScrollToTop";
 
 import ProtectedRoute from "./ProtectedRoute";
-import Login from "../pages/auth/Login";
 
 import Home from "../pages/consumer/Home";
 import Products from "../pages/consumer/Products";
@@ -13,20 +13,29 @@ import Checkout from "../pages/consumer/Checkout";
 import OrderSuccess from "../pages/consumer/OrderSuccess";
 import Orders from "@/pages/consumer/Orders";
 
+import Login from "../pages/auth/Login";
+import Register from "../pages/auth/Register";
+
 export default function AppRoutes() {
   return (
     <>
       <ScrollToTop />
 
       <Routes>
-        <Route element={<AppLayout />}>
 
+        {/* Main App */}
+        <Route element={<AppLayout />}>
           <Route index element={<Home />} />
+
           <Route path="products" element={<Products />} />
-          <Route path="products/:id" element={<ProductDetails />} />
+
+          <Route
+            path="products/:id"
+            element={<ProductDetails />}
+          />
+
           <Route path="cart" element={<Cart />} />
 
-          {/* 🔒 Protected Routes */}
           <Route
             path="checkout"
             element={
@@ -45,12 +54,20 @@ export default function AppRoutes() {
             }
           />
 
-          {/* Success page (optional protection) */}
-          <Route path="order-success" element={<OrderSuccess />} />
-
-          <Route path="login" element={<Login />} />
-
+          <Route
+            path="order-success"
+            element={<OrderSuccess />}
+          />
         </Route>
+
+        {/* Auth Pages */}
+        <Route path="login" element={<Login />} />
+
+        <Route
+          path="register"
+          element={<Register />}
+        />
+
       </Routes>
     </>
   );
