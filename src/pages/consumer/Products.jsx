@@ -1,5 +1,7 @@
 import { useState, useMemo } from "react";
 import { productsData } from "@/data/productsData";
+import { useSearchParams } from "react-router-dom";
+
 import useProductsFilter from "@/hooks/useProductsFilter";
 import ProductFilters from "@/components/product/ProductFilters";
 import ProductsPageHeader from "@/components/product/ProductPageHeader";
@@ -11,6 +13,7 @@ export default function Products() {
     return ["All", ...new Set(productsData.map((item) => item.category))];
   }, []);
 
+  
   /* Dynamic Max Price */
   const maxLimit = useMemo(() => {
     return Math.max(
@@ -31,7 +34,7 @@ export default function Products() {
     setMinRating,
     filteredProducts,
   } = useProductsFilter(productsData);
-
+  
   /* Dynamic Locations */
   const availableLocations = useMemo(() => {
     const locations = productsData.map((p) => {
@@ -39,18 +42,31 @@ export default function Products() {
 
       return loc.charAt(0).toUpperCase() + loc.slice(1).toLowerCase();
     });
-
+    
     return ["All", ...new Set(locations.filter((loc) => loc !== ""))];
   }, []);
+  
+  // Search Query
+  
+  const [searchParams] = useSearchParams();
 
+  const searchQuery = searchParams.get("search")?.toLowerCase() || "";
+  
   /* Final Filtering */
   const finalFilteredProducts = useMemo(() => {
     return filteredProducts.filter((product) => {
-      if (selectedLocation === "All") return true;
+      /* Location Filter */
+      const matchesLocation =
+        selectedLocation === "All"
+          ? true
+          : product.location?.toLowerCase() === selectedLocation.toLowerCase();
 
-      return product.location?.toLowerCase() === selectedLocation.toLowerCase();
+      /* Search Filter */
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery);
+
+      return matchesLocation && matchesSearch;
     });
-  }, [filteredProducts, selectedLocation]);
+  }, [filteredProducts, selectedLocation, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">

@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 import {
   DropdownMenu,
@@ -29,6 +30,20 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    const trimmed = searchQuery.trim();
+
+    if (!trimmed) return;
+
+    navigate(`/products?search=${trimmed}`);
+
+    setSearchQuery("");
+  };
 
   return (
     <>
@@ -81,9 +96,35 @@ export default function Navbar() {
 
           {/* Desktop Actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <button className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition">
-              <Search size={20} />
-            </button>
+            <form
+              onSubmit={handleSearch}
+              className="hidden md:flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)]"
+            >
+              <button type="submit">
+                <Search size={18} className="text-[var(--text-secondary)]" />
+              </button>
+
+              <input
+                type="text"
+                placeholder="Search fresh products..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="bg-transparent outline-none border-none focus:outline-none focus:ring-0 text-sm w-44 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
+              />
+            </form>
+
+            {/* <div className="relative w-full">
+        <Search
+          size={20}
+          className="absolute top-1/2 -translate-y-1/2 left-4 text-[var(--text-light)]"
+        />
+
+        <input
+          type="text"
+          placeholder="Search fresh products..."
+          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-[var(--border-strong)] focus:border-green-500 outline-none"
+        />
+      </div> */}
 
             <Link
               to="/cart"

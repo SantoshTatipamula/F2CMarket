@@ -6,7 +6,7 @@ export default function HeroContent() {
   return (
     <>
       {/* Badge */}
-      <span className="inline-flex items-center gap-2 bg-green-100 hover:bg-[var(--primary-hover)] px-4 py-2 rounded-full text-sm font-semibold my-3">
+      <span className="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full text-sm font-semibold my-3">
         <img src={herbal} alt="Fresh Farm" className="w-5" />
         Fresh Farm Delivery
       </span>

@@ -9,7 +9,7 @@ export default function SectionHeader({
   return (
     <div className={`${center ? "text-center" : ""} mb-14`}>
       {badge && (
-        <span className="inline-flex items-center gap-2 bg-green-100 hover:bg-[var(--primary-hover)] px-4 py-2 rounded-full text-sm font-semibold my-3">
+        <span className="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full text-sm font-semibold my-3">
           <span>
             <img src={icon} alt="Herbal Leaves" className="w-5" />
           </span>{" "}
