@@ -15,6 +15,7 @@ import Orders from "@/pages/consumer/Orders";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
+import Wishlist from "../pages/consumer/Wishlist";
 
 export default function AppRoutes() {
   return (
@@ -35,6 +36,8 @@ export default function AppRoutes() {
           />
 
           <Route path="cart" element={<Cart />} />
+
+          <Route path="wishlist" element={<Wishlist />} />
 
           <Route
             path="checkout"

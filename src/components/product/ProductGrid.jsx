@@ -1,7 +1,10 @@
 import { SearchX } from "lucide-react";
 import ProductCard from "@/components/product/ProductCard";
 
-export default function ProductGrid({ products }) {
+export default function ProductGrid({
+  products,
+  gridClassName = "",
+}) {
   if (products.length === 0) {
     return (
       <div className="bg-[var(--bg)] border border-[var(--border)] rounded-3xl p-10 text-center flex flex-col items-center">
@@ -25,7 +28,9 @@ export default function ProductGrid({ products }) {
   }
 
   return (
-    <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-6">
+    <div
+      className={`grid sm:grid-cols-2 xl:grid-cols-3 gap-6 ${gridClassName}`}
+    >
       {products.map((product) => (
         <ProductCard
           key={product.id}

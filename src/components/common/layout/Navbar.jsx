@@ -12,6 +12,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useWishlist } from "@/context/WishlistContext";
+
 import logo from "../../../assets/logos/Logo.png";
 import { useState } from "react";
 import { Link } from "react-router-dom";
@@ -24,6 +26,7 @@ import {
   Package,
   Settings,
   LogOut,
+  Heart,
 } from "lucide-react";
 
 export default function Navbar() {
@@ -44,6 +47,8 @@ export default function Navbar() {
 
     setSearchQuery("");
   };
+
+  const { wishlistCount } = useWishlist();
 
   return (
     <>
@@ -113,18 +118,18 @@ export default function Navbar() {
               />
             </form>
 
-            {/* <div className="relative w-full">
-        <Search
-          size={20}
-          className="absolute top-1/2 -translate-y-1/2 left-4 text-[var(--text-light)]"
-        />
+            <Link
+              to="/wishlist"
+              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+            >
+              <Heart size={20} />
 
-        <input
-          type="text"
-          placeholder="Search fresh products..."
-          className="w-full pl-12 pr-4 py-4 rounded-2xl border border-[var(--border-strong)] focus:border-green-500 outline-none"
-        />
-      </div> */}
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
 
             <Link
               to="/cart"
@@ -246,6 +251,40 @@ export default function Navbar() {
           </Link>
           <Link to="/about" onClick={() => setMenuOpen(false)}>
             About
+          </Link>
+
+          <Link
+            to="/wishlist"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+          >
+            <div className="flex items-center gap-2">
+              <Heart size={18} />
+              Wishlist
+            </div>
+
+            {wishlistCount > 0 && (
+              <span className="min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                {wishlistCount}
+              </span>
+            )}
+          </Link>
+
+          <Link
+            to="/cart"
+            onClick={() => setMenuOpen(false)}
+            className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+          >
+            <div className="flex items-center gap-2">
+              <ShoppingCart size={18} />
+              Cart
+            </div>
+
+            {cartCount > 0 && (
+              <span className="min-w-[22px] h-[22px] px-1 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center">
+                {cartCount}
+              </span>
+            )}
           </Link>
           {user ? (
             <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-3">
