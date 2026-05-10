@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Heart, ShoppingCart, Star, MapPin } from "lucide-react";
+import { toast } from "sonner";
 
 export default function ProductCard({
   product,
@@ -39,6 +40,12 @@ export default function ProductCard({
               e.stopPropagation();
 
               toggleWishlist(product);
+              if (isWishlisted) {
+                toast.error(`${product.name} removed from wishlist`);
+                console.log(product);
+              } else {
+                toast.success(`${product.name} added to wishlist`);
+              }
             }}
             className="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-white/90 backdrop-blur flex items-center justify-center hover:bg-[var(--surface)] hover:scale-105 transition"
           >
@@ -95,6 +102,7 @@ export default function ProductCard({
                 e.stopPropagation();
 
                 addToCart(product);
+                toast.success(`${product.name} added to cart`);
               }}
               className="min-w-[120px] px-5 py-2.5 rounded-2xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white font-semibold flex items-center justify-center gap-2 transition"
             >
