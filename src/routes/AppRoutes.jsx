@@ -12,6 +12,7 @@ import Cart from "../pages/consumer/Cart";
 import Checkout from "../pages/consumer/Checkout";
 import OrderSuccess from "../pages/consumer/OrderSuccess";
 import Orders from "@/pages/consumer/Orders";
+import Farmers from "../pages/consumer/Farmers";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
@@ -61,7 +62,9 @@ export default function AppRoutes() {
             path="order-success"
             element={<OrderSuccess />}
           />
+        <Route path="farmers" element={<Farmers />} />
         </Route>
+
 
         {/* Auth Pages */}
         <Route path="login" element={<Login />} />
