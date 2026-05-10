@@ -266,6 +266,23 @@ export default function Navbar() {
                 </div>
               </div>
 
+              <form
+                onSubmit={handleSearch}
+                className="flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)]"
+              >
+                <button type="submit">
+                  <Search size={18} className="text-[var(--text-secondary)]" />
+                </button>
+
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent outline-none border-none focus:ring-0 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
+                />
+              </form>
+
               {/* Orders */}
               <Link
                 to="/orders"
