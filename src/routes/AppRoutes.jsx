@@ -13,6 +13,7 @@ import Checkout from "../pages/consumer/Checkout";
 import OrderSuccess from "../pages/consumer/OrderSuccess";
 import Orders from "@/pages/consumer/Orders";
 import Farmers from "../pages/consumer/Farmers";
+import About from "../pages/common/About";
 
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
@@ -63,6 +64,8 @@ export default function AppRoutes() {
             element={<OrderSuccess />}
           />
         <Route path="farmers" element={<Farmers />} />
+
+        <Route path="/about" element={<About />} />
         </Route>
 
 
