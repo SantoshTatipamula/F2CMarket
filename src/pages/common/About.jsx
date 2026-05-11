@@ -1,4 +1,3 @@
-// import AboutFarmers from "@/components/common/about/AboutFarmers";
 import AboutHero from "@/components/common/about/AboutHero";
 import AboutMission from "@/components/common/about/AboutMission";
 import AboutStory from "@/components/common/about/AboutStory";
@@ -10,7 +9,6 @@ const About = () => {
       <AboutHero />
       <AboutStory/>
       <AboutMission/>
-      {/* <AboutFarmers/> */}
       <AppStats/>
     </main>
   );

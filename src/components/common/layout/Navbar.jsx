@@ -1,54 +1,83 @@
-import { NavLink } from "react-router-dom";
-import { useCart } from "@/context/CartContext";
-import { useAuth } from "@/context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import {
+  Menu, X, Search, ShoppingCart, User, Package,
+  Settings, LogOut, Heart,
+} from "lucide-react";
 
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
+  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
 
-import logo from "../../../assets/logos/Logo.png";
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import {
-  Menu,
-  X,
-  Search,
-  ShoppingCart,
-  User,
-  Package,
-  Settings,
-  LogOut,
-  Heart,
-} from "lucide-react";
+import logo from "@/assets/logos/Logo.png";
+
+/* ─── Small reusable sub-components ───────────────────────────────── */
+
+/** Coloured notification dot on cart / wishlist icons */
+function NavBadge({ count, color = "bg-orange-500" }) {
+  if (!count) return null;
+  return (
+    <span
+      className={`absolute -top-1 -right-1 ${color} text-white text-[10px] px-1.5 rounded-full`}
+    >
+      {count}
+    </span>
+  );
+}
+
+/** Shared search bar markup */
+function SearchBar({ value, onChange, onSubmit, className = "" }) {
+  return (
+    <form
+      onSubmit={onSubmit}
+      className={`flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)] ${className}`}
+    >
+      <button type="submit">
+        <Search size={18} className="text-[var(--text-secondary)]" />
+      </button>
+      <input
+        type="text"
+        placeholder="Search fresh products..."
+        value={value}
+        onChange={onChange}
+        className="bg-transparent outline-none border-none focus:ring-0 text-sm w-44 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
+      />
+    </form>
+  );
+}
+
+/* ─── Main Navbar ──────────────────────────────────────────────────── */
+
+const NAV_LINKS = [
+  { label: "Home", to: "/" },
+  { label: "Products", to: "/products" },
+  { label: "Farmers", to: "/farmers" },
+  { label: "About", to: "/about" },
+];
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { cartCount } = useCart();
-  const [menuOpen, setMenuOpen] = useState(false);
-
+  const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
+
+  const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  const closeMenu = () => setMenuOpen(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
     const trimmed = searchQuery.trim();
-
     if (!trimmed) return;
-
     navigate(`/products?search=${trimmed}`);
-
     setSearchQuery("");
   };
-
-  const { wishlistCount } = useWishlist();
 
   return (
     <>
@@ -56,314 +85,167 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-4 lg:px-8 h-[60px] flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img
-              src={logo}
-              alt="F2CMARKET"
-              className="h-12 w-auto object-contain"
-            />
+            <img src={logo} alt="F2CMARKET" className="h-12 w-auto object-contain" />
           </Link>
 
-          {/* Desktop Menu */}
+          {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[var(--text-secondary)]">
-            <li>
-              <NavLink
-                to="/"
-                className="hover:text-[var(--primary)] transition"
-              >
-                Home
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/products"
-                className="hover:text-[var(--primary)] transition"
-              >
-                Products
-              </NavLink>
-            </li>
-            <li>
-              <Link
-                to="/farmers"
-                className="hover:text-[var(--primary)] transition"
-              >
-                Farmers
-              </Link>
-            </li>
-            <li>
-              <Link
-                to="/about"
-                className="hover:text-[var(--primary)] transition"
-              >
-                About
-              </Link>
-            </li>
+            {NAV_LINKS.map(({ label, to }) => (
+              <li key={to}>
+                <NavLink to={to} className="hover:text-[var(--primary)] transition">
+                  {label}
+                </NavLink>
+              </li>
+            ))}
           </ul>
 
-          {/* Desktop Actions */}
+          {/* Desktop actions */}
           <div className="hidden lg:flex items-center gap-3">
-            <form
+            <SearchBar
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               onSubmit={handleSearch}
-              className="hidden md:flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)]"
-            >
-              <button type="submit">
-                <Search size={18} className="text-[var(--text-secondary)]" />
-              </button>
+            />
 
-              <input
-                type="text"
-                placeholder="Search fresh products..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="bg-transparent outline-none border-none focus:outline-none focus:ring-0 text-sm w-44 text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
-              />
-            </form>
-
-            <Link
-              to="/wishlist"
-              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
-            >
+            <Link to="/wishlist" className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
               <Heart size={20} />
-
-              {wishlistCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 rounded-full">
-                  {wishlistCount}
-                </span>
-              )}
+              <NavBadge count={wishlistCount} color="bg-red-500" />
             </Link>
 
-            <Link
-              to="/cart"
-              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
-            >
+            <Link to="/cart" className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
               <ShoppingCart size={20} />
-
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[10px] px-1.5 rounded-full">
-                  {cartCount}
-                </span>
-              )}
+              <NavBadge count={cartCount} />
             </Link>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 hover:bg-[var(--surface-2)] transition">
-                  <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-semibold">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                </button>
-              </DropdownMenuTrigger>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--surface)] px-3 py-2 hover:bg-[var(--surface-2)] transition">
+                    <div className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-semibold">
+                      {user.email?.charAt(0).toUpperCase()}
+                    </div>
+                  </button>
+                </DropdownMenuTrigger>
 
-              <DropdownMenuContent
-                align="end"
-                className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl"
+                <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl">
+                  <DropdownMenuLabel className="space-y-1">
+                    <p className="text-sm font-medium">My Account</p>
+                    <p className="text-xs text-[var(--text-secondary)] truncate">{user.email}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
+                      <Package size={16} /> My Orders
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                    <User size={16} /> Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
+                    <Settings size={16} /> Settings
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer">
+                    <LogOut size={16} /> Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Link
+                to="/login"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition text-sm font-medium"
               >
-                {/* User */}
-                <DropdownMenuLabel className="space-y-1">
-                  <p className="text-sm font-medium">My Account</p>
-
-                  <p className="text-xs text-[var(--text-secondary)] truncate">
-                    {user.email}
-                  </p>
-                </DropdownMenuLabel>
-
-                <DropdownMenuSeparator />
-
-                {/* Orders */}
-                <DropdownMenuItem asChild>
-                  <Link
-                    to="/orders"
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <Package size={16} />
-                    My Orders
-                  </Link>
-                </DropdownMenuItem>
-
-                {/* Profile */}
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                  <User size={16} />
-                  Profile
-                </DropdownMenuItem>
-
-                {/* Settings */}
-                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
-                  <Settings size={16} />
-                  Settings
-                </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                {/* Logout */}
-                <DropdownMenuItem
-                  onClick={logout}
-                  className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer"
-                >
-                  <LogOut size={16} />
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <User size={18} /> Login
+              </Link>
+            )}
           </div>
 
-          {/* Mobile Toggle */}
-          <button
-            className="lg:hidden p-2 rounded-lg"
-            onClick={() => setMenuOpen(!menuOpen)}
-          >
-            {<Menu size={26} />}
+          {/* Mobile toggle */}
+          <button className="lg:hidden p-2 rounded-lg" onClick={() => setMenuOpen(!menuOpen)}>
+            <Menu size={26} />
           </button>
         </nav>
       </header>
 
-      {/* Overlay */}
+      {/* Mobile overlay */}
       <div
-        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-        onClick={() => setMenuOpen(false)}
+        className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${menuOpen ? "opacity-100 visible" : "opacity-0 invisible"}`}
+        onClick={closeMenu}
       />
 
-      {/* Slide Drawer */}
+      {/* Slide drawer */}
       <div
-        className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-xl transform transition-transform duration-300 ${
-          menuOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-xl transform transition-transform duration-300 ${menuOpen ? "translate-x-0" : "translate-x-full"}`}
       >
-        {/* Header */}
         <div className="flex items-center justify-between py-[0.625rem] p-5 border-b">
           <img src={logo} alt="logo" className="h-10" />
-
-          <button onClick={() => setMenuOpen(false)}>
-            <X size={24} />
-          </button>
+          <button onClick={closeMenu}><X size={24} /></button>
         </div>
 
-        {/* Links */}
         <div className="flex flex-col p-5 gap-5 text-[16px] font-medium text-[var(--text-secondary)]">
-          <Link to="/" onClick={() => setMenuOpen(false)}>
-            Home
-          </Link>
-          <Link to="/products" onClick={() => setMenuOpen(false)}>
-            Products
-          </Link>
-          <Link to="/farmers" onClick={() => setMenuOpen(false)}>
-            Farmers
-          </Link>
-          <Link to="/about" onClick={() => setMenuOpen(false)}>
-            About
-          </Link>
+          {NAV_LINKS.map(({ label, to }) => (
+            <Link key={to} to={to} onClick={closeMenu}>
+              {label}
+            </Link>
+          ))}
 
           <Link
             to="/wishlist"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+            onClick={closeMenu}
+            className="flex items-center justify-between hover:text-[var(--primary)] transition"
           >
-            <div className="flex items-center gap-2">
-              <Heart size={18} />
-              Wishlist
-            </div>
-
-            {wishlistCount > 0 && (
-              <span className="min-w-[22px] h-[22px] px-1 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                {wishlistCount}
-              </span>
-            )}
+            <span className="flex items-center gap-2"><Heart size={18} /> Wishlist</span>
+            <NavBadge count={wishlistCount} color="bg-red-500" />
           </Link>
 
           <Link
             to="/cart"
-            onClick={() => setMenuOpen(false)}
-            className="flex items-center justify-between text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+            onClick={closeMenu}
+            className="flex items-center justify-between hover:text-[var(--primary)] transition"
           >
-            <div className="flex items-center gap-2">
-              <ShoppingCart size={18} />
-              Cart
-            </div>
-
-            {cartCount > 0 && (
-              <span className="min-w-[22px] h-[22px] px-1 rounded-full bg-orange-500 text-white text-xs flex items-center justify-center">
-                {cartCount}
-              </span>
-            )}
+            <span className="flex items-center gap-2"><ShoppingCart size={18} /> Cart</span>
+            <NavBadge count={cartCount} />
           </Link>
+
           {user ? (
             <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-3">
-              {/* User Info */}
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-semibold">
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
-
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">
-                    My Account
-                  </p>
-
-                  <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">
-                    {user.email}
-                  </p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">My Account</p>
+                  <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">{user.email}</p>
                 </div>
               </div>
 
-              <form
-                onSubmit={handleSearch}
-                className="flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)]"
-              >
-                <button type="submit">
-                  <Search size={18} className="text-[var(--text-secondary)]" />
-                </button>
+              <SearchBar
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onSubmit={(e) => { handleSearch(e); closeMenu(); }}
+                className="w-full"
+              />
 
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent outline-none border-none focus:ring-0 text-sm text-[var(--text-primary)] placeholder:text-[var(--text-secondary)]"
-                />
-              </form>
-
-              {/* Orders */}
-              <Link
-                to="/orders"
-                onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
-              >
-                <Package size={18} />
-                My Orders
+              <Link to="/orders" onClick={closeMenu} className="flex items-center gap-2 hover:text-[var(--primary)] transition">
+                <Package size={18} /> My Orders
               </Link>
-
-              {/* Profile */}
-              <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
-                <User size={18} />
-                Profile
+              <button className="flex items-center gap-2 hover:text-[var(--primary)] transition">
+                <User size={18} /> Profile
               </button>
-
-              {/* Settings */}
-              <button className="flex items-center gap-2 text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
-                <Settings size={18} />
-                Settings
+              <button className="flex items-center gap-2 hover:text-[var(--primary)] transition">
+                <Settings size={18} /> Settings
               </button>
-
-              {/* Logout */}
-              <button
-                onClick={() => {
-                  logout();
-                  setMenuOpen(false);
-                }}
-                className="flex items-center gap-2 text-red-500"
-              >
-                <LogOut size={18} />
-                Logout
+              <button onClick={() => { logout(); closeMenu(); }} className="flex items-center gap-2 text-red-500">
+                <LogOut size={18} /> Logout
               </button>
             </div>
           ) : (
             <Link
               to="/login"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
               className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
             >
-              <User size={18} />
-              Login
+              <User size={18} /> Login
             </Link>
           )}
         </div>
