@@ -1,133 +1,61 @@
-// src/context/CartContext.jsx
-
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useContext, useMemo } from "react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { parsePrice } from "@/utils/parsePrice";
 
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [cartItems, setCartItems] = useState(() => {
-    const savedCart = localStorage.getItem("f2c-cart");
+  const [cartItems, setCartItems] = useLocalStorage("f2c-cart", []);
 
-    return savedCart ? JSON.parse(savedCart) : [];
-  });
-
-  /* Save cart in localStorage */
-  useEffect(() => {
-    localStorage.setItem(
-      "f2c-cart",
-      JSON.stringify(cartItems)
-    );
-  }, [cartItems]);
-
-  /* Add Item */
+  /* Add Item — merges quantity if product already exists */
   const addToCart = (product, quantity = 1) => {
     setCartItems((prev) => {
-      const existingItem = prev.find(
-        (item) => item.id === product.id
-      );
-
-      if (existingItem) {
+      const existing = prev.find((item) => item.id === product.id);
+      if (existing) {
         return prev.map((item) =>
           item.id === product.id
-            ? {
-                ...item,
-                quantity:
-                  item.quantity + quantity,
-              }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-
-      return [
-        ...prev,
-        {
-          ...product,
-          quantity,
-        },
-      ];
+      return [...prev, { ...product, quantity }];
     });
   };
 
-  /* Remove Item */
-  const removeFromCart = (id) => {
-    setCartItems((prev) =>
-      prev.filter((item) => item.id !== id)
-    );
-  };
+  const removeFromCart = (id) =>
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
 
-  /* Increase Qty */
-  const increaseQty = (id) => {
+  const increaseQty = (id) =>
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              quantity: item.quantity + 1,
-            }
-          : item
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
       )
     );
-  };
 
-  /* Decrease Qty */
-  const decreaseQty = (id) => {
+  const decreaseQty = (id) =>
     setCartItems((prev) =>
       prev
         .map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                quantity:
-                  item.quantity - 1,
-              }
-            : item
+          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
         )
-        .filter(
-          (item) => item.quantity > 0
-        )
+        .filter((item) => item.quantity > 0)
     );
-  };
 
-  /* Clear Cart */
-  const clearCart = () => {
-    setCartItems([]);
-  };
+  const clearCart = () => setCartItems([]);
 
-  /* Cart Count */
-  const cartCount = useMemo(() => {
-    return cartItems.reduce(
-      (total, item) =>
-        total + item.quantity,
-      0
-    );
-  }, [cartItems]);
+  const cartCount = useMemo(
+    () => cartItems.reduce((total, item) => total + item.quantity, 0),
+    [cartItems]
+  );
 
-  /* Cart Total */
-  const cartTotal = useMemo(() => {
-    return cartItems.reduce(
-      (total, item) => {
-        const price =
-          Number(
-            String(item.price).replace(
-              /[^\d.]/g,
-              ""
-            )
-          ) || 0;
-
-        return (
-          total +
-          price * item.quantity
-        );
-      },
-      0
-    );
-  }, [cartItems]);
+  const cartTotal = useMemo(
+    () =>
+      cartItems.reduce(
+        (total, item) => total + parsePrice(item.price) * item.quantity,
+        0
+      ),
+    [cartItems]
+  );
 
   return (
     <CartContext.Provider
@@ -147,7 +75,4 @@ export function CartProvider({ children }) {
   );
 }
 
-/* Hook */
-export function useCart() {
-  return useContext(CartContext);
-}
+export const useCart = () => useContext(CartContext);
