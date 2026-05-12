@@ -68,11 +68,17 @@ const NAV_LINKS = [
   { label: "Home", to: "/" },
   { label: "Products", to: "/products" },
   { label: "Farmers", to: "/farmers" },
-  { label: "About", to: "/about" },
 ];
 
 export default function Navbar() {
   const { user, logout } = useAuth();
+
+  const role = user?.role;
+
+  const isConsumer = role === "consumer";
+  const isFarmer = role === "farmer";
+  const isAdmin = role === "admin";
+
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
@@ -115,6 +121,52 @@ export default function Navbar() {
                 </NavLink>
               </li>
             ))}
+
+            {/* Farmer Links */}
+            {isFarmer && (
+              <>
+                <li>
+                  <NavLink
+                    to="/farmer/dashboard"
+                    className="hover:text-[var(--primary)] transition"
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/farmer/products"
+                    className="hover:text-[var(--primary)] transition"
+                  >
+                    My Products
+                  </NavLink>
+                </li>
+              </>
+            )}
+
+            {/* Admin Links */}
+            {isAdmin && (
+              <>
+                <li>
+                  <NavLink
+                    to="/admin/dashboard"
+                    className="hover:text-[var(--primary)] transition"
+                  >
+                    Dashboard
+                  </NavLink>
+                </li>
+
+                <li>
+                  <NavLink
+                    to="/admin/users"
+                    className="hover:text-[var(--primary)] transition"
+                  >
+                    Users
+                  </NavLink>
+                </li>
+              </>
+            )}
           </ul>
 
           {/* Desktop actions */}
@@ -125,21 +177,25 @@ export default function Navbar() {
               onSubmit={handleSearch}
             />
 
-            <Link
-              to="/wishlist"
-              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
-            >
-              <Heart size={20} />
-              <NavBadge count={wishlistCount} color="bg-red-500" />
-            </Link>
+            {isConsumer && (
+              <Link
+                to="/wishlist"
+                className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+              >
+                <Heart size={20} />
+                <NavBadge count={wishlistCount} color="bg-red-500" />
+              </Link>
+            )}
 
-            <Link
-              to="/cart"
-              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
-            >
-              <ShoppingCart size={20} />
-              <NavBadge count={cartCount} />
-            </Link>
+            {isConsumer && (
+              <Link
+                to="/cart"
+                className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+              >
+                <ShoppingCart size={20} />
+                <NavBadge count={cartCount} />
+              </Link>
+            )}
 
             {user ? (
               <DropdownMenu>
@@ -162,14 +218,26 @@ export default function Navbar() {
                     </p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link
-                      to="/orders"
-                      className="flex items-center gap-2 cursor-pointer"
-                    >
-                      <Package size={16} /> My Orders
-                    </Link>
-                  </DropdownMenuItem>
+                  {isConsumer && (
+                    <DropdownMenuItem asChild>
+                      <Link
+                        to="/orders"
+                        className="flex items-center gap-2 cursor-pointer"
+                      >
+                        <Package size={16} /> My Orders
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isFarmer && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/farmer/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin/dashboard">Dashboard</Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
                     <User size={16} /> Profile
                   </DropdownMenuItem>
