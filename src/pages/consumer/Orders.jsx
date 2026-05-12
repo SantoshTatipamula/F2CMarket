@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Package } from "lucide-react";
-
 import { useCart } from "@/context/CartContext";
 import OrderCard from "@/components/order/OrderCard";
 import EmptyState from "@/components/common/ui/EmptyState";
 import PageHeader from "@/components/common/ui/PageHeader";
+import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 export default function Orders() {
   const { addToCart } = useCart();
@@ -24,10 +24,8 @@ export default function Orders() {
   return (
     <section className="min-h-screen bg-[var(--surface)] py-10">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
-        <PageHeader
-          title="My Orders"
-          subtitle="Track and review your previous purchases."
-        />
+        <Breadcrumb items={[{ label: "My Orders" }]} />
+        <PageHeader title="My Orders" subtitle="Track and review your previous purchases." />
 
         {orders.length === 0 ? (
           <EmptyState

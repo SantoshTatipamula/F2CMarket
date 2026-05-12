@@ -1,28 +1,19 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import { useCart } from "@/context/CartContext";
 import CheckoutForm from "@/components/order/CheckoutForm";
 import PaymentMethods from "@/components/order/PaymentMethods";
 import OrderSummary from "@/components/order/OrderSummary";
 import PlaceOrderButton from "@/components/order/PlaceOrderButton";
 import PageHeader from "@/components/common/ui/PageHeader";
+import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
-const INITIAL_FORM = {
-  fullName: "",
-  phone: "",
-  city: "",
-  pincode: "",
-  address: "",
-};
-
-const isFormFilled = (form) =>
-  Object.values(form).every((v) => v.trim() !== "");
+const INITIAL_FORM = { fullName: "", phone: "", city: "", pincode: "", address: "" };
+const isFormFilled = (form) => Object.values(form).every((v) => v.trim() !== "");
 
 export default function Checkout() {
   const navigate = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
-
   const [selectedMethod, setSelectedMethod] = useState("cod");
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -41,7 +32,6 @@ export default function Checkout() {
 
   const handlePlaceOrder = () => {
     setLoading(true);
-
     setTimeout(() => {
       const newOrder = {
         id: "F2C" + Math.floor(100000 + Math.random() * 900000),
@@ -52,10 +42,8 @@ export default function Checkout() {
         date: new Date().toISOString(),
         status: "Placed",
       };
-
       const existing = JSON.parse(localStorage.getItem("f2c-orders")) || [];
       localStorage.setItem("f2c-orders", JSON.stringify([newOrder, ...existing]));
-
       navigate("/order-success", { state: { orderId: newOrder.id } });
       setTimeout(clearCart, 100);
     }, 1200);
@@ -64,32 +52,17 @@ export default function Checkout() {
   return (
     <section className="min-h-screen bg-[var(--surface)] py-10">
       <div className="max-w-7xl mx-auto px-4 md:px-6">
-        <PageHeader
-          title="Checkout"
-          subtitle="Complete your purchase securely."
-        />
+        <Breadcrumb items={[{ label: "Cart", href: "/cart" }, { label: "Checkout" }]} />
+        <PageHeader title="Checkout" subtitle="Complete your purchase securely." />
 
         <div className="grid lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
             <CheckoutForm formData={formData} onChange={handleChange} />
-            <PaymentMethods
-              selectedMethod={selectedMethod}
-              setSelectedMethod={setSelectedMethod}
-            />
+            <PaymentMethods selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} />
           </div>
-
           <div className="space-y-4 lg:sticky lg:top-24 h-fit">
-            <OrderSummary
-              cartItems={cartItems}
-              cartTotal={cartTotal}
-              deliveryFee={deliveryFee}
-              finalTotal={finalTotal}
-            />
-            <PlaceOrderButton
-              onClick={handlePlaceOrder}
-              loading={loading}
-              disabled={!isFormFilled(formData)}
-            />
+            <OrderSummary cartItems={cartItems} cartTotal={cartTotal} deliveryFee={deliveryFee} finalTotal={finalTotal} />
+            <PlaceOrderButton onClick={handlePlaceOrder} loading={loading} disabled={!isFormFilled(formData)} />
           </div>
         </div>
       </div>
