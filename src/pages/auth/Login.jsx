@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
+import { usersData } from "@/data/usersData";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInputField from "@/components/auth/AuthInputField";
@@ -17,6 +18,8 @@ export default function Login() {
   const from = location.state?.from?.pathname || "/";
   const isValid = form.email.trim() && form.password.trim();
 
+  const [error, setError] = useState("");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -24,10 +27,28 @@ export default function Login() {
 
   const handleLogin = () => {
     if (!isValid) return;
-    login({ email: form.email });
-    navigate(from, { replace: true });
-  };
 
+    const foundUser = usersData.find(
+      (user) => user.email === form.email && user.password === form.password,
+    );
+
+    if (!foundUser) {
+      setError("Invalid email or password");
+      return;
+    }
+
+    login(foundUser);
+    setError("");
+
+    // Role-based redirect
+    if (foundUser.role === "consumer") {
+      navigate("/products");
+    } else if (foundUser.role === "farmer") {
+      navigate("/");
+    } else if (foundUser.role === "admin") {
+      navigate("/");
+    }
+  };
   return (
     <AuthLayout title="Login" subtitle="Connect to your source">
       <AuthInputField
@@ -53,7 +74,7 @@ export default function Login() {
           Forgot Password?
         </button>
       </div>
-
+      {error && <p className="text-sm text-red-500">{error}</p>}
       <Button
         onClick={handleLogin}
         disabled={!isValid}

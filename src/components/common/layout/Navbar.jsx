@@ -153,7 +153,7 @@ export default function Navbar() {
             ) : (
               <Link
                 to="/login"
-                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition text-sm font-medium"
+                className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:text-[var(--surface)] hover:bg-[var(--primary)] transition text-sm font-medium"
               >
                 <User size={18} /> Login
               </Link>
@@ -243,7 +243,7 @@ export default function Navbar() {
             <Link
               to="/login"
               onClick={closeMenu}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--surface)] transition"
+              className="flex items-center gap-2 px-4 py-2 rounded-xl border border-[var(--border-strong)] hover:bg-[var(--primary)] transition"
             >
               <User size={18} /> Login
             </Link>
