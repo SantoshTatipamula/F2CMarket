@@ -19,36 +19,40 @@ export default function Login() {
   const isValid = form.email.trim() && form.password.trim();
 
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = () => {
-    if (!isValid) return;
+const handleLogin = async () => {
+  if (!isValid || loading) return;
 
+  setLoading(true);
+  setError("");
+
+  setTimeout(() => {
     const foundUser = usersData.find(
-      (user) => user.email === form.email && user.password === form.password,
+      (user) =>
+        user.email === form.email &&
+        user.password === form.password
     );
 
     if (!foundUser) {
       setError("Invalid email or password");
+      setLoading(false);
       return;
     }
 
     login(foundUser);
-    setError("");
 
-    // Role-based redirect
-    if (foundUser.role === "consumer") {
-      navigate("/products");
-    } else if (foundUser.role === "farmer") {
-      navigate("/");
-    } else if (foundUser.role === "admin") {
-      navigate("/");
-    }
-  };
+    // Redirect back to previous protected page
+    navigate(from, { replace: true });
+
+    setLoading(false);
+  }, 800);
+};
   return (
     <AuthLayout title="Login" subtitle="Connect to your source">
       <AuthInputField
@@ -77,14 +81,14 @@ export default function Login() {
       {error && <p className="text-sm text-red-500">{error}</p>}
       <Button
         onClick={handleLogin}
-        disabled={!isValid}
+        disabled={!isValid || loading}
         className={`w-full h-11 rounded-xl font-semibold ${
           isValid
             ? "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white"
             : "bg-gray-400 text-gray-200 cursor-not-allowed"
         }`}
       >
-        Login
+        {loading ? "Logging in..." : "Login"}
       </Button>
 
       <AuthDivider />

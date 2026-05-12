@@ -1,13 +1,24 @@
 import { useState } from "react";
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import {
-  Menu, X, Search, ShoppingCart, User, Package,
-  Settings, LogOut, Heart,
+  Menu,
+  X,
+  Search,
+  ShoppingCart,
+  User,
+  Package,
+  Settings,
+  LogOut,
+  Heart,
 } from "lucide-react";
 
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 import { useCart } from "@/context/CartContext";
@@ -85,14 +96,21 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-4 lg:px-8 h-[60px] flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center">
-            <img src={logo} alt="F2CMARKET" className="h-12 w-auto object-contain" />
+            <img
+              src={logo}
+              alt="F2CMARKET"
+              className="h-12 w-auto object-contain"
+            />
           </Link>
 
           {/* Desktop links */}
           <ul className="hidden lg:flex items-center gap-8 text-[15px] font-medium text-[var(--text-secondary)]">
             {NAV_LINKS.map(({ label, to }) => (
               <li key={to}>
-                <NavLink to={to} className="hover:text-[var(--primary)] transition">
+                <NavLink
+                  to={to}
+                  className="hover:text-[var(--primary)] transition"
+                >
                   {label}
                 </NavLink>
               </li>
@@ -107,12 +125,18 @@ export default function Navbar() {
               onSubmit={handleSearch}
             />
 
-            <Link to="/wishlist" className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
+            <Link
+              to="/wishlist"
+              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+            >
               <Heart size={20} />
               <NavBadge count={wishlistCount} color="bg-red-500" />
             </Link>
 
-            <Link to="/cart" className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative">
+            <Link
+              to="/cart"
+              className="p-2 rounded-xl hover:bg-[var(--surface-2)] transition relative"
+            >
               <ShoppingCart size={20} />
               <NavBadge count={cartCount} />
             </Link>
@@ -127,14 +151,22 @@ export default function Navbar() {
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl"
+                >
                   <DropdownMenuLabel className="space-y-1">
                     <p className="text-sm font-medium">My Account</p>
-                    <p className="text-xs text-[var(--text-secondary)] truncate">{user.email}</p>
+                    <p className="text-xs text-[var(--text-secondary)] truncate">
+                      {user.email}
+                    </p>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem asChild>
-                    <Link to="/orders" className="flex items-center gap-2 cursor-pointer">
+                    <Link
+                      to="/orders"
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
                       <Package size={16} /> My Orders
                     </Link>
                   </DropdownMenuItem>
@@ -145,7 +177,10 @@ export default function Navbar() {
                     <Settings size={16} /> Settings
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer">
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer"
+                  >
                     <LogOut size={16} /> Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -161,7 +196,10 @@ export default function Navbar() {
           </div>
 
           {/* Mobile toggle */}
-          <button className="lg:hidden p-2 rounded-lg" onClick={() => setMenuOpen(!menuOpen)}>
+          <button
+            className="lg:hidden p-2 rounded-lg"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
             <Menu size={26} />
           </button>
         </nav>
@@ -179,7 +217,9 @@ export default function Navbar() {
       >
         <div className="flex items-center justify-between py-[0.625rem] p-5 border-b">
           <img src={logo} alt="logo" className="h-10" />
-          <button onClick={closeMenu}><X size={24} /></button>
+          <button onClick={closeMenu}>
+            <X size={24} />
+          </button>
         </div>
 
         <div className="flex flex-col p-5 gap-5 text-[16px] font-medium text-[var(--text-secondary)]">
@@ -194,7 +234,9 @@ export default function Navbar() {
             onClick={closeMenu}
             className="flex items-center justify-between hover:text-[var(--primary)] transition"
           >
-            <span className="flex items-center gap-2"><Heart size={18} /> Wishlist</span>
+            <span className="flex items-center gap-2">
+              <Heart size={18} /> Wishlist
+            </span>
             <NavBadge count={wishlistCount} color="bg-red-500" />
           </Link>
 
@@ -203,7 +245,9 @@ export default function Navbar() {
             onClick={closeMenu}
             className="flex items-center justify-between hover:text-[var(--primary)] transition"
           >
-            <span className="flex items-center gap-2"><ShoppingCart size={18} /> Cart</span>
+            <span className="flex items-center gap-2">
+              <ShoppingCart size={18} /> Cart
+            </span>
             <NavBadge count={cartCount} />
           </Link>
 
@@ -214,19 +258,30 @@ export default function Navbar() {
                   {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-[var(--text-primary)]">My Account</p>
-                  <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">{user.email}</p>
+                  <p className="text-sm font-medium text-[var(--text-primary)]">
+                    My Account
+                  </p>
+                  <p className="text-xs text-[var(--text-secondary)] truncate max-w-[180px]">
+                    {user.email}
+                  </p>
                 </div>
               </div>
 
               <SearchBar
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onSubmit={(e) => { handleSearch(e); closeMenu(); }}
+                onSubmit={(e) => {
+                  handleSearch(e);
+                  closeMenu();
+                }}
                 className="w-full"
               />
 
-              <Link to="/orders" onClick={closeMenu} className="flex items-center gap-2 hover:text-[var(--primary)] transition">
+              <Link
+                to="/orders"
+                onClick={closeMenu}
+                className="flex items-center gap-2 hover:text-[var(--primary)] transition"
+              >
                 <Package size={18} /> My Orders
               </Link>
               <button className="flex items-center gap-2 hover:text-[var(--primary)] transition">
@@ -235,7 +290,13 @@ export default function Navbar() {
               <button className="flex items-center gap-2 hover:text-[var(--primary)] transition">
                 <Settings size={18} /> Settings
               </button>
-              <button onClick={() => { logout(); closeMenu(); }} className="flex items-center gap-2 text-red-500">
+              <button
+                onClick={() => {
+                  logout();
+                  closeMenu();
+                }}
+                className="flex items-center gap-2 text-red-500"
+              >
                 <LogOut size={18} /> Logout
               </button>
             </div>
