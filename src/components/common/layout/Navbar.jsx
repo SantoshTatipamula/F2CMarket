@@ -230,12 +230,18 @@ export default function Navbar() {
                   )}
                   {isFarmer && (
                     <DropdownMenuItem asChild>
-                      <Link to="/farmer/dashboard">Dashboard</Link>
+                      <Link to="/farmer/dashboard">
+                        <Package size={16} />
+                        Dashboard
+                      </Link>
                     </DropdownMenuItem>
                   )}
                   {isAdmin && (
                     <DropdownMenuItem asChild>
-                      <Link to="/admin/dashboard">Dashboard</Link>
+                      <Link to="/admin/dashboard">
+                        <Package size={16} />
+                        Dashboard
+                      </Link>
                     </DropdownMenuItem>
                   )}
                   <DropdownMenuItem className="flex items-center gap-2 cursor-pointer">
