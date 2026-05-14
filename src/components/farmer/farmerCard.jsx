@@ -1,89 +1,131 @@
-import { Link } from "react-router-dom";
-
-import {
-  MapPin,
-  Star,
-  ArrowRight,
-} from "lucide-react";
+import { MapPin, Star } from "lucide-react";
 
 export default function FarmerCard({
   farmer,
 }) {
   return (
-    <div className="bg-white border border-[var(--border)] rounded-2xl px-3 sm:px-4 py-3 hover:shadow-sm transition">
-
-      <div className="flex items-center gap-3">
-
-        {/* Profile Image */}
+    <article
+      className="
+        group overflow-hidden
+        rounded-3xl
+        border border-[var(--border)]
+        bg-[var(--surface)]
+        transition-all duration-300
+        hover:-translate-y-1
+        hover:shadow-2xl
+      "
+    >
+      
+      {/* Cover Image */}
+      <div className="relative h-56 overflow-hidden">
+        
         <img
           src={farmer.image}
           alt={farmer.name}
-          className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border border-[var(--border)] shrink-0"
+          className="
+            h-full w-full object-cover
+            transition duration-500
+            group-hover:scale-105
+          "
         />
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
 
-          {/* Top Row */}
-          <div className="flex items-center justify-between gap-3">
-
-            {/* Name + Location */}
-            <div className="min-w-0">
-
-              <h2 className="text-sm sm:text-base font-semibold text-[var(--text-primary)] leading-tight">
-                {farmer.name}
-              </h2>
-
-              <div className="flex items-center gap-1 mt-1 text-xs sm:text-sm text-[var(--text-secondary)]">
-
-                <MapPin
-                  size={12}
-                  className="text-[var(--primary)] shrink-0"
-                />
-
-                <span>
-                  {farmer.location}
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-          {/* Bottom Row */}
-          <div className="mt-2 flex items-center justify-between gap-3">
-
-            {/* Rating */}
-            <div className="flex items-center gap-1">
-
-              <Star
-                size={14}
-                className="fill-amber-400 text-amber-400"
-              />
-
-              <span className="text-xs sm:text-sm font-medium text-[var(--text-secondary)]">
-                {farmer.rating}
-              </span>
-
-            </div>
-
-            {/* CTA */}
-            <Link
-              to={`/farmers/${farmer.id}`}
-              className="h-8 sm:h-9 px-3 sm:px-4 rounded-xl border border-[var(--border)] hover:bg-[var(--surface)] text-xs sm:text-sm font-medium text-[var(--text-primary)] flex items-center gap-1.5 transition shrink-0"
-            >
-              View
-
-              <ArrowRight size={13} />
-            </Link>
-
-          </div>
-
+        {/* Badge */}
+        <div className="absolute top-4 left-4">
+          <span
+            className="
+              rounded-full
+              bg-white/90 backdrop-blur
+              px-3 py-1
+              text-xs font-semibold
+              text-black
+            "
+          >
+            Verified Farmer
+          </span>
         </div>
-
       </div>
 
-    </div>
+      {/* Content */}
+      <div className="p-5 space-y-4">
+        
+        {/* Header */}
+        <div>
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            {farmer.name}
+          </h2>
+
+          <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
+            {farmer.description}
+          </p>
+        </div>
+
+        {/* Meta */}
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          
+          {/* Location */}
+          <div
+            className="
+              flex items-center gap-1.5
+              rounded-full
+              bg-[var(--surface-2)]
+              px-3 py-1.5
+              text-[var(--text-secondary)]
+            "
+          >
+            <MapPin size={14} />
+
+            <span>{farmer.location}</span>
+          </div>
+
+          {/* Rating */}
+          <div
+            className="
+              flex items-center gap-1.5
+              rounded-full
+              bg-[var(--surface-2)]
+              px-3 py-1.5
+              text-[var(--text-secondary)]
+            "
+          >
+            <Star
+              size={14}
+              className="fill-yellow-400 text-yellow-400"
+            />
+
+            <span>
+              {farmer.rating} Rating
+            </span>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-2">
+          
+          <div>
+            <p className="text-xs text-[var(--text-secondary)]">
+              Products
+            </p>
+
+            <p className="font-semibold text-[var(--text-primary)]">
+              {farmer.productsCount}
+            </p>
+          </div>
+
+          <button
+            className="
+              h-11 px-5 rounded-xl
+              bg-[var(--primary)]
+              text-white text-sm font-medium
+              transition hover:opacity-90
+            "
+          >
+            View Profile
+          </button>
+        </div>
+      </div>
+    </article>
   );
 }

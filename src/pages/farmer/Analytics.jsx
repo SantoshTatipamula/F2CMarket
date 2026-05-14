@@ -1,0 +1,53 @@
+import StatsGrid from "@/components/farmer/dashboard/StatsGrid";
+
+import RecentOrders from "@/components/farmer/dashboard/RecentOrders";
+
+import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
+
+import WorkspaceActions from "@/components/farmer/workspace/WorkspaceActions";
+
+export default function Analytics() {
+  return (
+    <section className="space-y-8 py-8">
+      
+      {/* Workspace Header */}
+      <WorkspaceHeader
+        title="Analytics"
+        description="Monitor your farm performance and customer activity."
+      />
+
+      {/* Workspace Controls */}
+      <WorkspaceActions
+        placeholder="Search analytics..."
+      >
+        <button
+          className="
+            h-11 px-4 rounded-xl
+            border border-[var(--border)]
+            bg-[var(--surface)]
+            text-sm font-medium
+          "
+        >
+          This Month
+        </button>
+
+        <button
+          className="
+            h-11 px-4 rounded-xl
+            border border-[var(--border)]
+            bg-[var(--surface)]
+            text-sm font-medium
+          "
+        >
+          Export
+        </button>
+      </WorkspaceActions>
+
+      {/* Stats */}
+      <StatsGrid />
+
+      {/* Recent Activity */}
+      <RecentOrders />
+    </section>
+  );
+}

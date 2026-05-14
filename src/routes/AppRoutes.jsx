@@ -18,6 +18,15 @@ const Farmers = lazy(() => import("../pages/consumer/Farmers"));
 const Wishlist = lazy(() => import("../pages/consumer/Wishlist"));
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
+const FarmerDashboard = lazy(() => import("../pages/farmer/Dashboard"));
+const FarmerProducts = lazy(() => import("../pages/farmer/Products"));
+const AddProduct = lazy(() => import("../pages/farmer/AddProduct"));
+const FarmerOrders = lazy(() => import("../pages/farmer/Orders"));
+const FarmerAnalytics = lazy(() => import("../pages/farmer/Analytics"));
+const FarmerProfile = lazy(() => import("../pages/farmer/Profile"));
+const EditProduct = lazy(
+  () => import("../pages/farmer/EditProduct")
+);
 
 export default function AppRoutes() {
   return (
@@ -73,6 +82,73 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Farmer Routes */}
+
+<Route
+  path="farmer/dashboard"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <FarmerDashboard />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/products"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <FarmerProducts />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/products/add"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <AddProduct />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/orders"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <FarmerOrders />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/analytics"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <FarmerAnalytics />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/profile"
+  element={
+    <ProtectedRoute allowedRoles={["farmer"]}>
+      <FarmerProfile />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="farmer/products/edit/:id"
+  element={
+    <ProtectedRoute
+      allowedRoles={["farmer"]}
+    >
+      <EditProduct />
+    </ProtectedRoute>
+  }
+/>
           </Route>
 
           {/* Auth Pages */}
