@@ -47,10 +47,7 @@ function SearchBar({ value, onChange, onSubmit, className = "" }) {
       className={`flex items-center gap-2 h-11 px-4 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] transition focus-within:border-[var(--primary)] ${className}`}
     >
       <button type="submit">
-        <Search
-          size={18}
-          className="text-[var(--text-secondary)]"
-        />
+        <Search size={18} className="text-[var(--text-secondary)]" />
       </button>
 
       <input
@@ -119,14 +116,32 @@ export default function Navbar() {
   }
 
   // Farmer
-  else if (isFarmer) {
-    navLinks = [
-      { label: "Home", to: "/" },
-      { label: "Products", to: "/products" },
-      { label: "Dashboard", to: "/farmer/dashboard" },
-      { label: "Orders", to: "/farmer/orders" },
-    ];
-  }
+  // Farmer
+else if (isFarmer) {
+  navLinks = [
+    { label: "Marketplace", to: "/products" },
+
+    {
+      label: "My Products",
+      to: "/farmer/products",
+    },
+
+    {
+      label: "Add Product",
+      to: "/farmer/products/add",
+    },
+
+    {
+      label: "Orders",
+      to: "/farmer/orders",
+    },
+
+    {
+      label: "Analytics",
+      to: "/farmer/analytics",
+    },
+  ];
+}
 
   // Admin
   else if (isAdmin) {
@@ -202,10 +217,7 @@ export default function Navbar() {
                 >
                   <Heart size={20} />
 
-                  <NavBadge
-                    count={wishlistCount}
-                    color="bg-red-500"
-                  />
+                  <NavBadge count={wishlistCount} color="bg-red-500" />
                 </Link>
 
                 <Link
@@ -280,9 +292,7 @@ export default function Navbar() {
       {/* Mobile Overlay */}
       <div
         className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 ${
-          menuOpen
-            ? "opacity-100 visible"
-            : "opacity-0 invisible"
+          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
         }`}
         onClick={closeMenu}
       />
@@ -290,9 +300,7 @@ export default function Navbar() {
       {/* Mobile Drawer */}
       <div
         className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-xl transform transition-transform duration-300 ${
-          menuOpen
-            ? "translate-x-0"
-            : "translate-x-full"
+          menuOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         <div className="flex items-center justify-between py-[0.625rem] p-5 border-b">
@@ -305,11 +313,7 @@ export default function Navbar() {
 
         <div className="flex flex-col p-5 gap-5 text-[16px] font-medium text-[var(--text-secondary)]">
           {navLinks.map(({ label, to }) => (
-            <Link
-              key={to}
-              to={to}
-              onClick={closeMenu}
-            >
+            <Link key={to} to={to} onClick={closeMenu}>
               {label}
             </Link>
           ))}
@@ -326,10 +330,7 @@ export default function Navbar() {
                   <Heart size={18} /> Wishlist
                 </span>
 
-                <NavBadge
-                  count={wishlistCount}
-                  color="bg-red-500"
-                />
+                <NavBadge count={wishlistCount} color="bg-red-500" />
               </Link>
 
               <Link
@@ -389,9 +390,7 @@ export default function Navbar() {
 
               <SearchBar
                 value={searchQuery}
-                onChange={(e) =>
-                  setSearchQuery(e.target.value)
-                }
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onSubmit={(e) => {
                   handleSearch(e);
                   closeMenu();
