@@ -1,34 +1,37 @@
 import { useNavigate } from "react-router-dom";
 
-
+import {
+  getProducts,
+  saveProducts,
+} from "@/utils/productStorage";
 import ProductForm from "@/components/farmer/products/ProductForm";
 
 export default function AddProduct() {
   const navigate = useNavigate();
 
-  const handleAddProduct = (newProduct) => {
-    // Get existing products
-    const existingProducts =
-      JSON.parse(
-        localStorage.getItem(
-          "f2c-farmer-products"
-        )
-      ) || [];
+const handleAddProduct = (
+  newProduct
+) => {
+  // Get all existing products
+  const existingProducts =
+    getProducts();
 
-    // Save updated products
-    localStorage.setItem(
-      "f2c-farmer-products",
-      JSON.stringify([
-        ...existingProducts,
-        newProduct,
-      ])
-    );
+  // Add new product
+  const updatedProducts = [
+    ...existingProducts,
+    {
+      ...newProduct,
 
-    console.log("New Product:", newProduct);
+      id: Date.now(),
+    },
+  ];
 
-    // Redirect
-    navigate("/farmer/products");
-  };
+  // Save centrally
+  saveProducts(updatedProducts);
+
+  // Redirect
+  navigate("/farmer/products");
+};
 
   return (
     <section  className="space-y-6 py-8">
