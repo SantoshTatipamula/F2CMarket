@@ -8,7 +8,11 @@ import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
 import WorkspaceActions from "@/components/farmer/workspace/WorkspaceActions";
 
-import { farmerProductsData } from "@/data/farmerProductsData";
+import {
+  getProducts,
+  initializeProducts,
+  saveProducts,
+} from "@/utils/productStorage";
 
 export default function Products() {
   const navigate = useNavigate();
@@ -17,19 +21,11 @@ export default function Products() {
 
   const [search, setSearch] = useState("");
 
-  // Load Products
+  // Initialize + Load Products
   useEffect(() => {
-    const storedProducts =
-      JSON.parse(
-        localStorage.getItem(
-          "f2c-farmer-products"
-        )
-      ) || [];
+    initializeProducts();
 
-    setProducts([
-      ...farmerProductsData,
-      ...storedProducts,
-    ]);
+    setProducts(getProducts());
   }, []);
 
   // Delete Product
@@ -40,24 +36,15 @@ export default function Products() {
 
     setProducts(updatedProducts);
 
-    // Save only custom products
-    const customProducts =
-      updatedProducts.filter(
-        (product) => product.id > 100000
-      );
-
-    localStorage.setItem(
-      "f2c-farmer-products",
-      JSON.stringify(customProducts)
-    );
+    saveProducts(updatedProducts);
   };
 
   // Edit Product
-const handleEdit = (product) => {
-  navigate(
-    `/farmer/products/edit/${product.id}`
-  );
-};
+  const handleEdit = (product) => {
+    navigate(
+      `/farmer/products/edit/${product.id}`
+    );
+  };
 
   // Search Filter
   const filteredProducts = useMemo(() => {
@@ -71,7 +58,7 @@ const handleEdit = (product) => {
   return (
     <section className="space-y-8 py-8">
       
-      {/* Workspace Header */}
+      {/* Header */}
       <WorkspaceHeader
         title="My Products"
         description="Manage your farm products and inventory."
@@ -81,7 +68,7 @@ const handleEdit = (product) => {
         }
       />
 
-      {/* Workspace Controls */}
+      {/* Actions */}
       <WorkspaceActions
         searchValue={search}
         onSearchChange={setSearch}

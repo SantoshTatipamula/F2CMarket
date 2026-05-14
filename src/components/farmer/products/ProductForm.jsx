@@ -344,6 +344,7 @@ export default function ProductForm({
           bg-[var(--primary)]
           text-sm font-semibold
           hover:bg-[var(--primary-hover)]
+          text-white
         "
       >
         {submitLabel}
