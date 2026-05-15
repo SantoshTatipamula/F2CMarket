@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import {
   Menu,
   X,
@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
+import { useSearch } from "@/context/SearchContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
@@ -75,24 +76,14 @@ export default function Navbar() {
   const { cartCount } = useCart();
   const { wishlistCount } = useWishlist();
 
-  const navigate = useNavigate();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-
+  const {searchQuery, setSearchQuery} = useSearch();
   const closeMenu = () => setMenuOpen(false);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-
-    const trimmed = searchQuery.trim();
-
-    if (!trimmed) return;
-
-    navigate(`/products?search=${trimmed}`);
-
-    setSearchQuery("");
-  };
+const handleSearch = (e) => {
+  e.preventDefault();
+};
 
   let navLinks = [];
 
