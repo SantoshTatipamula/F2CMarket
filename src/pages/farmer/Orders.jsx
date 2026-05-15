@@ -14,15 +14,24 @@ export default function Orders() {
   // Search Filter
   const filteredOrders = useMemo(() => {
     return farmerOrdersData.filter((order) =>
-      order.customerName
-        .toLowerCase()
-        .includes(search.toLowerCase())
+      order.customerName.toLowerCase().includes(search.toLowerCase()),
     );
   }, [search]);
 
   return (
-    <section className="space-y-8 py-8">
-      
+    <section
+      className="
+    mx-auto
+    w-full
+    max-w-7xl
+    space-y-8
+    px-4
+    py-6
+    sm:px-6
+    lg:px-8
+    lg:py-8
+  "
+    >
       {/* Workspace Header */}
       <WorkspaceHeader
         title="Orders"
@@ -37,9 +46,7 @@ export default function Orders() {
       />
 
       {/* Orders */}
-      <OrdersList
-        orders={filteredOrders}
-      />
+      <OrdersList orders={filteredOrders} />
     </section>
   );
 }

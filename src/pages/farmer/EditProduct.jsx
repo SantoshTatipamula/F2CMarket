@@ -71,7 +71,19 @@ export default function EditProduct() {
   // Loading
   if (!product) {
     return (
-      <section className="py-10">
+      <section
+  className="
+    mx-auto
+    w-full
+    max-w-7xl
+    space-y-8
+    px-4
+    py-6
+    sm:px-6
+    lg:px-8
+    lg:py-8
+  "
+>
         <p className="text-sm text-[var(--text-secondary)]">
           Loading product...
         </p>
@@ -80,7 +92,19 @@ export default function EditProduct() {
   }
 
   return (
-    <section className="space-y-8 py-8">
+    <section
+  className="
+    mx-auto
+    w-full
+    max-w-7xl
+    space-y-8
+    px-4
+    py-6
+    sm:px-6
+    lg:px-8
+    lg:py-8
+  "
+>
       
       {/* Header */}
       <WorkspaceHeader

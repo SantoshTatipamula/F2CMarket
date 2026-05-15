@@ -8,7 +8,19 @@ import WorkspaceActions from "@/components/farmer/workspace/WorkspaceActions";
 
 export default function Analytics() {
   return (
-    <section className="space-y-8 py-8">
+    <section
+  className="
+    mx-auto
+    w-full
+    max-w-7xl
+    space-y-8
+    px-4
+    py-6
+    sm:px-6
+    lg:px-8
+    lg:py-8
+  "
+>
       
       {/* Workspace Header */}
       <WorkspaceHeader
