@@ -5,8 +5,9 @@ import {
   Layers3,
   IndianRupee,
   Boxes,
-  ImageIcon,
   FileText,
+  ImagePlus,
+  X,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -44,6 +45,10 @@ export default function ProductForm({
     description: initialData.description || "",
   });
 
+  const [uploading, setUploading] = useState(false);
+
+  const [preview, setPreview] = useState(initialData.image || "");
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -53,8 +58,32 @@ export default function ProductForm({
     }));
   };
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setUploading(true);
+
+    // Fake Upload Delay
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+    const imageUrl = URL.createObjectURL(file);
+
+    setPreview(imageUrl);
+
+    setForm((prev) => ({
+      ...prev,
+      image: imageUrl,
+    }));
+
+    setUploading(false);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (uploading) return;
 
     onSubmit({
       ...form,
@@ -80,7 +109,6 @@ export default function ProductForm({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-7">
-      
       {/* Product Name */}
       <div className="space-y-2.5">
         <Label className="text-sm font-medium text-[var(--text-primary)]">
@@ -212,7 +240,6 @@ export default function ProductForm({
 
       {/* Price + Stock */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        
         {/* Price */}
         <div className="space-y-2.5">
           <Label className="text-sm font-medium text-[var(--text-primary)]">
@@ -270,30 +297,113 @@ export default function ProductForm({
         </div>
       </div>
 
-      {/* Image URL */}
-      <div className="space-y-2.5">
+      {/* Product Image */}
+      <div className="space-y-3">
         <Label className="text-sm font-medium text-[var(--text-primary)]">
-          Product Image URL
+          Product Image
         </Label>
 
-        <div className="relative">
-          <ImageIcon
-            size={18}
-            className="
-              absolute left-4 top-1/2
-              -translate-y-1/2
-              text-[var(--text-secondary)]
-            "
-          />
+        <div
+          className={`
+    rounded-3xl
+    border border-dashed border-black/10
+    bg-white
+    transition-all duration-300
+    ${preview ? "inline-flex p-3" : "w-full p-5"}
+  `}
+        >
+          {!preview ? (
+            <label
+              className="
+                flex cursor-pointer flex-col items-center
+                justify-center rounded-2xl
+                border border-black/5
+                bg-[var(--surface)]
+                px-6 py-10
+                text-center
+                transition hover:border-[var(--primary)]/20
+              "
+            >
+              <div
+                className="
+                  flex h-14 w-14 items-center justify-center
+                  rounded-2xl
+                  bg-[var(--primary)]/10
+                "
+              >
+                <ImagePlus size={24} className="text-[var(--primary)]" />
+              </div>
 
-          <Input
-            type="text"
-            name="image"
-            value={form.image}
-            onChange={handleChange}
-            placeholder="Paste image URL"
-            className={fieldStyles}
-          />
+              <h4 className="mt-4 text-sm font-semibold text-[var(--text-primary)]">
+                Upload Product Image
+              </h4>
+
+              <p className="mt-1 text-xs text-[var(--text-secondary)]">
+                PNG, JPG or WEBP
+              </p>
+
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageUpload}
+              />
+            </label>
+          ) : (
+            <div className="relative overflow-hidden rounded-2xl">
+              <img
+                src={preview}
+                alt="Preview"
+                className="
+  h-64 w-full max-w-sm
+  rounded-2xl
+  object-cover
+  shadow-sm
+"
+              />
+
+              <button
+                type="button"
+                onClick={() => {
+                  setPreview("");
+
+                  setForm((prev) => ({
+                    ...prev,
+                    image: "",
+                  }));
+                }}
+                className="
+                  absolute right-3 top-3
+                  flex h-9 w-9 items-center justify-center
+                  rounded-full
+                  bg-black/70
+                  text-white
+                  backdrop-blur-md
+                  transition hover:bg-black
+                "
+              >
+                <X size={16} />
+              </button>
+            </div>
+          )}
+
+          {/* Uploading */}
+          {uploading && (
+            <div className="mt-4 flex items-center gap-3">
+              <div
+                className="
+                  h-5 w-5 rounded-full
+                  border-2 border-[var(--primary)]/20
+                  border-t-[var(--primary)]
+                  animate-spin
+                "
+              />
+
+              <p className="text-sm text-[var(--text-secondary)]">
+                Uploading image...
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -339,15 +449,18 @@ export default function ProductForm({
       {/* Submit */}
       <Button
         type="submit"
+        disabled={uploading}
         className="
           h-12 w-full rounded-2xl
           bg-[var(--primary)]
           text-sm font-semibold
           hover:bg-[var(--primary-hover)]
           text-white
+          disabled:pointer-events-none
+          disabled:opacity-60
         "
       >
-        {submitLabel}
+        {uploading ? "Uploading..." : submitLabel}
       </Button>
     </form>
   );
