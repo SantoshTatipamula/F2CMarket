@@ -1,12 +1,16 @@
 import { createContext, useContext } from "react";
+
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useLocalStorage("f2c-user", null);
+  const [user, setUser] = useLocalStorage(
+    "f2c-user",
+    null
+  );
 
-  // Check authentication
+  // Authentication status
   const isAuthenticated = !!user;
 
   // Login
@@ -23,13 +27,25 @@ export function AuthProvider({ children }) {
 
     localStorage.setItem(
       "f2c-users",
-      JSON.stringify([...existingUsers, newUser])
+      JSON.stringify([
+        ...existingUsers,
+        newUser,
+      ])
     );
+  };
+
+  // Update user
+  const updateUser = (updatedData) => {
+    setUser((prev) => ({
+      ...prev,
+      ...updatedData,
+    }));
   };
 
   // Logout
   const logout = () => {
     setUser(null);
+
     localStorage.removeItem("f2c-user");
   };
 
@@ -38,8 +54,10 @@ export function AuthProvider({ children }) {
       value={{
         user,
         isAuthenticated,
+
         login,
         register,
+        updateUser,
         logout,
       }}
     >
@@ -48,4 +66,5 @@ export function AuthProvider({ children }) {
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () =>
+  useContext(AuthContext);
