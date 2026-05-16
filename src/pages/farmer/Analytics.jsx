@@ -29,9 +29,7 @@ export default function Analytics() {
       />
 
       {/* Workspace Controls */}
-      <WorkspaceActions
-        placeholder="Search analytics..."
-      >
+      <WorkspaceActions>
         <button
           className="
             h-11 px-4 rounded-xl
