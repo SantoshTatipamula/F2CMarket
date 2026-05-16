@@ -1,6 +1,6 @@
-import ProfileHeader from "@/components/farmer/profile/ProfileHeader";
+import ProfileHeader from "@/components/profile/ProfileHeader";
 
-import FarmProfileForm from "@/components/farmer/profile/FarmProfileForm";
+import FarmProfileForm from "@/components/profile/ProfileForm";
 
 import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
