@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+
+import { useSearch } from "@/context/SearchContext";
 
 import OrdersList from "@/components/farmer/orders/OrdersList";
 
@@ -9,14 +11,14 @@ import WorkspaceActions from "@/components/farmer/workspace/WorkspaceActions";
 import { farmerOrdersData } from "@/data/farmerOrdersData";
 
 export default function Orders() {
-  const [search, setSearch] = useState("");
+  const { searchQuery } = useSearch();
 
   // Search Filter
   const filteredOrders = useMemo(() => {
     return farmerOrdersData.filter((order) =>
-      order.customerName.toLowerCase().includes(search.toLowerCase()),
+      order.customerName.toLowerCase().includes(searchQuery.toLowerCase().trim()),
     );
-  }, [search]);
+  }, [searchQuery]);
 
   return (
     <section
@@ -38,12 +40,7 @@ export default function Orders() {
         description="Track customer purchases and delivery status."
       />
 
-      {/* Workspace Actions */}
-      <WorkspaceActions
-        searchValue={search}
-        onSearchChange={setSearch}
-        placeholder="Search customer orders..."
-      />
+
 
       {/* Orders */}
       <OrdersList orders={filteredOrders} />
