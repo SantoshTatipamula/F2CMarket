@@ -24,9 +24,8 @@ const AddProduct = lazy(() => import("../pages/farmer/AddProduct"));
 const FarmerOrders = lazy(() => import("../pages/farmer/Orders"));
 const FarmerAnalytics = lazy(() => import("../pages/farmer/Analytics"));
 const FarmerProfile = lazy(() => import("../pages/farmer/Profile"));
-const EditProduct = lazy(
-  () => import("../pages/farmer/EditProduct")
-);
+const EditProduct = lazy(() => import("../pages/farmer/EditProduct"));
+const Profile = lazy(() => import("../pages/profile/Profile"));
 
 export default function AppRoutes() {
   return (
@@ -74,6 +73,15 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             />
+
+            <Route
+              path="profile"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="order-success"
               element={
@@ -85,70 +93,68 @@ export default function AppRoutes() {
 
             {/* Farmer Routes */}
 
-<Route
-  path="farmer/dashboard"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <FarmerDashboard />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/dashboard"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/products"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <FarmerProducts />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/products"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerProducts />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/products/add"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <AddProduct />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/products/add"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <AddProduct />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/orders"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <FarmerOrders />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/orders"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerOrders />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/analytics"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <FarmerAnalytics />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/analytics"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerAnalytics />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/profile"
-  element={
-    <ProtectedRoute allowedRoles={["farmer"]}>
-      <FarmerProfile />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/profile"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <FarmerProfile />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="farmer/products/edit/:id"
-  element={
-    <ProtectedRoute
-      allowedRoles={["farmer"]}
-    >
-      <EditProduct />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="farmer/products/edit/:id"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <EditProduct />
+                </ProtectedRoute>
+              }
+            />
           </Route>
 
           {/* Auth Pages */}
