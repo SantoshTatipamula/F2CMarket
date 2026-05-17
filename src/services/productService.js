@@ -66,17 +66,23 @@ export function updateProduct(
 
   const updatedProducts =
     products.map((product) =>
-      product.id === productId
+      product.id.toString() ===
+      productId.toString()
         ? {
             ...product,
             ...updatedData,
+            id: product.id,
           }
         : product
     );
 
   saveProducts(updatedProducts);
 
-  return updatedProducts;
+  return updatedProducts.find(
+    (product) =>
+      product.id.toString() ===
+      productId.toString()
+  );
 }
 
 /* Delete product */
@@ -105,4 +111,46 @@ export function getFarmerProducts(
     (product) =>
       product.farmerId === farmerId
   );
+}
+
+/* Get single product */
+export function getProductById(
+  productId
+) {
+  return getProducts().find(
+    (product) =>
+      product.id.toString() ===
+      productId.toString()
+  );
+}
+
+
+/* Create product */
+export function createProduct(
+  productData
+) {
+  const products =
+    getProducts();
+
+  const newProduct = {
+    ...productData,
+
+    id: crypto.randomUUID(),
+
+    createdAt:
+      new Date().toISOString(),
+
+    status: "active",
+
+    totalOrders: 0,
+  };
+
+  const updatedProducts = [
+    newProduct,
+    ...products,
+  ];
+
+  saveProducts(updatedProducts);
+
+  return newProduct;
 }

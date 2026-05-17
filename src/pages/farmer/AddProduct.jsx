@@ -1,9 +1,7 @@
 import { useNavigate } from "react-router-dom";
 
-import {
-  getProducts,
-  saveProducts,
-} from "@/services/productService";
+import { createProduct }
+from "@/services/productService";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
 
@@ -12,26 +10,13 @@ import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 export default function AddProduct() {
   const navigate = useNavigate();
 
-  const handleAddProduct = (
-    newProduct
-  ) => {
-    const existingProducts =
-      getProducts();
+const handleAddProduct = (
+  newProduct
+) => {
+  createProduct(newProduct);
 
-    const updatedProducts = [
-      ...existingProducts,
-      {
-        ...newProduct,
-        id: crypto.randomUUID(),
-        createdAt:
-          new Date().toISOString(),
-      },
-    ];
-
-    saveProducts(updatedProducts);
-
-    navigate("/farmer/products");
-  };
+  navigate("/farmer/products");
+};
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
