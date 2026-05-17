@@ -1,4 +1,4 @@
-import { farmerProductsData } from "@/data/farmerProductsData";
+import { productsData } from "@/data/productsData";
 
 const STORAGE_KEY =
   "f2c-products";
@@ -12,7 +12,7 @@ export function initializeProducts() {
     localStorage.setItem(
       STORAGE_KEY,
       JSON.stringify(
-        farmerProductsData
+        productsData
       )
     );
   }
@@ -133,7 +133,17 @@ export function createProduct(
     getProducts();
 
   const newProduct = {
-    ...productData,
+  ...productData,
+
+  location:
+    productData.location ||
+    "Karimnagar",
+
+  farmer:
+    productData.farmer ||
+    "Local Farmer",
+
+  rating: 4.5,
 
     id: crypto.randomUUID(),
 

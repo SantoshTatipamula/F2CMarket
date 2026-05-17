@@ -43,6 +43,8 @@ export default function ProductForm({
     image: initialData.image || "",
 
     description: initialData.description || "",
+
+    location: initialData.location || "",
   });
 
   const [uploading, setUploading] = useState(false);
@@ -294,6 +296,23 @@ export default function ProductForm({
               required
             />
           </div>
+        </div>
+
+        {/* Location */}
+        <div className="space-y-2.5">
+          <Label className="text-sm font-medium text-[var(--text-primary)]">
+            Location
+          </Label>
+
+          <Input
+            type="text"
+            name="location"
+            value={form.location}
+            onChange={handleChange}
+            placeholder="Karimnagar"
+            className={fieldStyles}
+            required
+          />
         </div>
       </div>
 

@@ -1,21 +1,19 @@
 import { useMemo } from "react";
 
-import {
-  useNavigate,
-  useParams,
-} from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
 
 import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
-import {
-  getProductById,
-  updateProduct,
-} from "@/services/productService";
+import { getProductById, } from "@/services/productService";
+
+import { useProducts } from "@/context/ProductContext";
 
 export default function EditProduct() {
   const navigate = useNavigate();
+
+const { updateProduct } = useProducts();
 
   const { id } = useParams();
 
@@ -25,13 +23,8 @@ export default function EditProduct() {
   }, [id]);
 
   // Update Product
-  const handleUpdateProduct = (
-    updatedProduct
-  ) => {
-    updateProduct(
-      id,
-      updatedProduct
-    );
+  const handleUpdateProduct = (updatedProduct) => {
+    updateProduct(id, updatedProduct);
 
     navigate("/farmer/products");
   };
@@ -71,7 +64,6 @@ export default function EditProduct() {
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
-      
       {/* Hero */}
       <section
         className="
@@ -83,7 +75,6 @@ export default function EditProduct() {
         "
       >
         <div className="max-w-7xl mx-auto px-4 lg:px-8 py-14">
-          
           <div className="max-w-3xl">
             <WorkspaceHeader
               title="Edit Product"
@@ -95,7 +86,6 @@ export default function EditProduct() {
 
       {/* Content */}
       <section className="max-w-7xl mx-auto px-4 lg:px-8 py-10">
-        
         <div
           className="
             overflow-hidden
@@ -105,7 +95,6 @@ export default function EditProduct() {
             shadow-sm
           "
         >
-          
           {/* Card Header */}
           <div
             className="
@@ -118,7 +107,6 @@ export default function EditProduct() {
             "
           >
             <div className="max-w-2xl">
-              
               <div
                 className="
                   inline-flex items-center
@@ -137,7 +125,8 @@ export default function EditProduct() {
               </h2>
 
               <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-                Keep your marketplace listings accurate and updated for better customer engagement.
+                Keep your marketplace listings accurate and updated for better
+                customer engagement.
               </p>
             </div>
           </div>

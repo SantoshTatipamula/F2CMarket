@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import {getProducts, initializeProducts, } from "@/services/productService";
+import { useProducts } from "@/context/ProductContext";
 
 import { parsePrice } from "@/utils/parsePrice";
 
@@ -18,10 +18,10 @@ export default function Products() {
   // Global Search
   const { searchQuery } = useSearch();
 
-initializeProducts();
-const products = useMemo(() => getProducts(),[]);
+const { products } = useProducts();
 
   /* Dynamic categories */
+  
   const categories = useMemo(
     () => ["All", ...new Set(products.map((item) => item.category))],
     [],

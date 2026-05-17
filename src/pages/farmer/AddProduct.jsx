@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
-import { createProduct }
-from "@/services/productService";
+import { useProducts } from "@/context/ProductContext";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
 
@@ -9,6 +8,8 @@ import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
 export default function AddProduct() {
   const navigate = useNavigate();
+
+  const { createProduct } = useProducts();
 
 const handleAddProduct = (
   newProduct
