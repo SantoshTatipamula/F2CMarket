@@ -1,26 +1,29 @@
 import { useMemo } from "react";
 
-import { useNavigate, useParams } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
 
 import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
-import { getProductById, } from "@/services/productService";
+import { getProductById } from "@/services/productService";
 
 import { useProducts } from "@/context/ProductContext";
 
 export default function EditProduct() {
   const navigate = useNavigate();
+  const { user } = useAuth();
 
-const { updateProduct } = useProducts();
+  const { updateProduct } = useProducts();
 
   const { id } = useParams();
 
   // Get Product
-  const product = useMemo(() => {
-    return getProductById(id);
-  }, [id]);
+  const product = getProductById(id);
+
+  const isOwner = product?.sellerId === user?.id;
 
   // Update Product
   const handleUpdateProduct = (updatedProduct) => {
@@ -28,6 +31,10 @@ const { updateProduct } = useProducts();
 
     navigate("/farmer/products");
   };
+
+  if (product && !isOwner) {
+    return <Navigate to="/farmer/products" replace />;
+  }
 
   // Product Not Found
   if (!product) {
