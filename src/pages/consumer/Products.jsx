@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { productsData } from "@/data/productsData";
+import {getProducts, initializeProducts, } from "@/services/productService";
 
 import { parsePrice } from "@/utils/parsePrice";
 
@@ -16,37 +16,24 @@ import { useSearch } from "@/context/SearchContext";
 
 export default function Products() {
   // Global Search
-  const { searchQuery } =
-    useSearch();
+  const { searchQuery } = useSearch();
+
+initializeProducts();
+const products = useMemo(() => getProducts(),[]);
 
   /* Dynamic categories */
   const categories = useMemo(
-    () => [
-      "All",
-      ...new Set(
-        productsData.map(
-          (item) => item.category
-        )
-      ),
-    ],
-    []
+    () => ["All", ...new Set(products.map((item) => item.category))],
+    [],
   );
 
   /* Dynamic max price */
   const maxLimit = useMemo(
-    () =>
-      Math.max(
-        ...productsData.map((item) =>
-          parsePrice(item.price)
-        )
-      ),
-    []
+    () => Math.max(...products.map((item) => parsePrice(item.price))),
+    [],
   );
 
-  const [
-    selectedLocation,
-    setSelectedLocation,
-  ] = useState("All");
+  const [selectedLocation, setSelectedLocation] = useState("All");
 
   const {
     category,
@@ -62,86 +49,38 @@ export default function Products() {
     setMinRating,
 
     filteredProducts,
-  } = useProductsFilter(
-    productsData
-  );
+  } = useProductsFilter(products);
 
   /* Dynamic locations */
-  const availableLocations =
-    useMemo(() => {
-      const locs =
-        productsData.map((p) => {
-          const loc =
-            p.location || "";
+  const availableLocations = useMemo(() => {
+    const locs = products.map((p) => {
+      const loc = p.location || "";
 
-          return (
-            loc.charAt(0).toUpperCase() +
-            loc
-              .slice(1)
-              .toLowerCase()
-          );
-        });
+      return loc.charAt(0).toUpperCase() + loc.slice(1).toLowerCase();
+    });
 
-      return [
-        "All",
-        ...new Set(
-          locs.filter(Boolean)
-        ),
-      ];
-    }, []);
+    return ["All", ...new Set(locs.filter(Boolean))];
+  }, []);
 
   /* Final filtering */
-  const finalProducts =
-    useMemo(() => {
-      const searchTerm =
-        searchQuery
-          .toLowerCase()
-          .trim();
+  const finalProducts = useMemo(() => {
+    const searchTerm = searchQuery.toLowerCase().trim();
 
-      return filteredProducts.filter(
-        (product) => {
-          const matchesLocation =
-            selectedLocation === "All"
-              ? true
-              : product.location?.toLowerCase() ===
-                selectedLocation.toLowerCase();
+    return filteredProducts.filter((product) => {
+      const matchesLocation =
+        selectedLocation === "All"
+          ? true
+          : product.location?.toLowerCase() === selectedLocation.toLowerCase();
 
-          const matchesSearch =
-            product.name
-              ?.toLowerCase()
-              .includes(
-                searchTerm
-              ) ||
+      const matchesSearch =
+        product.name?.toLowerCase().includes(searchTerm) ||
+        product.category?.toLowerCase().includes(searchTerm) ||
+        product.farmer?.toLowerCase().includes(searchTerm) ||
+        product.location?.toLowerCase().includes(searchTerm);
 
-            product.category
-              ?.toLowerCase()
-              .includes(
-                searchTerm
-              ) ||
-
-            product.farmer
-              ?.toLowerCase()
-              .includes(
-                searchTerm
-              ) ||
-
-            product.location
-              ?.toLowerCase()
-              .includes(
-                searchTerm
-              );
-
-          return (
-            matchesLocation &&
-            matchesSearch
-          );
-        }
-      );
-    }, [
-      filteredProducts,
-      selectedLocation,
-      searchQuery,
-    ]);
+      return matchesLocation && matchesSearch;
+    });
+  }, [filteredProducts, selectedLocation, searchQuery]);
 
   const filterProps = {
     category,
@@ -163,11 +102,8 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
-      
       <ProductsPageHeader
-        totalProducts={
-          finalProducts.length
-        }
+        totalProducts={finalProducts.length}
         sortBy={sortBy}
         setSortBy={setSortBy}
         categories={categories}
@@ -175,9 +111,7 @@ export default function Products() {
       />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        
         <div className="flex flex-col lg:flex-row items-start gap-8">
-          
           {/* Sidebar */}
           <aside
             className="
@@ -189,18 +123,12 @@ export default function Products() {
               overflow-y-auto
             "
           >
-            <ProductFilters
-              {...filterProps}
-            />
+            <ProductFilters {...filterProps} />
           </aside>
 
           {/* Product Grid */}
           <div className="flex-1 w-full min-w-0">
-            <ProductGrid
-              products={
-                finalProducts
-              }
-            />
+            <ProductGrid products={finalProducts} />
           </div>
         </div>
       </section>
