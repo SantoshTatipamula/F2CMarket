@@ -1,6 +1,12 @@
 import { createContext, useContext } from "react";
 
+import {
+  saveUser,
+  updateStoredUser,
+} from "@/services/profileService";
+
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+
 
 const AuthContext = createContext();
 
@@ -15,12 +21,14 @@ export function AuthProvider({ children }) {
 
   // Login
   const login = (userData) => {
+    saveUser(userData);
     setUser(userData);
   };
 
   // Register
   const register = (newUser) => {
     setUser(newUser);
+    saveUser(newUser);
 
     const existingUsers =
       JSON.parse(localStorage.getItem("f2c-users")) || [];
@@ -35,12 +43,14 @@ export function AuthProvider({ children }) {
   };
 
   // Update user
-  const updateUser = (updatedData) => {
-    setUser((prev) => ({
-      ...prev,
-      ...updatedData,
-    }));
-  };
+  const updateUser = (
+  updatedData
+) => {
+  const updatedUser =
+    updateStoredUser(updatedData);
+
+  setUser(updatedUser);
+};
 
   // Logout
   const logout = () => {

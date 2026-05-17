@@ -12,7 +12,7 @@ import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 import {
   getProducts,
   saveProducts,
-} from "@/utils/productStorage";
+} from "@/services/productService";
 
 export default function EditProduct() {
   const navigate = useNavigate();

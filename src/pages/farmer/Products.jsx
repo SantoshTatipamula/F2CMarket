@@ -13,7 +13,7 @@ import {
   getProducts,
   initializeProducts,
   saveProducts,
-} from "@/utils/productStorage";
+} from "@/services/productService";
 
 import { useSearch } from "@/context/SearchContext";
 

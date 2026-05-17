@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import {
   getProducts,
   saveProducts,
-} from "@/utils/productStorage";
+} from "@/services/productService";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
 
