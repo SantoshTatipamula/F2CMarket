@@ -10,8 +10,12 @@ import { useProducts } from "@/context/ProductContext";
 
 import { useSearch } from "@/context/SearchContext";
 
+import { useAuth } from "@/context/AuthContext";
+
 export default function Products() {
   const navigate = useNavigate();
+
+  const { user } = useAuth();
 
   // Global Search
   const { searchQuery } = useSearch();
@@ -28,19 +32,25 @@ export default function Products() {
     navigate(`/farmer/products/edit/${product.id}`);
   };
 
+  const sellerProducts =
+  products.filter(
+    (product) =>
+      product.sellerId === user?.id
+  );
+
   // Search Filter
   const filteredProducts = useMemo(() => {
     const searchTerm = searchQuery.toLowerCase().trim();
 
-    return products.filter((product) => {
+    return sellerProducts.filter((product) => {
       return (
         product.name?.toLowerCase().includes(searchTerm) ||
         product.category?.toLowerCase().includes(searchTerm) ||
         product.status?.toLowerCase().includes(searchTerm) ||
-        product.farmerName?.toLowerCase().includes(searchTerm)
+        product.sellerName?.toLowerCase().includes(searchTerm)
       );
     });
-  }, [products, searchQuery]);
+  }, [sellerProducts, searchQuery]);
 
   return (
     <section
@@ -77,7 +87,7 @@ export default function Products() {
           <p className="text-sm text-[var(--text-secondary)]">Total Products</p>
 
           <h3 className="mt-2 text-3xl font-bold text-[var(--text-primary)]">
-            {products.length}
+            {sellerProducts.length}
           </h3>
         </div>
 
@@ -92,7 +102,7 @@ export default function Products() {
           <p className="text-sm text-[var(--text-secondary)]">Low Stock</p>
 
           <h3 className="mt-2 text-3xl font-bold text-orange-500">
-            {products.filter((product) => Number(product.stock) <= 10).length}
+            {sellerProducts.filter((product) => Number(product.stock) <= 10).length}
           </h3>
         </div>
 
@@ -109,7 +119,7 @@ export default function Products() {
           </p>
 
           <h3 className="mt-2 text-3xl font-bold text-emerald-500">
-            {products.length}
+            {sellerProducts.length}
           </h3>
         </div>
       </div>

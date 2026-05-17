@@ -1,9 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import {
   getProducts,
@@ -13,14 +8,14 @@ import {
   deleteProduct as deleteProductService,
 } from "@/services/productService";
 
-const ProductContext =
-  createContext();
+import { useAuth } from "@/context/AuthContext";
 
-export function ProductProvider({
-  children,
-}) {
-  const [products, setProducts] =
-    useState([]);
+const ProductContext = createContext();
+
+export function ProductProvider({ children }) {
+  const { user } = useAuth();
+
+  const [products, setProducts] = useState([]);
 
   // Initialize
   useEffect(() => {
@@ -35,36 +30,30 @@ export function ProductProvider({
   };
 
   // Create Product
-  const createProduct = (
-    productData
-  ) => {
-    createProductService(
-      productData
-    );
+  const createProduct = (productData) => {
+    createProductService({
+      ...productData,
+
+      sellerId: user?.id,
+
+      sellerName: user?.farmerProfile?.farmName || user?.name,
+
+      sellerRole: user?.role,
+    });
 
     refreshProducts();
   };
 
   // Update Product
-  const updateProduct = (
-    productId,
-    updatedData
-  ) => {
-    updateProductService(
-      productId,
-      updatedData
-    );
+  const updateProduct = (productId, updatedData) => {
+    updateProductService(productId, updatedData, user?.id);
 
     refreshProducts();
   };
 
   // Delete Product
-  const deleteProduct = (
-    productId
-  ) => {
-    deleteProductService(
-      productId
-    );
+  const deleteProduct = (productId) => {
+    deleteProductService(productId, user?.id);
 
     refreshProducts();
   };

@@ -1,17 +1,9 @@
-import {
-  PackageCheck,
-  AlertTriangle,
-} from "lucide-react";
+import { PackageCheck, AlertTriangle } from "lucide-react";
 
 import ProductActions from "./ProductActions";
 
-export default function FarmerProductCard({
-  product,
-  onEdit,
-  onDelete,
-}) {
-  const lowStock =
-    Number(product.stock) <= 10;
+export default function FarmerProductCard({ product, onEdit, onDelete, canManage=false }) {
+  const lowStock = Number(product.stock) <= 10;
 
   return (
     <article
@@ -26,10 +18,8 @@ export default function FarmerProductCard({
         hover:shadow-xl
       "
     >
-      
       {/* Image */}
       <div className="relative h-56 overflow-hidden">
-        
         <img
           src={product.image}
           alt={product.name}
@@ -53,7 +43,6 @@ export default function FarmerProductCard({
 
         {/* Status */}
         <div className="absolute left-4 top-4">
-          
           {lowStock ? (
             <div
               className="
@@ -86,17 +75,14 @@ export default function FarmerProductCard({
 
       {/* Content */}
       <div
-  className="
+        className="
     flex h-full flex-col
     p-5
   "
->
-        
+      >
         {/* Top */}
         <div>
-          
           <div className="flex items-start justify-between gap-4">
-            
             <div>
               <h2 className="text-lg font-semibold text-[var(--text-primary)]">
                 {product.name}
@@ -137,7 +123,6 @@ export default function FarmerProductCard({
             mt-5 grid grid-cols-2 gap-4
           "
         >
-          
           <div
             className="
               rounded-2xl
@@ -146,9 +131,7 @@ export default function FarmerProductCard({
               p-3
             "
           >
-            <p className="text-xs text-[var(--text-secondary)]">
-              Stock
-            </p>
+            <p className="text-xs text-[var(--text-secondary)]">Stock</p>
 
             <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
               {product.stock}
@@ -163,9 +146,7 @@ export default function FarmerProductCard({
               p-3
             "
           >
-            <p className="text-xs text-[var(--text-secondary)]">
-              Orders
-            </p>
+            <p className="text-xs text-[var(--text-secondary)]">Orders</p>
 
             <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
               {product.totalOrders || 0}
@@ -175,12 +156,16 @@ export default function FarmerProductCard({
 
         {/* Actions */}
         <div className="mt-5">
-          <ProductActions
-            onEdit={() => onEdit(product)}
-            onDelete={() =>
-              onDelete(product.id)
-            }
-          />
+          {canManage && (
+  <div className="mt-5">
+    <ProductActions
+      onEdit={() => onEdit(product)}
+      onDelete={() =>
+        onDelete(product.id)
+      }
+    />
+  </div>
+)}
         </div>
       </div>
     </article>
