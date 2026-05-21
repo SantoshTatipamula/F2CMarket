@@ -22,38 +22,17 @@ const FarmerDashboard = lazy(() => import("../pages/farmer/Dashboard"));
 const FarmerProducts = lazy(() => import("../pages/farmer/Products"));
 const AddProduct = lazy(() => import("../pages/farmer/AddProduct"));
 const FarmerOrders = lazy(() => import("../pages/farmer/Orders"));
-const FarmerAnalytics = lazy(() => import("../pages/farmer/Analytics"));
 const FarmerProfile = lazy(() => import("../pages/farmer/Profile"));
 const EditProduct = lazy(() => import("../pages/farmer/EditProduct"));
 const Profile = lazy(() => import("../pages/profile/MyProfile"));
-
-const EditProfile = lazy(() =>
-  import("../pages/profile/EditProfile")
-);
-
-const ProfileSettings = lazy(() =>
-  import("../pages/profile/ProfileSettings")
-);
-
-const Security = lazy(() =>
-  import("../pages/profile/Security")
-);
-
-const Notifications = lazy(() =>
-  import("../pages/profile/Notifications")
-);
-
-const ActivityHistory = lazy(() =>
-  import("../pages/profile/ActivityHistory")
-);
-
-const SellerProducts = lazy(() =>
-  import("../pages/profile/SellerProducts")
-);
-
-const SellerReviews = lazy(() =>
-  import("../pages/profile/SellerReviews")
-);
+const EditProfile = lazy(() => import("../pages/profile/EditProfile"));
+const ProfileSettings = lazy(() => import("../pages/profile/ProfileSettings"));
+const Security = lazy(() => import("../pages/profile/Security"));
+const Notifications = lazy(() => import("../pages/profile/Notifications"));
+const ActivityHistory = lazy(() => import("../pages/profile/ActivityHistory"));
+const SellerProducts = lazy(() => import("../pages/profile/SellerProducts"));
+const SellerReviews = lazy(() => import("../pages/profile/SellerReviews"));
+const Dashboard = lazy(() => import("../pages/dashboard/Dashboard.jsx"));
 
 export default function AppRoutes() {
   return (
@@ -112,106 +91,67 @@ export default function AppRoutes() {
             />
 
             <Route
-  path="profile/edit"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "consumer",
-        "farmer",
-        "admin",
-      ]}
-    >
-      <EditProfile />
-    </ProtectedRoute>
-  }
-/>
+              path="profile/edit"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <EditProfile />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/settings"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "consumer",
-        "farmer",
-        "admin",
-      ]}
-    >
-      <ProfileSettings />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="profile/settings"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <ProfileSettings />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/security"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "consumer",
-        "farmer",
-        "admin",
-      ]}
-    >
-      <Security />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="profile/security"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <Security />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/notifications"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "consumer",
-        "farmer",
-        "admin",
-      ]}
-    >
-      <Notifications />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="profile/notifications"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <Notifications />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/activity"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "consumer",
-        "farmer",
-        "admin",
-      ]}
-    >
-      <ActivityHistory />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="profile/activity"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <ActivityHistory />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/seller-products"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "farmer",
-      ]}
-    >
-      <SellerProducts />
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="profile/seller-products"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <SellerProducts />
+                </ProtectedRoute>
+              }
+            />
 
-<Route
-  path="profile/seller-reviews"
-  element={
-    <ProtectedRoute
-      allowedRoles={[
-        "farmer",
-      ]}
-    >
-      <SellerReviews />
-    </ProtectedRoute>
-  }
-/>
-
+            <Route
+              path="profile/seller-reviews"
+              element={
+                <ProtectedRoute allowedRoles={["farmer"]}>
+                  <SellerReviews />
+                </ProtectedRoute>
+              }
+            />
 
             <Route
               path="order-success"
@@ -224,14 +164,7 @@ export default function AppRoutes() {
 
             {/* Farmer Routes */}
 
-            <Route
-              path="farmer/dashboard"
-              element={
-                <ProtectedRoute allowedRoles={["farmer"]}>
-                  <FarmerDashboard />
-                </ProtectedRoute>
-              }
-            />
+            
 
             <Route
               path="farmer/products"
@@ -261,10 +194,10 @@ export default function AppRoutes() {
             />
 
             <Route
-              path="farmer/analytics"
+              path="farmer/dashboard"
               element={
                 <ProtectedRoute allowedRoles={["farmer"]}>
-                  <FarmerAnalytics />
+                  <Dashboard />
                 </ProtectedRoute>
               }
             />

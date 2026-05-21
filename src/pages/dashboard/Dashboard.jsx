@@ -1,63 +1,119 @@
+import { Package, ShoppingCart, Wallet, Users } from "lucide-react";
+
 import { useAuth } from "@/context/AuthContext";
+
+// import DashboardHeader from "@/dashboard/DashboardHeader";
+
+import DashboardStats from "@/components/dashboard/DashboardStats";
+
 import QuickActions from "@/components/dashboard/QuickActions";
 
 import RecentActivity from "@/components/dashboard/RecentActivity";
-import SettingsMenu from "@/components/dashboard/SettingsMenu";
 
-import SellerTrustCard from "@/components/farmer/profile/SellerTrustCard";
-import VerificationSection from "@/components/farmer/profile/VerificationSection";
-import PublicProductsPreview from "@/components/farmer/profile/PublicProductsPreview";
-import ReviewPreview from "@/components/farmer/profile/ReviewPreview";
+import FarmerOverview from "@/components/dashboard/FarmerOverview";
+
+import ConsumerOverview from "@/components/dashboard/ConsumerOverview";
+
+import AdminOverview from "@/components/dashboard/AdminOverview";
 
 export default function Dashboard() {
   const { user } = useAuth();
 
-  const isFarmer =
-    user?.role === "farmer";
+  const isFarmer = user?.role === "farmer";
+
+  const isConsumer = user?.role === "consumer";
+
+  const isAdmin = user?.role === "admin";
+
+  /* Dashboard Stats */
+  const stats = [
+    {
+      title: "Products",
+      value: "24",
+      icon: Package,
+      trend: "+12%",
+      trendLabel: "this month",
+    },
+
+    {
+      title: "Orders",
+      value: "148",
+      icon: ShoppingCart,
+      trend: "+18%",
+      trendLabel: "marketplace growth",
+    },
+
+    {
+      title: "Revenue",
+      value: "₹48K",
+      icon: Wallet,
+      trend: "+9%",
+      trendLabel: "this month",
+    },
+
+    {
+      title: "Customers",
+      value: "320",
+      icon: Users,
+      trend: "+22%",
+      trendLabel: "active buyers",
+    },
+  ];
 
   return (
-<main className="min-h-screen bg-[var(--bg)]">
-  
-  <section className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
+    <main className="min-h-screen bg-[var(--bg)]">
+      <section
+        className="
+    mx-auto
+    w-full
+    max-w-7xl
+    space-y-8
+    px-4
+    py-6
+    sm:px-6
+    lg:px-8
+    lg:py-8
+  "
+      >
+        {/* Header */}
+        {/* <DashboardHeader /> */}
 
-    {/* Quick Actions */}
-    <div className="mt-8">
-      <QuickActions />
-    </div>
+        {/* Stats */}
+        <div className="mt-8">
+          <DashboardStats stats={stats} />
+        </div>
 
-    {/* Trust + Verification */}
-    <div
-      className="
-        mt-8
-        grid grid-cols-1
-        gap-8
-        xl:grid-cols-2
-      "
-    >
-      <SellerTrustCard />
+        {/* Main Grid */}
+        <div
+          className="
+            mt-8
+            grid grid-cols-1
+            gap-8
+            xl:grid-cols-[1.3fr_0.7fr]
+          "
+        >
+          {/* LEFT */}
+          <div className="space-y-8">
+            {/* Farmer */}
+            {isFarmer && <FarmerOverview />}
 
-      <VerificationSection />
-    </div>
+            {/* Consumer */}
+            {isConsumer && <ConsumerOverview />}
 
-    {/* Products */}
-    <div className="mt-8">
-      <PublicProductsPreview />
-    </div>
+            {/* Admin */}
+            {isAdmin && <AdminOverview />}
 
-    {/* Activity + Reviews */}
-    <div
-      className="
-        mt-8
-        grid grid-cols-1
-        gap-8
-        xl:grid-cols-2
-      "
-    >
-      <RecentActivity />
+            {/* Activity */}
+            <RecentActivity />
+          </div>
 
-      <ReviewPreview />
-    </div>
-  </section>
-</main>
+          {/* RIGHT */}
+          <div className="space-y-8">
+            {/* Actions */}
+            <QuickActions />
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
