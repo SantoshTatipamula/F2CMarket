@@ -148,6 +148,7 @@ function useNavLinks(role) {
         ];
       case "farmer":
         return [
+          { label: "Home",     to: "/" },
           { label: "Marketplace",  to: "/products" },
           { label: "My Products",  to: "/farmer/products" },
           { label: "Orders",       to: "/farmer/orders" },
@@ -319,8 +320,8 @@ export default function Navbar() {
                         </Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/farmer/analytics" className="flex items-center gap-2 cursor-pointer">
-                          <ChartColumn size={16} /> Analytics
+                        <Link to="/farmer/dashboard" className="flex items-center gap-2 cursor-pointer">
+                          <ChartColumn size={16} /> Dashboard
                         </Link>
                       </DropdownMenuItem>
                     </>
@@ -512,7 +513,7 @@ export default function Navbar() {
                 <Link to="/farmer/products/add" onClick={closeMenu} className={drawerLinkClass}>
                   <Plus size={18} /> Add Product
                 </Link>
-                <Link to="/farmer/analytics" onClick={closeMenu} className={drawerLinkClass}>
+                <Link to="/farmer/dashboard" onClick={closeMenu} className={drawerLinkClass}>
                   <ChartColumn size={18} /> Analytics
                 </Link>
               </>
