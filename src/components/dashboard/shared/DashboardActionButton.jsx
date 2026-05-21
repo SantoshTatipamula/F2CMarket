@@ -1,10 +1,7 @@
-import { ArrowRight } from "lucide-react";
-
 import { Link } from "react-router-dom";
 
-export default function ActionCard({
+export default function DashboardActionButton({
   title,
-  description,
   icon: Icon,
   href,
 }) {
@@ -13,68 +10,61 @@ export default function ActionCard({
       to={href}
       className="
         group
-        rounded-3xl
+
+        flex flex-col
+        items-center
+        justify-center
+
+        gap-4
+
+        rounded-[24px]
         border border-black/5
-        bg-[var(--surface)]
-        p-5
-        shadow-sm
+        bg-[var(--surface-2)]
+
+        px-6 py-8
+
+        text-center
+
         transition-all duration-300
         hover:-translate-y-1
-        hover:shadow-xl
+        hover:border-[var(--primary)]/20
+        hover:bg-[var(--primary)]/5
+        hover:shadow-lg
       "
     >
       
-      <div className="flex items-start justify-between gap-4">
-        
-        {/* Left */}
-        <div className="space-y-4">
-          
-          <div
-            className="
-              flex h-12 w-12
-              items-center justify-center
-              rounded-2xl
-              bg-[var(--primary)]/10
-              text-[var(--primary)]
-            "
-          >
-            <Icon size={22} />
-          </div>
+      {/* Icon */}
+      <div
+        className="
+          flex h-16 w-16
+          items-center justify-center
 
-          <div>
-            
-            <h3
-              className="
-                text-lg font-semibold
-                text-[var(--text-primary)]
-              "
-            >
-              {title}
-            </h3>
+          rounded-2xl
 
-            <p
-              className="
-                mt-2
-                text-sm leading-relaxed
-                text-[var(--text-secondary)]
-              "
-            >
-              {description}
-            </p>
-          </div>
-        </div>
+          bg-[var(--primary)]/10
+          text-[var(--primary)]
 
-        {/* Arrow */}
-        <div
-          className="
-            text-[var(--text-secondary)]
-            transition-transform duration-300
-            group-hover:translate-x-1
-          "
-        >
-          <ArrowRight size={20} />
-        </div>
+          transition-transform duration-300
+          group-hover:scale-105
+        "
+      >
+        <Icon size={28} />
       </div>
+
+      {/* Title */}
+      <h3
+        className="
+          max-w-[120px]
+
+          text-center
+          text-sm font-semibold
+          leading-snug
+
+          text-[var(--text-primary)]
+        "
+      >
+        {title}
+      </h3>
     </Link>
   );
 }
