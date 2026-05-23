@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { buildOrder, saveOrder } from "@/services/orderService";
+
 import CheckoutForm from "@/components/order/CheckoutForm";
 import PaymentMethods from "@/components/order/PaymentMethods";
 import OrderSummary from "@/components/order/OrderSummary";
@@ -12,14 +16,16 @@ const INITIAL_FORM = { fullName: "", phone: "", city: "", pincode: "", address: 
 const isFormFilled = (form) => Object.values(form).every((v) => v.trim() !== "");
 
 export default function Checkout() {
-  const navigate = useNavigate();
+  const navigate              = useNavigate();
   const { cartItems, cartTotal, clearCart } = useCart();
+  const { user }              = useAuth();
+
   const [selectedMethod, setSelectedMethod] = useState("cod");
-  const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState(INITIAL_FORM);
+  const [loading, setLoading]               = useState(false);
+  const [formData, setFormData]             = useState(INITIAL_FORM);
 
   const deliveryFee = cartTotal > 499 ? 0 : 40;
-  const finalTotal = cartTotal + deliveryFee;
+  const finalTotal  = cartTotal + deliveryFee;
 
   useEffect(() => {
     if (cartItems.length === 0) navigate("/cart");
@@ -31,20 +37,22 @@ export default function Checkout() {
   };
 
   const handlePlaceOrder = () => {
+    if (!isFormFilled(formData) || loading) return;
     setLoading(true);
+
     setTimeout(() => {
-      const newOrder = {
-        id: "F2C" + Math.floor(100000 + Math.random() * 900000),
-        items: cartItems,
-        total: finalTotal,
+      /* Build well-shaped order via service — single place to change structure */
+      const orderPayload = buildOrder({
+        cartItems,
+        formData,
         paymentMethod: selectedMethod,
-        address: formData,
-        date: new Date().toISOString(),
-        status: "Placed",
-      };
-      const existing = JSON.parse(localStorage.getItem("f2c-orders")) || [];
-      localStorage.setItem("f2c-orders", JSON.stringify([newOrder, ...existing]));
-      navigate("/order-success", { state: { orderId: newOrder.id } });
+        user,
+        deliveryFee,
+      });
+
+      const saved = saveOrder(orderPayload);
+
+      navigate("/order-success", { state: { orderId: saved.id } });
       setTimeout(clearCart, 100);
     }, 1200);
   };
@@ -60,9 +68,19 @@ export default function Checkout() {
             <CheckoutForm formData={formData} onChange={handleChange} />
             <PaymentMethods selectedMethod={selectedMethod} setSelectedMethod={setSelectedMethod} />
           </div>
+
           <div className="space-y-4 lg:sticky lg:top-24 h-fit">
-            <OrderSummary cartItems={cartItems} cartTotal={cartTotal} deliveryFee={deliveryFee} finalTotal={finalTotal} />
-            <PlaceOrderButton onClick={handlePlaceOrder} loading={loading} disabled={!isFormFilled(formData)} />
+            <OrderSummary
+              cartItems={cartItems}
+              cartTotal={cartTotal}
+              deliveryFee={deliveryFee}
+              finalTotal={finalTotal}
+            />
+            <PlaceOrderButton
+              onClick={handlePlaceOrder}
+              loading={loading}
+              disabled={!isFormFilled(formData)}
+            />
           </div>
         </div>
       </div>

@@ -7,7 +7,6 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useLocalStorage("f2c-cart", []);
 
-  /* Add Item — merges quantity if product already exists */
   const addToCart = (product, quantity = 1) => {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
@@ -18,7 +17,8 @@ export function CartProvider({ children }) {
             : item
         );
       }
-      return [...prev, { ...product, quantity }];
+      /* Store numericPrice once so downstream (orderService) never re-parses */
+      return [...prev, { ...product, quantity, numericPrice: parsePrice(product.price) }];
     });
   };
 
@@ -51,7 +51,7 @@ export function CartProvider({ children }) {
   const cartTotal = useMemo(
     () =>
       cartItems.reduce(
-        (total, item) => total + parsePrice(item.price) * item.quantity,
+        (total, item) => total + (item.numericPrice ?? parsePrice(item.price)) * item.quantity,
         0
       ),
     [cartItems]
@@ -59,16 +59,7 @@ export function CartProvider({ children }) {
 
   return (
     <CartContext.Provider
-      value={{
-        cartItems,
-        addToCart,
-        removeFromCart,
-        increaseQty,
-        decreaseQty,
-        clearCart,
-        cartCount,
-        cartTotal,
-      }}
+      value={{ cartItems, addToCart, removeFromCart, increaseQty, decreaseQty, clearCart, cartCount, cartTotal }}
     >
       {children}
     </CartContext.Provider>

@@ -1,31 +1,41 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { Package } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+
+import { useAuth } from "@/context/AuthContext";
+import { getConsumerOrders } from "@/services/orderService";
+
 import OrderCard from "@/components/order/OrderCard";
+import OrdersSummary from "@/components/order/OrdersSummary";
 import EmptyState from "@/components/common/ui/EmptyState";
 import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 export default function Orders() {
-  const { addToCart } = useCart();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    setOrders(JSON.parse(localStorage.getItem("f2c-orders")) || []);
-  }, []);
+    /* Load orders for this consumer; fall back to all orders for guests */
+    const loaded = user?.id
+      ? getConsumerOrders(user.id)
+      : getConsumerOrders("guest");
+    setOrders(loaded);
+  }, [user]);
 
-  const handleReorder = (order) => {
-    order.items.forEach((item) => addToCart(item, item.quantity));
-    navigate("/cart");
-  };
+  const stats = useMemo(() => ({
+    total:     orders.length,
+    pending:   orders.filter((o) => o.orderStatus === "Pending").length,
+    delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
+    cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
+  }), [orders]);
 
   return (
     <section className="min-h-screen bg-[var(--surface)] py-10">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         <Breadcrumb items={[{ label: "My Orders" }]} />
-        <PageHeader title="My Orders" subtitle="Track and review your previous purchases." />
+        <PageHeader title="My Orders" subtitle="Track and review your purchases." />
+
+        {orders.length > 0 && <OrdersSummary stats={stats} />}
 
         {orders.length === 0 ? (
           <EmptyState
@@ -36,9 +46,9 @@ export default function Orders() {
             ctaHref="/products"
           />
         ) : (
-          <div className="grid gap-5">
+          <div className="mt-6 grid gap-5">
             {orders.map((order) => (
-              <OrderCard key={order.id} order={order} onReorder={handleReorder} />
+              <OrderCard key={order.id} order={order} />
             ))}
           </div>
         )}
