@@ -19,7 +19,7 @@ html {
 }
 
 body {
-  font-family: 'Poppins';
+  font-family: 'poppins' , 'Helvetica Neue';
   background: var(--bg);
   color: var(--text-primary);
   text-rendering: optimizeLegibility;
