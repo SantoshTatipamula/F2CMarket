@@ -1,20 +1,14 @@
 import { Package, ShoppingCart, Wallet, Users } from "lucide-react";
-
 import { useAuth } from "@/context/AuthContext";
 
-// import DashboardHeader from "@/dashboard/DashboardHeader";
-
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
-
 import QuickActions from "@/components/dashboard/QuickActions";
-
 import RecentActivity from "@/components/dashboard/RecentActivity";
-
 import FarmerOverview from "@/components/dashboard/FarmerOverview";
-
 import ConsumerOverview from "@/components/dashboard/ConsumerOverview";
-
 import AdminOverview from "@/components/dashboard/AdminOverview";
+import RevenuePreviewChart from "@/components/dashboard/analytics/RevenuePreviewChart";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -76,17 +70,14 @@ export default function Dashboard() {
   "
       >
         {/* Header */}
-        {/* <DashboardHeader /> */}
+        <DashboardHeader />
 
         {/* Stats */}
-        <div className="mt-8">
-          <DashboardStats stats={stats} />
-        </div>
+        <DashboardStats stats={stats} />
 
         {/* Main Grid */}
         <div
           className="
-            mt-8
             grid grid-cols-1
             gap-8
             xl:grid-cols-[1.3fr_0.7fr]
@@ -111,6 +102,9 @@ export default function Dashboard() {
           <div className="space-y-8">
             {/* Actions */}
             <QuickActions />
+
+            {/* Revenue Preview  */}
+            <RevenuePreviewChart/>
           </div>
         </div>
       </section>

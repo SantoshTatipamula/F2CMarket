@@ -54,7 +54,7 @@ export default function QuickActions() {
       {
         title: "Analytics",
         icon: BarChart3,
-        href: "/farmer/analytics",
+        href: "/dashboard/analytics",
       },
     );
   }

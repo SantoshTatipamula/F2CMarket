@@ -1,44 +1,40 @@
 import {
-  Package,
+  DollarSign,
   ShoppingBag,
-  Star,
+  Users,
   TrendingUp,
 } from "lucide-react";
 
-import StatCard from "@/components/dashboard/shared/DashboardStatCard";
+import AnalyticsStatCard from "@/components/dashboard/analytics/AnalyticsStatCard";
 
-export default function ProfileStats() {
+export default function DashboardStats() {
   const stats = [
     {
-      title: "Products",
-      value: "24",
-      icon: Package,
-      description:
-        "Active marketplace listings",
+      title: "Total Revenue",
+      value: "₹48,520",
+      growth: "+18%",
+      icon: DollarSign,
     },
 
     {
       title: "Orders",
-      value: "128",
+      value: "1,284",
+      growth: "+12%",
       icon: ShoppingBag,
-      description:
-        "Completed platform orders",
     },
 
     {
-      title: "Rating",
-      value: "4.9",
-      icon: Star,
-      description:
-        "Marketplace customer rating",
+      title: "Customers",
+      value: "842",
+      growth: "+9%",
+      icon: Users,
     },
 
     {
       title: "Growth",
-      value: "+18%",
+      value: "24%",
+      growth: "+6%",
       icon: TrendingUp,
-      description:
-        "Monthly marketplace engagement",
     },
   ];
 
@@ -47,12 +43,12 @@ export default function ProfileStats() {
       className="
         grid grid-cols-2
         gap-4
-        sm:grid-cols-2
-        xl:grid-cols-4
+
+        lg:grid-cols-4
       "
     >
       {stats.map((stat) => (
-        <StatCard
+        <AnalyticsStatCard
           key={stat.title}
           {...stat}
         />
