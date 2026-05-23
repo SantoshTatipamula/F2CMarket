@@ -18,7 +18,6 @@ const Farmers = lazy(() => import("../pages/consumer/Farmers"));
 const Wishlist = lazy(() => import("../pages/consumer/Wishlist"));
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
-const FarmerDashboard = lazy(() => import("../pages/farmer/Dashboard"));
 const FarmerProducts = lazy(() => import("../pages/farmer/Products"));
 const AddProduct = lazy(() => import("../pages/farmer/AddProduct"));
 const FarmerOrders = lazy(() => import("../pages/farmer/Orders"));
@@ -33,6 +32,7 @@ const ActivityHistory = lazy(() => import("../pages/profile/ActivityHistory"));
 const SellerProducts = lazy(() => import("../pages/profile/SellerProducts"));
 const SellerReviews = lazy(() => import("../pages/profile/SellerReviews"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard.jsx"));
+const Analytics = lazy(() => import("../pages/dashboard/Analytics"));
 
 export default function AppRoutes() {
   return (
@@ -164,8 +164,6 @@ export default function AppRoutes() {
 
             {/* Farmer Routes */}
 
-            
-
             <Route
               path="farmer/products"
               element={
@@ -198,6 +196,15 @@ export default function AppRoutes() {
               element={
                 <ProtectedRoute allowedRoles={["farmer"]}>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="dashboard/analytics"
+              element={
+                <ProtectedRoute allowedRoles={["consumer", "farmer", "admin"]}>
+                  <Analytics />
                 </ProtectedRoute>
               }
             />
