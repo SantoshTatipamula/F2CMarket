@@ -25,6 +25,7 @@ import { useSearch } from "@/context/SearchContext";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useWishlist } from "@/context/WishlistContext";
+import NotificationBell from "@/components/common/ui/NotificationBell";
 
 import logo from "@/assets/logos/Logo.png";
 
@@ -271,7 +272,10 @@ export default function Navbar() {
               </>
             )}
 
-            {/* FIX: Cart & Wishlist for BOTH consumer and farmer */}
+            {/* Notification Bell — visible to logged in users */}
+            {user && <NotificationBell />}
+
+            {/* Cart & Wishlist for consumer */}
             {showCartWishlist && (
               <>
                 <IconButton to="/wishlist" title="Wishlist">
