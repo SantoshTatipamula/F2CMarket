@@ -1,33 +1,18 @@
 /**
  * orderService.js
- * ─────────────────────────────────────────────────────────────
  * Single source of truth for ALL order operations.
- * Currently backed by localStorage — swap internals for
- * Firestore later WITHOUT touching any UI component.
- *
- * Order shape:
- * {
- *   id:            "ORD-XXXXXX",
- *   consumerId:    string,
- *   consumer:      { name, phone, address },
- *   items: [{
- *     productId, farmerId, farmerName,
- *     name, image, quantity, price, subtotal
- *   }],
- *   totalItems:    number,
- *   subtotal:      number,
- *   deliveryFee:   number,
- *   total:         number,
- *   paymentMethod: string,
- *   paymentStatus: "Pending" | "Paid",
- *   orderStatus:   "Pending" | "Accepted" | "Packed" | "Shipped" | "Delivered" | "Cancelled",
- *   createdAt:     ISO string,
- * }
+ * localStorage-backed — swap internals for Firestore later.
  */
+
+import {
+  notifyOrderPlaced,
+  notifyOrderCancelled,
+  notifyOrderStatusChanged,
+} from "@/services/notificationService";
 
 const ORDERS_KEY = "f2c-orders";
 
-/* ── Helpers ────────────────────────────────────────────────── */
+/* ── Helpers ──────────────────────────────────────────────── */
 
 function generateOrderId() {
   return "ORD-" + Math.floor(100000 + Math.random() * 900000);
@@ -45,24 +30,18 @@ function writeAll(orders) {
   localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
 }
 
-/* ── Public API ─────────────────────────────────────────────── */
+/* ── Public API ───────────────────────────────────────────── */
 
-/** Return every order (newest first) */
 export function getOrders() {
   return readAll().sort(
     (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
   );
 }
 
-/** Return orders placed by a specific consumer */
 export function getConsumerOrders(consumerId) {
   return getOrders().filter((o) => o.consumerId === consumerId);
 }
 
-/**
- * Return orders that contain at least one item belonging to a farmer.
- * Each returned order is trimmed so `items` contains ONLY that farmer's items.
- */
 export function getFarmerOrders(farmerId) {
   return getOrders()
     .filter((o) => o.items.some((item) => item.farmerId === farmerId))
@@ -72,24 +51,28 @@ export function getFarmerOrders(farmerId) {
     }));
 }
 
-/** Save a brand-new order, returns the saved order */
+/** Save a new order + fire order_placed notification */
 export function saveOrder(orderData) {
   const orders = readAll();
   const order = {
     ...orderData,
-    id: generateOrderId(),
-    orderStatus: "Pending",
+    id:            generateOrderId(),
+    orderStatus:   "Pending",
     paymentStatus: orderData.paymentMethod === "cod" ? "Pending" : "Paid",
-    createdAt: new Date().toISOString(),
+    createdAt:     new Date().toISOString(),
   };
   writeAll([order, ...orders]);
+
+  /* Notify consumer */
+  notifyOrderPlaced(order.consumerId, order.id, order.total);
+
   return order;
 }
 
-/** Update the status of a single order, returns updated order or null */
+/** Update order status — fires notification to consumer */
 export function updateOrderStatus(orderId, newStatus) {
   const orders = readAll();
-  let updated = null;
+  let updated  = null;
 
   const next = orders.map((o) => {
     if (o.id === orderId) {
@@ -99,16 +82,47 @@ export function updateOrderStatus(orderId, newStatus) {
     return o;
   });
 
-  if (updated) writeAll(next);
+  if (updated) {
+    writeAll(next);
+    /* Notify consumer on meaningful status changes */
+    const notifyStatuses = ["Accepted", "Packed", "Shipped", "Delivered", "Cancelled"];
+    if (notifyStatuses.includes(newStatus)) {
+      if (newStatus === "Cancelled") {
+        notifyOrderCancelled(updated.consumerId, orderId);
+      } else {
+        notifyOrderStatusChanged(updated.consumerId, orderId, newStatus);
+      }
+    }
+  }
+
   return updated;
 }
 
-/** Delete all orders (dev/testing helper) */
+/** Consumer cancels their own order (only if Pending or Accepted) */
+export function cancelOrder(orderId) {
+  const orders = readAll();
+  let updated  = null;
+
+  const next = orders.map((o) => {
+    if (o.id === orderId && ["Pending", "Accepted"].includes(o.orderStatus)) {
+      updated = { ...o, orderStatus: "Cancelled" };
+      return updated;
+    }
+    return o;
+  });
+
+  if (updated) {
+    writeAll(next);
+    notifyOrderCancelled(updated.consumerId, orderId);
+  }
+
+  return updated;
+}
+
 export function clearOrders() {
   localStorage.removeItem(ORDERS_KEY);
 }
 
-/** Build a well-shaped order object from checkout data */
 export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryFee }) {
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.numericPrice ?? item.price) * item.quantity,
@@ -117,7 +131,7 @@ export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryF
 
   const items = cartItems.map((item) => ({
     productId:  String(item.id),
-    farmerId:   String(item.sellerId  || item.farmerId  || "unknown"),
+    farmerId:   String(item.sellerId || item.farmerId || "unknown"),
     farmerName: item.sellerName || item.farmerName || item.farmer || "Local Farmer",
     name:       item.name,
     image:      item.image || "",
@@ -127,7 +141,7 @@ export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryF
   }));
 
   return {
-    consumerId: user?.id || "guest",
+    consumerId:    user?.id || "guest",
     consumer: {
       name:    formData.fullName,
       phone:   formData.phone,
