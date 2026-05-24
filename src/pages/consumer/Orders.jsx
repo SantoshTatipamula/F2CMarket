@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Package } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
@@ -11,16 +11,22 @@ import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 export default function Orders() {
-  const { user } = useAuth();
+  const { user }            = useAuth();
   const [orders, setOrders] = useState([]);
 
-  useEffect(() => {
-    /* Load orders for this consumer; fall back to all orders for guests */
-    const loaded = user?.id
-      ? getConsumerOrders(user.id)
-      : getConsumerOrders("guest");
-    setOrders(loaded);
+  const loadOrders = useCallback(() => {
+    const id = user?.id || "guest";
+    setOrders(getConsumerOrders(id));
   }, [user]);
+
+  useEffect(() => { loadOrders(); }, [loadOrders]);
+
+  /* Called by OrderCard after cancel so list updates instantly */
+  const handleOrderUpdate = (updatedOrder) => {
+    setOrders((prev) =>
+      prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+    );
+  };
 
   const stats = useMemo(() => ({
     total:     orders.length,
@@ -48,7 +54,11 @@ export default function Orders() {
         ) : (
           <div className="mt-6 grid gap-5">
             {orders.map((order) => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard
+                key={order.id}
+                order={order}
+                onOrderUpdate={handleOrderUpdate}
+              />
             ))}
           </div>
         )}
