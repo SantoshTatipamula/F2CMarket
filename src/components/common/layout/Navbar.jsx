@@ -10,12 +10,12 @@ import {
   DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useSearch }        from "@/context/SearchContext";
-import { useCart }          from "@/context/CartContext";
-import { useAuth }          from "@/context/AuthContext";
-import { useWishlist }      from "@/context/WishlistContext";
-import NotificationBell     from "@/components/common/ui/NotificationBell";
-import logo                 from "@/assets/logos/Logo.png";
+import { useSearch }    from "@/context/SearchContext";
+import { useCart }      from "@/context/CartContext";
+import { useAuth }      from "@/context/AuthContext";
+import { useWishlist }  from "@/context/WishlistContext";
+import NotificationBell from "@/components/common/ui/NotificationBell";
+import logo             from "@/assets/logos/Logo.png";
 
 /* ── NavBadge ──────────────────────────────────────────── */
 function NavBadge({ count, color = "bg-orange-500" }) {
@@ -68,23 +68,25 @@ function RoleChip({ role }) {
 }
 
 /* ── Nav links per role ────────────────────────────────── */
+/*
+  Navbar (primary actions — used constantly):
+    Guest/Consumer : Home · Marketplace · Farmers · About
+    Farmer         : Home · Marketplace · Dashboard · Add Product
+    Admin          : Home · Dashboard · Users · Farmers · Products
+
+  Profile dropdown (account + occasional tools):
+    All roles      : Profile · My Products* · Orders* · Settings · Logout
+    (* shown per role)
+*/
 function useNavLinks(role) {
   return useMemo(() => {
     switch (role) {
-      case "consumer":
-        return [
-          { label: "Home",     to: "/",        icon: Home  },
-          { label: "Products", to: "/products", icon: Store },
-          { label: "Farmers",  to: "/farmers",  icon: Users },
-          { label: "About",    to: "/about",    icon: Info  },
-        ];
       case "farmer":
         return [
           { label: "Home",        to: "/",                 icon: Home            },
-          { label: "Dashboard",   to: "/farmer/dashboard", icon: LayoutDashboard },
-          { label: "My Products", to: "/farmer/products",  icon: Package         },
-          { label: "Orders",      to: "/farmer/orders",    icon: ClipboardList   },
           { label: "Marketplace", to: "/products",         icon: Store           },
+          { label: "Dashboard",   to: "/farmer/dashboard", icon: LayoutDashboard },
+          { label: "Add Product", to: "/farmer/products/add", icon: Plus         },
         ];
       case "admin":
         return [
@@ -94,12 +96,39 @@ function useNavLinks(role) {
           { label: "Farmers",   to: "/admin/farmers",   icon: Store           },
           { label: "Products",  to: "/admin/products",  icon: Package         },
         ];
-      default:
+      default: // guest + consumer
         return [
-          { label: "Home",     to: "/",        icon: Home  },
-          { label: "Products", to: "/products", icon: Store },
-          { label: "Farmers",  to: "/farmers",  icon: Users },
-          { label: "About",    to: "/about",    icon: Info  },
+          { label: "Home",        to: "/",        icon: Home  },
+          { label: "Marketplace", to: "/products", icon: Store },
+          { label: "Farmers",     to: "/farmers",  icon: Users },
+          { label: "About",       to: "/about",    icon: Info  },
+        ];
+    }
+  }, [role]);
+}
+
+/* ── Dropdown items per role ───────────────────────────── */
+function useDropdownItems(role) {
+  return useMemo(() => {
+    switch (role) {
+      case "farmer":
+        return [
+          { label: "Profile",     to: "/profile",          icon: User         },
+          { label: "My Products", to: "/farmer/products",  icon: Package      },
+          { label: "Orders",      to: "/farmer/orders",    icon: ClipboardList },
+          { label: "Analytics",   to: "/farmer/analytics", icon: BarChart2    },
+          { label: "Settings",    to: "/profile/settings", icon: Settings     },
+        ];
+      case "admin":
+        return [
+          { label: "Profile",  to: "/profile",         icon: User     },
+          { label: "Settings", to: "/profile/settings", icon: Settings },
+        ];
+      default: // consumer
+        return [
+          { label: "Profile",  to: "/profile",         icon: User         },
+          { label: "Orders",   to: "/orders",          icon: ClipboardList },
+          { label: "Settings", to: "/profile/settings", icon: Settings     },
         ];
     }
   }, [role]);
@@ -114,29 +143,20 @@ export default function Navbar() {
   const navigate                        = useNavigate();
   const location                        = useLocation();
 
-  const [menuOpen, setMenuOpen]     = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const mobileSearchRef             = useRef(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const mobileSearchRef         = useRef(null);
 
-  /* Close drawer + search on every route change */
+  /* Close drawer on every route change */
   useEffect(() => {
     setMenuOpen(false);
-    setSearchOpen(false);
   }, [location.pathname]);
 
-  /* Auto-focus mobile search */
-  useEffect(() => {
-    if (searchOpen) setTimeout(() => mobileSearchRef.current?.focus(), 50);
-  }, [searchOpen]);
-
   const role     = user?.role;
-  const isFarmer = role === "farmer";
   const isAdmin  = role === "admin";
-
-  /* Admins don't shop — everyone else gets cart + wishlist */
   const showCartWishlist = !isAdmin;
 
-  const navLinks = useNavLinks(role);
+  const navLinks     = useNavLinks(role);
+  const dropdownItems = useDropdownItems(role);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -189,6 +209,7 @@ export default function Navbar() {
               onSubmit={handleSearch}
             />
 
+            {/* Guest buttons */}
             {!user && (
               <>
                 <Link to="/login" className="h-9 px-3 rounded-xl border border-[var(--border-strong)] text-sm font-medium flex items-center gap-1.5 hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all">
@@ -200,8 +221,10 @@ export default function Navbar() {
               </>
             )}
 
+            {/* Bell */}
             {user && <NotificationBell />}
 
+            {/* Wishlist + Cart */}
             {showCartWishlist && (
               <>
                 <IconButton to="/wishlist" title="Wishlist">
@@ -215,6 +238,7 @@ export default function Navbar() {
               </>
             )}
 
+            {/* Avatar + Dropdown */}
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -223,10 +247,11 @@ export default function Navbar() {
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-56 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl p-1">
+                <DropdownMenuContent align="end" className="w-52 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl p-1">
+                  {/* User info */}
                   <DropdownMenuLabel className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold leading-tight">{user.name || "My Account"}</p>
+                      <p className="text-sm font-semibold leading-tight truncate">{user.name || "My Account"}</p>
                       <RoleChip role={role} />
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{user.email}</p>
@@ -234,32 +259,13 @@ export default function Navbar() {
 
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile" className="flex items-center gap-2 cursor-pointer rounded-xl">
-                      <User size={15} /> Profile
-                    </Link>
-                  </DropdownMenuItem>
-
-                  {isFarmer && (
-                    <>
-                      <DropdownMenuItem asChild>
-                        <Link to="/farmer/analytics" className="flex items-center gap-2 cursor-pointer rounded-xl">
-                          <BarChart2 size={15} /> Analytics
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link to="/farmer/products/add" className="flex items-center gap-2 cursor-pointer rounded-xl">
-                          <Plus size={15} /> Add Product
-                        </Link>
-                      </DropdownMenuItem>
-                    </>
-                  )}
-
-                  <DropdownMenuItem asChild>
-                    <Link to="/profile/settings" className="flex items-center gap-2 cursor-pointer rounded-xl">
-                      <Settings size={15} /> Settings
-                    </Link>
-                  </DropdownMenuItem>
+                  {dropdownItems.map(({ label, to, icon: Icon }) => (
+                    <DropdownMenuItem key={to} asChild>
+                      <Link to={to} className="flex items-center gap-2 cursor-pointer rounded-xl">
+                        <Icon size={15} /> {label}
+                      </Link>
+                    </DropdownMenuItem>
+                  ))}
 
                   <DropdownMenuSeparator />
 
@@ -272,15 +278,12 @@ export default function Navbar() {
           </div>
 
           {/* ── Mobile Top Bar ──────────────────────────────
-              Kept minimal: Bell + Cart + Hamburger only.
-              3 icons × ~40px + logo ~120px = safe for 360px screens.
-              Wishlist + Search live inside the drawer.
+              Only 3 items: Bell + Cart + Hamburger
+              Logo ~120px + 3×40px + padding = safe for 360px
           ── */}
           <div className="lg:hidden flex items-center gap-0.5">
-
             {user && <NotificationBell />}
 
-            {/* Cart only — wishlist is in the drawer */}
             {showCartWishlist && (
               <IconButton to="/cart" title="Cart">
                 <ShoppingCart size={21} />
@@ -288,7 +291,6 @@ export default function Navbar() {
               </IconButton>
             )}
 
-            {/* Hamburger */}
             <button
               onClick={() => setMenuOpen((m) => !m)}
               className="p-2.5 rounded-xl hover:bg-[var(--surface-2)] transition flex items-center justify-center"
@@ -353,11 +355,10 @@ export default function Navbar() {
             </NavLink>
           ))}
 
-          {/* Wishlist + Cart in drawer */}
+          {/* Wishlist + Cart */}
           {showCartWishlist && (
             <>
               <div className="h-px bg-[var(--border)] my-2 mx-1" />
-
               <Link to="/wishlist" className={drawerLinkCls}>
                 <Heart size={17} className="shrink-0" />
                 <span className="flex-1">Wishlist</span>
@@ -367,7 +368,6 @@ export default function Navbar() {
                   </span>
                 )}
               </Link>
-
               <Link to="/cart" className={drawerLinkCls}>
                 <ShoppingCart size={17} className="shrink-0" />
                 <span className="flex-1">Cart</span>
@@ -397,6 +397,7 @@ export default function Navbar() {
         {user && (
           <div className="border-t border-[var(--border)] p-3 space-y-0.5">
 
+            {/* Avatar + name + role */}
             <div className="flex items-center gap-3 px-3 py-2 mb-1">
               <div className="h-10 w-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-bold text-sm shrink-0">
                 {(user.name || user.email)?.charAt(0).toUpperCase()}
@@ -410,24 +411,12 @@ export default function Navbar() {
               </div>
             </div>
 
-            <Link to="/profile" className={drawerLinkCls}>
-              <User size={17} /> Profile
-            </Link>
-
-            {isFarmer && (
-              <>
-                <Link to="/farmer/analytics" className={drawerLinkCls}>
-                  <BarChart2 size={17} /> Analytics
-                </Link>
-                <Link to="/farmer/products/add" className={drawerLinkCls}>
-                  <Plus size={17} /> Add Product
-                </Link>
-              </>
-            )}
-
-            <Link to="/profile/settings" className={drawerLinkCls}>
-              <Settings size={17} /> Settings
-            </Link>
+            {/* Dropdown items mirrored in drawer */}
+            {dropdownItems.map(({ label, to, icon: Icon }) => (
+              <Link key={to} to={to} className={drawerLinkCls}>
+                <Icon size={17} /> {label}
+              </Link>
+            ))}
 
             <button
               onClick={logout}
