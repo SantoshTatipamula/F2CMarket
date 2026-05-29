@@ -1,94 +1,80 @@
 import { useState } from "react";
 import { useNavigate, Link, useLocation } from "react-router-dom";
 import { Mail, Lock } from "lucide-react";
-
 import { useAuth } from "@/context/AuthContext";
-import { usersData } from "@/data/usersData";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInputField from "@/components/auth/AuthInputField";
 import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
 
+const ROLE_REDIRECT = {
+  consumer: "/",
+  farmer:   "/farmer/dashboard",
+  admin:    "/admin/dashboard",
+};
+
 export default function Login() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate  = useNavigate();
+  const location  = useLocation();
   const { login } = useAuth();
 
-  const [form, setForm] = useState({ email: "", password: "" });
-  const from = location.state?.from?.pathname || "/";
-  const isValid = form.email.trim() && form.password.trim();
-
-  const [error, setError] = useState("");
+  const [form,    setForm]    = useState({ email: "", password: "" });
+  const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
+
+  const from    = location.state?.from?.pathname || null;
+  const isValid = form.email.trim() && form.password.trim();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
+    if (error) setError("");
   };
 
-const handleLogin = async () => {
-  if (!isValid || loading) return;
-
-  setLoading(true);
-  setError("");
-
-  setTimeout(() => {
-    const foundUser = usersData.find(
-      (user) =>
-        user.email === form.email &&
-        user.password === form.password
-    );
-
-    if (!foundUser) {
-      setError("Invalid email or password");
+  const handleLogin = () => {
+    if (!isValid || loading) return;
+    setLoading(true);
+    setTimeout(() => {
+      const result = login(form.email.trim(), form.password);
+      if (!result.success) { setError(result.error); setLoading(false); return; }
+      navigate(from || ROLE_REDIRECT[result.role] || "/", { replace: true });
       setLoading(false);
-      return;
-    }
+    }, 500);
+  };
 
-    login(foundUser);
+  const handleKeyDown = (e) => { if (e.key === "Enter") handleLogin(); };
 
-    // Redirect back to previous protected page
-    navigate(from, { replace: true });
-
-    setLoading(false);
-  }, 800);
-};
   return (
-    <AuthLayout title="Login" subtitle="Connect to your source">
-      <AuthInputField
-        icon={Mail}
-        name="email"
-        type="email"
-        placeholder="Email Address"
-        value={form.email}
-        onChange={handleChange}
-      />
+    <AuthLayout title="Welcome Back" subtitle="Login to your F2CMARKET account">
+      <AuthInputField icon={Mail} name="email" type="email" placeholder="Email Address"
+        value={form.email} onChange={handleChange} onKeyDown={handleKeyDown} />
+      <AuthInputField icon={Lock} name="password" type="password" placeholder="Password"
+        value={form.password} onChange={handleChange} onKeyDown={handleKeyDown} />
 
-      <AuthInputField
-        icon={Lock}
-        name="password"
-        type="password"
-        placeholder="Password"
-        value={form.password}
-        onChange={handleChange}
-      />
+      {error && (
+        <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-3">
+          <p className="text-xs font-medium text-red-300 leading-5">{error}</p>
+        </div>
+      )}
 
-      <div className="text-right text-sm">
-        <button className="text-[var(--primary)] hover:text-[var(--primary-hover)] transition">
+      <div className="text-right">
+        <button className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] transition font-medium">
           Forgot Password?
         </button>
       </div>
-      {error && <p className="text-sm text-red-500">{error}</p>}
-      <Button
-        onClick={handleLogin}
-        disabled={!isValid || loading}
-        className={`w-full h-11 rounded-xl font-semibold ${
-          isValid
-            ? "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white"
-            : "bg-gray-400 text-gray-200 cursor-not-allowed"
-        }`}
-      >
-        {loading ? "Logging in..." : "Login"}
+
+      <Button onClick={handleLogin} disabled={!isValid || loading}
+        className={`w-full h-11 rounded-xl font-semibold transition-all ${
+          isValid && !loading
+            ? "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white shadow-lg shadow-green-900/30"
+            : "bg-white/10 text-white/40 cursor-not-allowed"
+        }`}>
+        {loading
+          ? <span className="flex items-center justify-center gap-2">
+              <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+              Logging in…
+            </span>
+          : "Login"}
       </Button>
 
       <AuthDivider />
@@ -96,10 +82,7 @@ const handleLogin = async () => {
 
       <p className="text-center text-sm text-[var(--glass-text-muted)]">
         Don't have an account?{" "}
-        <Link
-          to="/register"
-          className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-medium"
-        >
+        <Link to="/register" className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold">
           Create an account
         </Link>
       </p>
