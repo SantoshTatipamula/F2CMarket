@@ -32,7 +32,8 @@ const FarmerProducts= lazy(() => import("@/pages/farmer/Products"));
 const AddProduct    = lazy(() => import("@/pages/farmer/AddProduct"));
 const EditProduct   = lazy(() => import("@/pages/farmer/EditProduct"));
 const FarmerOrders  = lazy(() => import("@/pages/farmer/Orders"));
-const FarmerProfile = lazy(() => import("@/pages/farmer/Profile"));
+const FarmerProfile          = lazy(() => import("@/pages/farmer/Profile"));
+const FarmerPendingDashboard = lazy(() => import("@/pages/farmer/FarmerPendingDashboard"));
 
 /* ── Admin ───────────────────────────────────────────────── */
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
@@ -133,6 +134,13 @@ export default function AppRoutes() {
             }/>
 
             {/* Farmer workspace */}
+            {/* Pending farmer workspace — accessible with pending status */}
+            <Route path="farmer/pending" element={
+              <ProtectedRoute allowedRoles={["farmer"]}>
+                <FarmerPendingDashboard />
+              </ProtectedRoute>
+            }/>
+
             <Route path="farmer/dashboard" element={
               <ProtectedRoute allowedRoles={["farmer"]}>
                 <Dashboard />
@@ -196,6 +204,7 @@ export default function AppRoutes() {
           {/* ── No-layout pages ─────────────────────────── */}
           <Route path="login"                 element={<Login />} />
           <Route path="register"              element={<Register />} />
+          <Route path="admin/login"            element={<AdminLogin />} />
           <Route path="pending-verification"  element={<PendingVerification />} />
 
           {/* ── Catch-all ───────────────────────────────── */}

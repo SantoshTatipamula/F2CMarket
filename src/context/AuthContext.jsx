@@ -40,17 +40,22 @@ export function AuthProvider({ children }) {
     if (found.banned)
       return { success: false, error: "Your account has been suspended. Contact support." };
 
-    if (found.role === "farmer" && found.verificationStatus !== "approved") {
-      const msg =
-        found.verificationStatus === "pending"
-          ? "Your farmer account is pending admin verification. You will be notified once approved."
-          : "Your farmer application was rejected. Please contact support@f2cmarket.com.";
-      return { success: false, error: msg };
+    /* Rejected farmers cannot log in */
+    if (found.role === "farmer" && found.verificationStatus === "rejected") {
+      return {
+        success: false,
+        error: "Your farmer application was rejected. Please contact support@f2cmarket.com.",
+      };
     }
 
+    /* Pending farmers CAN log in — into a restricted workspace */
     setUser(found);
     saveUser(found);
-    return { success: true, role: found.role };
+    return {
+      success: true,
+      role: found.role,
+      verificationStatus: found.verificationStatus || "pending",
+    };
   };
 
   /* ── Register ── */

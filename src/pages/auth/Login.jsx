@@ -7,11 +7,12 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInputField from "@/components/auth/AuthInputField";
 import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
 
-const ROLE_REDIRECT = {
-  consumer: "/",
-  farmer:   "/farmer/dashboard",
-  admin:    "/admin/dashboard",
-};
+function getRoleRedirect(result) {
+  if (result.role === "farmer" && result.verificationStatus === "pending")
+    return "/farmer/pending";
+  const map = { consumer: "/", farmer: "/farmer/dashboard", admin: "/admin/dashboard" };
+  return map[result.role] || "/";
+}
 
 export default function Login() {
   const navigate  = useNavigate();
@@ -37,7 +38,7 @@ export default function Login() {
     setTimeout(() => {
       const result = login(form.email.trim(), form.password);
       if (!result.success) { setError(result.error); setLoading(false); return; }
-      navigate(from || ROLE_REDIRECT[result.role] || "/", { replace: true });
+      navigate(from || getRoleRedirect(result), { replace: true });
       setLoading(false);
     }, 500);
   };

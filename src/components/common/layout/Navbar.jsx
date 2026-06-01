@@ -78,15 +78,21 @@ function RoleChip({ role }) {
     All roles      : Profile · My Products* · Orders* · Settings · Logout
     (* shown per role)
 */
-function useNavLinks(role) {
+function useNavLinks(role, user) {
   return useMemo(() => {
     switch (role) {
       case "farmer":
+        if (user?.verificationStatus === "pending") {
+          return [
+            { label: "Home",       to: "/",               icon: Home            },
+            { label: "My Account", to: "/farmer/pending", icon: LayoutDashboard },
+          ];
+        }
         return [
-          { label: "Home",        to: "/",                 icon: Home            },
-          { label: "Marketplace", to: "/products",         icon: Store           },
-          { label: "Dashboard",   to: "/farmer/dashboard", icon: LayoutDashboard },
-          { label: "Add Product", to: "/farmer/products/add", icon: Plus         },
+          { label: "Home",        to: "/",                    icon: Home            },
+          { label: "Marketplace", to: "/products",            icon: Store           },
+          { label: "Dashboard",   to: "/farmer/dashboard",    icon: LayoutDashboard },
+          { label: "Add Product", to: "/farmer/products/add", icon: Plus            },
         ];
       case "admin":
         return [
@@ -104,14 +110,20 @@ function useNavLinks(role) {
           { label: "About",       to: "/about",    icon: Info  },
         ];
     }
-  }, [role]);
+  }, [role, user?.verificationStatus]);
 }
 
 /* ── Dropdown items per role ───────────────────────────── */
-function useDropdownItems(role) {
+function useDropdownItems(role, user) {
   return useMemo(() => {
     switch (role) {
       case "farmer":
+        if (user?.verificationStatus === "pending") {
+          return [
+            { label: "My Account", to: "/farmer/pending",   icon: User     },
+            { label: "Settings",   to: "/profile/settings", icon: Settings },
+          ];
+        }
         return [
           { label: "Profile",     to: "/profile",          icon: User         },
           { label: "My Products", to: "/farmer/products",  icon: Package      },
@@ -131,7 +143,7 @@ function useDropdownItems(role) {
           { label: "Settings", to: "/profile/settings", icon: Settings     },
         ];
     }
-  }, [role]);
+  }, [role, user?.verificationStatus]);
 }
 
 /* ── Main Navbar ───────────────────────────────────────── */
@@ -156,7 +168,7 @@ export default function Navbar() {
   const showCartWishlist = !isAdmin;
 
   const navLinks     = useNavLinks(role);
-  const dropdownItems = useDropdownItems(role);
+  const dropdownItems = useDropdownItems(role, user);
 
   const handleSearch = (e) => {
     e.preventDefault();

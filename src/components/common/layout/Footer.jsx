@@ -86,6 +86,9 @@ export default function Footer() {
         {/* Bottom */}
         <div className="pt-5 flex flex-col md:flex-row items-center justify-between gap-4 text-[var(--text-light)] text-sm">
           <p>{"\u00A9"} 2026 F2CMARKET. All rights reserved.</p>
+          <a href="/admin/login" className="text-[var(--text-muted)] hover:text-[var(--text-secondary)] text-xs transition opacity-40 hover:opacity-100">
+            Admin Portal
+          </a>
 
           <p>Straight from the Soil, Right to your Table.</p>
         </div>
