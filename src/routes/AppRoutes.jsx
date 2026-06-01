@@ -37,6 +37,7 @@ const FarmerPendingDashboard = lazy(() => import("@/pages/farmer/FarmerPendingDa
 
 /* ── Admin ───────────────────────────────────────────────── */
 const AdminDashboard = lazy(() => import("@/pages/admin/AdminDashboard"));
+const AdminLogin     = lazy(() => import("@/pages/admin/AdminLogin"));
 const AdminUsers     = lazy(() => import("@/pages/admin/AdminUsers"));
 const AdminFarmers   = lazy(() => import("@/pages/admin/AdminFarmers"));
 const AdminProducts  = lazy(() => import("@/pages/admin/AdminProducts"));
