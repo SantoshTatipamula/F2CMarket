@@ -1,89 +1,97 @@
-import { ShoppingBag, Package, Star, ShieldCheck } from "lucide-react";
-
 import { Link } from "react-router-dom";
-
+import { ShoppingBag, Package, Bell, ShieldCheck, ArrowUpRight } from "lucide-react";
+import { useMemo } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { getConsumerOrders, getFarmerOrders } from "@/services/orderService";
+import { getNotifications } from "@/services/notificationService";
+import ActivityItem from "@/components/dashboard/shared/DashboardActivityItem";
 import ProfileSectionHeader from "@/components/profile/shared/ProfileSectionHeader";
 
-import ActivityItem from "@/components/dashboard/shared/DashboardActivityItem";
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins  = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days  = Math.floor(diff / 86400000);
+  if (mins  <  1) return "Just now";
+  if (mins  < 60) return `${mins} min ago`;
+  if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+  if (days  <  7) return `${days} day${days > 1 ? "s" : ""} ago`;
+  return new Date(dateStr).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
 
 export default function RecentActivity() {
-  const activities = [
-    {
-      title: "Order completed successfully",
-      description: "Your marketplace order was delivered successfully.",
-      time: "2 hours ago",
-      icon: ShoppingBag,
-    },
+  const { user } = useAuth();
+  const role = user?.role;
 
-    {
-      title: "New product added",
-      description: "Fresh Organic Tomatoes added to marketplace inventory.",
-      time: "Yesterday",
-      icon: Package,
-    },
+  const activities = useMemo(() => {
+    if (!user?.id) return [];
 
-    {
-      title: "Received new review",
-      description: "A customer rated your marketplace service 5 stars.",
-      time: "2 days ago",
-      icon: Star,
-    },
+    const items = [];
 
-    {
-      title: "Profile verification updated",
-      description: "Your seller verification status was approved.",
-      time: "Last week",
-      icon: ShieldCheck,
-    },
+    /* Orders */
+    const orders = role === "farmer"
+      ? getFarmerOrders(user.id)
+      : getConsumerOrders(user.id);
+
+    orders.slice(0, 3).forEach(order => {
+      items.push({
+        title:       `Order #${order.id}`,
+        description: `Status: ${order.orderStatus} · ₹${order.total}`,
+        time:        timeAgo(order.createdAt),
+        icon:        ShoppingBag,
+        href:        role === "farmer" ? "/farmer/orders" : "/orders",
+      });
+    });
+
+    /* Notifications */
+    getNotifications(user.id).slice(0, 2).forEach(n => {
+      items.push({
+        title:       n.title,
+        description: n.message,
+        time:        timeAgo(n.createdAt),
+        icon:        Bell,
+        href:        "/profile/notifications",
+      });
+    });
+
+    /* Sort by newest */
+    return items
+      .sort((a, b) => 0) // already sorted by source
+      .slice(0, 5);
+  }, [user]);
+
+  /* Fallback static activities when no real data */
+  const displayActivities = activities.length > 0 ? activities : [
+    { title: "Welcome to F2CMARKET!",       description: "Your account is set up and ready to use.", time: "Just now", icon: ShieldCheck, href: "/profile" },
+    { title: "Browse fresh products",       description: "Discover produce from local verified farmers.", time: "",   icon: Package,     href: "/products" },
+    { title: "Complete your profile",       description: "Add your details for a better experience.",  time: "",        icon: ShieldCheck, href: "/profile/edit" },
   ];
 
+  const viewAllHref = role === "farmer" ? "/farmer/orders" : role === "admin" ? "/admin/dashboard" : "/orders";
+
   return (
-    <section
-      className="
-        rounded-3xl
-        border border-black/5
-        bg-[var(--surface)]
-        p-6
-        shadow-sm
-      "
-    >
-      {/* Header */}
+    <section className="rounded-3xl border border-black/5 bg-[var(--surface)] p-6 shadow-sm">
       <ProfileSectionHeader
         title="Recent Activity"
         description="Track your latest marketplace actions and engagement."
       />
 
-      {/* Timeline */}
       <div className="mt-8 space-y-5">
-        {activities.map((activity, index) => (
-          <ActivityItem key={index} {...activity} />
+        {displayActivities.map((activity, index) => (
+          activity.href
+            ? <Link key={index} to={activity.href} className="block hover:opacity-80 transition">
+                <ActivityItem {...activity} />
+              </Link>
+            : <ActivityItem key={index} {...activity} />
         ))}
       </div>
 
       <div className="flex justify-center pt-2">
         <Link
-          to="/profile/activity"
-          className="
-          inline-flex items-center
-          justify-center
-
-          rounded-2xl
-
-          border border-black/5
-          bg-[var(--surface-2)]
-
-          px-5 py-3
-
-          text-sm font-semibold
-          text-[var(--text-primary)]
-
-          transition-all duration-300
-          hover:border-[var(--primary)]/20
-          hover:bg-[var(--primary)]/5
-          hover:text-[var(--primary)]
-        "
+          to={viewAllHref}
+          className="inline-flex items-center gap-2 justify-center rounded-2xl border border-black/5 bg-[var(--surface-2)] px-5 py-3 text-sm font-semibold text-[var(--text-primary)] transition-all hover:border-[var(--primary)]/20 hover:bg-[var(--primary)]/5 hover:text-[var(--primary)]"
         >
-          View All
+          View All <ArrowUpRight size={15} />
         </Link>
       </div>
     </section>
