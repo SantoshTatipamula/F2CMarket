@@ -1,155 +1,47 @@
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-
-import DashboardCard from "@/components/dashboard/shared/DashboardCard";
-
+import { useMemo } from "react";
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import { useAuth }         from "@/context/AuthContext";
+import { getFarmerOrders } from "@/services/orderService";
+import DashboardCard       from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
-const revenueData = [
-  {
-    month: "Jan",
-    revenue: 12000,
-  },
-
-  {
-    month: "Feb",
-    revenue: 18000,
-  },
-
-  {
-    month: "Mar",
-    revenue: 15000,
-  },
-
-  {
-    month: "Apr",
-    revenue: 24000,
-  },
-
-  {
-    month: "May",
-    revenue: 32000,
-  },
-
-  {
-    month: "Jun",
-    revenue: 28000,
-  },
-];
-
 export default function RevenueBarChart() {
+  const { user } = useAuth();
+
+  const data = useMemo(() => {
+    const orders  = user?.id ? getFarmerOrders(user.id) : [];
+    const map     = {};
+    orders.filter(o => o.orderStatus === "Delivered").forEach(o => {
+      const m = new Date(o.createdAt).toLocaleString("en-IN", { month: "short" });
+      const rev = (o.items || []).reduce((s, i) => s + (i.subtotal || 0), 0);
+      map[m] = (map[m] || 0) + rev;
+    });
+    return Object.entries(map).map(([month, revenue]) => ({ month, revenue }));
+  }, [user]);
+
   return (
-    <DashboardCard className="min-w-0">
-      
-      {/* Header */}
+    <DashboardCard>
       <DashboardCardHeader
-        title="Revenue Analytics"
-        description="
-          Track marketplace revenue growth,
-          monthly earnings, and sales performance trends.
-        "
+        title="Revenue Overview"
+        description="Monthly revenue from delivered orders."
       />
-
-      {/* Chart */}
-      <div
-        className="
-          mt-8
-          h-[300px]
-          w-full
-          min-w-0
-
-          sm:h-[360px]
-          lg:h-[420px]
-        "
-      >
-        
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-        >
-          <BarChart
-            data={revenueData}
-            margin={{
-              top: 10,
-              right: 10,
-              left: -20,
-              bottom: 0,
-            }}
-          >
-            
-            {/* Grid */}
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="3 3"
-              strokeOpacity={0.08}
-            />
-
-            {/* X Axis */}
-            <XAxis
-              dataKey="month"
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-
-              interval="preserveStartEnd"
-              minTickGap={16}
-            />
-
-            {/* Y Axis */}
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-
-              tickFormatter={(value) =>
-                `₹${value / 1000}k`
-              }
-            />
-
-            {/* Tooltip */}
-            <Tooltip
-              cursor={{
-                fill: "rgba(0,0,0,0.03)",
-              }}
-
-              contentStyle={{
-                borderRadius: "16px",
-                border: "1px solid rgba(0,0,0,0.06)",
-                backgroundColor: "white",
-              }}
-
-              formatter={(value) => [
-                `₹${value.toLocaleString()}`,
-                "Revenue",
-              ]}
-            />
-
-            {/* Bars */}
-            <Bar
-              dataKey="revenue"
-
-              radius={[12, 12, 0, 0]}
-
-              fill="var(--primary)"
-
-              maxBarSize={48}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {data.length === 0 ? (
+        <div className="h-56 flex items-center justify-center text-sm text-[var(--text-muted)]">
+          Revenue data appears once orders are delivered.
+        </div>
+      ) : (
+        <div className="mt-6">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} tickFormatter={v => `₹${v}`} />
+              <Tooltip formatter={v => [`₹${v}`, "Revenue"]} />
+              <Bar dataKey="revenue" fill="var(--primary)" radius={[6,6,0,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </DashboardCard>
   );
 }

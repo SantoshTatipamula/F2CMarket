@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import { useAuth } from "@/context/AuthContext";
 import { useProducts } from "@/context/ProductContext";
 
 import ProductForm from "@/components/farmer/products/ProductForm";
@@ -8,16 +8,21 @@ import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
 export default function AddProduct() {
   const navigate = useNavigate();
-
+  const { user }  = useAuth();
   const { createProduct } = useProducts();
 
-const handleAddProduct = (
-  newProduct
-) => {
-  createProduct(newProduct);
-
-  navigate("/farmer/products");
-};
+  const handleAddProduct = (newProduct) => {
+    /* Tag product with farmer identity so orders and analytics match correctly */
+    createProduct({
+      ...newProduct,
+      farmerId:   user?.id,
+      sellerId:   user?.id,
+      sellerName: user?.name,
+      farmer:     user?.farmName || user?.name,
+      location:   user?.farmLocation || "",
+    });
+    navigate("/farmer/products");
+  };
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
@@ -243,18 +248,18 @@ const handleAddProduct = (
                   trusted, and sustainable farm-to-home commerce.
                 </p>
 
-                <button
-                  type="button"
+                <a href="/products"
                   className="
-                    mt-6 h-11 rounded-xl
+                    inline-block mt-6 h-11 rounded-xl
                     bg-white px-5
                     text-sm font-semibold
                     text-[var(--primary)]
                     transition hover:opacity-90
+                    leading-[44px]
                   "
                 >
                   View Marketplace
-                </button>
+                </a>
               </div>
 
               {/* Glow */}

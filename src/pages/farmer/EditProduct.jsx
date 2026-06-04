@@ -24,10 +24,16 @@ export default function EditProduct() {
 
   const isOwner = product?.sellerId === user?.id;
 
-  // Update Product
+  // Update Product — preserve farmer identity fields
   const handleUpdateProduct = (updatedProduct) => {
-    updateProduct(id, updatedProduct);
-
+    updateProduct(id, {
+      ...updatedProduct,
+      farmerId:   user?.id,
+      sellerId:   user?.id,
+      sellerName: user?.name,
+      farmer:     user?.farmName || user?.name,
+      location:   user?.farmLocation || updatedProduct.location || "",
+    });
     navigate("/farmer/products");
   };
 

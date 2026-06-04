@@ -1,145 +1,50 @@
-import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-
-import DashboardCard from "@/components/dashboard/shared/DashboardCard";
-
+import { useMemo } from "react";
+import { ResponsiveContainer, BarChart, Bar, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import { useAuth }         from "@/context/AuthContext";
+import { getFarmerOrders } from "@/services/orderService";
+import DashboardCard       from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
-const productData = [
-  {
-    product: "Tomatoes",
-    sales: 420,
-  },
-
-  {
-    product: "Potatoes",
-    sales: 310,
-  },
-
-  {
-    product: "Onions",
-    sales: 280,
-  },
-
-  {
-    product: "Carrots",
-    sales: 240,
-  },
-
-  {
-    product: "Spinach",
-    sales: 190,
-  },
-];
-
 export default function ProductPerformanceChart() {
+  const { user } = useAuth();
+
+  const data = useMemo(() => {
+    const orders  = user?.id ? getFarmerOrders(user.id) : [];
+    const map     = {};
+    orders.forEach(o =>
+      (o.items || []).forEach(i => {
+        map[i.name] = (map[i.name] || 0) + i.quantity;
+      })
+    );
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([name, units]) => ({ name, units }));
+  }, [user]);
+
   return (
-    <DashboardCard className="min-w-0">
-      
-      {/* Header */}
+    <DashboardCard>
       <DashboardCardHeader
         title="Product Performance"
-        description="
-          Compare product sales performance
-          and marketplace demand trends.
-        "
+        description="Top products by total units sold."
       />
-
-      {/* Chart */}
-      <div
-        className="
-          mt-8
-          h-[280px]
-          w-full
-          min-w-0
-
-          sm:h-[320px]
-        "
-      >
-        
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-        >
-          <BarChart
-            data={productData}
-            layout="vertical"
-
-            margin={{
-              top: 10,
-              right: 10,
-              left: 10,
-              bottom: 0,
-            }}
-          >
-            
-            {/* Grid */}
-            <CartesianGrid
-              horizontal={false}
-              strokeDasharray="3 3"
-              strokeOpacity={0.08}
-            />
-
-            {/* X Axis */}
-            <XAxis
-              type="number"
-
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-            />
-
-            {/* Y Axis */}
-            <YAxis
-              type="category"
-              dataKey="product"
-
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-
-              width={80}
-            />
-
-            {/* Tooltip */}
-            <Tooltip
-              cursor={{
-                fill: "rgba(0,0,0,0.03)",
-              }}
-
-              contentStyle={{
-                borderRadius: "16px",
-                border: "1px solid rgba(0,0,0,0.06)",
-                backgroundColor: "white",
-              }}
-            />
-
-            {/* Bars */}
-            <Bar
-              dataKey="sales"
-
-              fill="var(--primary)"
-
-              radius={[0, 12, 12, 0]}
-
-              maxBarSize={32}
-            />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {data.length === 0 ? (
+        <div className="h-56 flex items-center justify-center text-sm text-[var(--text-muted)]">
+          Product performance data appears after orders are placed.
+        </div>
+      ) : (
+        <div className="mt-6">
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={data} layout="vertical">
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis type="number" tick={{ fontSize: 12 }} />
+              <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={100} />
+              <Tooltip />
+              <Bar dataKey="units" fill="var(--primary)" radius={[0,6,6,0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </DashboardCard>
   );
 }

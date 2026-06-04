@@ -1,166 +1,53 @@
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
-
-import DashboardCard from "@/components/dashboard/shared/DashboardCard";
-
+import { useMemo } from "react";
+import { ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
+import { useAuth }         from "@/context/AuthContext";
+import { getFarmerOrders } from "@/services/orderService";
+import DashboardCard       from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
-const customerGrowthData = [
-  {
-    month: "Jan",
-    customers: 120,
-  },
-
-  {
-    month: "Feb",
-    customers: 180,
-  },
-
-  {
-    month: "Mar",
-    customers: 240,
-  },
-
-  {
-    month: "Apr",
-    customers: 320,
-  },
-
-  {
-    month: "May",
-    customers: 420,
-  },
-
-  {
-    month: "Jun",
-    customers: 520,
-  },
-];
-
 export default function CustomerGrowthChart() {
+  const { user } = useAuth();
+
+  const data = useMemo(() => {
+    const orders  = user?.id ? getFarmerOrders(user.id) : [];
+    const map     = {};
+    orders.forEach(o => {
+      const m = new Date(o.createdAt).toLocaleString("en-IN", { month: "short" });
+      if (!map[m]) map[m] = new Set();
+      map[m].add(o.consumerId);
+    });
+    return Object.entries(map).map(([month, set]) => ({ month, customers: set.size }));
+  }, [user]);
+
   return (
-    <DashboardCard className="min-w-0">
-      
-      {/* Header */}
+    <DashboardCard>
       <DashboardCardHeader
         title="Customer Growth"
-        description="
-          Analyze customer acquisition,
-          marketplace engagement, and user growth trends.
-        "
+        description="Unique customers placing orders each month."
       />
-
-      {/* Chart */}
-      <div
-        className="
-          mt-8
-          h-[280px]
-          w-full
-          min-w-0
-
-          sm:h-[320px]
-        "
-      >
-        
-        <ResponsiveContainer
-          width="100%"
-          height="100%"
-        >
-          <AreaChart
-            data={customerGrowthData}
-            margin={{
-              top: 10,
-              right: 10,
-              left: -20,
-              bottom: 0,
-            }}
-          >
-            
-            {/* Gradient */}
-            <defs>
-              
-              <linearGradient
-                id="customerGrowthGradient"
-                x1="0"
-                y1="0"
-                x2="0"
-                y2="1"
-              >
-                <stop
-                  offset="0%"
-                  stopColor="var(--primary)"
-                  stopOpacity={0.35}
-                />
-
-                <stop
-                  offset="100%"
-                  stopColor="var(--primary)"
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
-
-            {/* Grid */}
-            <CartesianGrid
-              vertical={false}
-              strokeDasharray="3 3"
-              strokeOpacity={0.08}
-            />
-
-            {/* X Axis */}
-            <XAxis
-              dataKey="month"
-
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-
-              interval="preserveStartEnd"
-              minTickGap={16}
-            />
-
-            {/* Y Axis */}
-            <YAxis
-              tickLine={false}
-              axisLine={false}
-
-              tick={{
-                fontSize: 11,
-              }}
-            />
-
-            {/* Tooltip */}
-            <Tooltip
-              contentStyle={{
-                borderRadius: "16px",
-                border: "1px solid rgba(0,0,0,0.06)",
-                backgroundColor: "white",
-              }}
-            />
-
-            {/* Area */}
-            <Area
-              type="monotone"
-              dataKey="customers"
-
-              stroke="var(--primary)"
-              strokeWidth={3}
-
-              fill="url(#customerGrowthGradient)"
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
+      {data.length === 0 ? (
+        <div className="h-56 flex items-center justify-center text-sm text-[var(--text-muted)]">
+          Customer data appears after your first orders.
+        </div>
+      ) : (
+        <div className="mt-6">
+          <ResponsiveContainer width="100%" height={220}>
+            <AreaChart data={data}>
+              <defs>
+                <linearGradient id="custGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%"  stopColor="var(--primary)" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="var(--primary)" stopOpacity={0}    />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+              <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+              <YAxis tick={{ fontSize: 12 }} />
+              <Tooltip />
+              <Area type="monotone" dataKey="customers" stroke="var(--primary)" strokeWidth={2} fill="url(#custGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </DashboardCard>
   );
 }
