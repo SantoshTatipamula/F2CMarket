@@ -1,8 +1,12 @@
 import herbal from "../../../assets/icons/herbs.png";
 
 import HeroSearch from "./HeroSearch";
+import { Navigate, useNavigate } from "react-router-dom";
+
+
 
 export default function HeroContent() {
+  const navigate = useNavigate();
   return (
     <>
       {/* Badge */}
@@ -27,11 +31,11 @@ export default function HeroContent() {
 
       {/* CTA Buttons */}
       <div className="mt-6 flex flex-wrap gap-4">
-        <button className="bg-orange-500 hover:bg-orange-600 text-white px-7 py-4 rounded-2xl font-semibold transition">
+        <button onClick={()=> navigate("/Products")} className="bg-orange-500 hover:bg-orange-600 text-white px-7 py-4 rounded-2xl font-semibold transition">
           Shop Now
         </button>
 
-        <button className="border border-[var(--border-strong)] hover:bg-[var(--surface)] px-7 py-4 rounded-2xl font-semibold transition">
+        <button onClick={()=> navigate("/farmers")} className="border border-[var(--border-strong)] hover:bg-[var(--surface)] px-7 py-4 rounded-2xl font-semibold transition">
           Explore Farmers
         </button>
       </div>
