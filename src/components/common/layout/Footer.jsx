@@ -18,9 +18,9 @@ const quickLinks = [
 ];
 
 const supportLinks = [
-  { label: "Help Center", path: "/help" },
-  { label: "Privacy Policy", path: "/privacy" },
-  { label: "Terms & Conditions", path: "/terms" },
+  { label: "Help Center", path: "/helpCenter" },
+  { label: "Privacy Policy", path: "/privacyPolicy" },
+  { label: "Terms & Conditions", path: "/termsConditions" },
   { label: "FAQs", path: "/faq" },
 ];
 

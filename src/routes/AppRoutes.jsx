@@ -12,6 +12,11 @@ const Products        = lazy(() => import("@/pages/consumer/Products"));
 const ProductDetails  = lazy(() => import("@/pages/consumer/ProductDetails"));
 const Farmers         = lazy(() => import("@/pages/consumer/Farmers"));
 const About           = lazy(() => import("@/pages/common/About"));
+const Contact         = lazy(() => import("@/pages/common/Contact"));
+const Faq             = lazy(() => import("@/pages/common/FAQ"));
+const HelpCenter      = lazy(() => import("@/pages/common/HelpCenter"));
+const PrivacyPolicy   = lazy(() => import("@/pages/common/PrivacyPolicy"));
+const TermsConditions = lazy(() => import("@/pages/common/TermsConditions"));
 
 /* ── Auth ────────────────────────────────────────────────── */
 const Login               = lazy(() => import("@/pages/auth/Login"));
@@ -68,6 +73,11 @@ export default function AppRoutes() {
             <Route path="products/:id" element={<ProductDetails />} />
             <Route path="farmers"    element={<Farmers />} />
             <Route path="about"      element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/faq" element={<Faq/>} />
+            <Route path="/helpCenter" element={<HelpCenter/>} />
+            <Route path="/privacyPolicy" element={<PrivacyPolicy/>} />
+            <Route path="/termsConditions" element={<TermsConditions/>} />
 
             {/* Cart + Wishlist — consumers AND farmers */}
             <Route path="cart" element={
