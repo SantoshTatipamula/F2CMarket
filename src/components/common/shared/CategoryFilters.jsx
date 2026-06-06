@@ -1,16 +1,7 @@
-const categories = [
-  "All",
-  "Orders",
-  "Payments",
-  "Farmers",
-  "Products",
-  "Account",
-  "Security",
-];
-
-export default function HelpCategories({
+export default function CategoryFilters({
+  categories,
   selectedCategory,
-  setSelectedCategory,
+  onSelect,
 }) {
   return (
     <section className="py-8 md:py-10">
@@ -19,9 +10,7 @@ export default function HelpCategories({
           {categories.map((category) => (
             <button
               key={category}
-              onClick={() =>
-                setSelectedCategory(category)
-              }
+              onClick={() => onSelect(category)}
               className={`
                 px-5 py-2.5
                 rounded-full
