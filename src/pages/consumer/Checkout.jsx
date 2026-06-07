@@ -12,7 +12,7 @@ import PlaceOrderButton from "@/components/order/PlaceOrderButton";
 import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
-const INITIAL_FORM = { fullName: "", phone: "", city: "", pincode: "", address: "" };
+const INITIAL_FORM = { fullName: "", phone: "", city: "", pincode: "", address: "", deliverySlot: "morning" };
 const isFormFilled = (form) => Object.values(form).every((v) => v.trim() !== "");
 
 export default function Checkout() {

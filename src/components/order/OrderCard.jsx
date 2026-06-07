@@ -2,15 +2,17 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { cancelOrder } from "@/services/orderService";
-import { CalendarDays, MapPin, CreditCard, RefreshCw, XCircle, AlertTriangle } from "lucide-react";
+import { CalendarDays, MapPin, CreditCard, RefreshCw, XCircle, AlertTriangle, Truck } from "lucide-react";
 import OrderStatusBadge from "@/components/order/shared/OrderStatusBadge";
+import OrderTrackingTimeline from "@/components/order/OrderTrackingTimeline";
 
 const CANCELLABLE = ["Pending", "Accepted"];
 
 export default function OrderCard({ order, onOrderUpdate }) {
   const { addToCart }  = useCart();
   const navigate       = useNavigate();
-  const [showConfirm, setShowConfirm] = useState(false);
+  const [showConfirm,  setShowConfirm]  = useState(false);
+  const [showTracking, setShowTracking] = useState(false);
 
   const visibleItems = order.items.slice(0, 3);
   const extraCount   = order.items.length - 3;
@@ -109,6 +111,17 @@ export default function OrderCard({ order, onOrderUpdate }) {
                 </button>
               )}
               <button
+                onClick={() => setShowTracking(t => !t)}
+                className={`flex items-center gap-1.5 h-10 px-3 rounded-xl border text-sm font-semibold transition active:scale-95 ${
+                  showTracking
+                    ? "border-[var(--primary)] bg-green-50 text-[var(--primary)]"
+                    : "border-[var(--border)] text-[var(--text-secondary)] hover:border-[var(--primary)] hover:text-[var(--primary)]"
+                }`}
+              >
+                <Truck size={14} />
+                <span className="hidden sm:inline">Track</span>
+              </button>
+              <button
                 onClick={handleReorder}
                 className="flex items-center gap-1.5 h-10 px-3 sm:px-4 rounded-xl bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white text-sm font-semibold transition active:scale-95"
               >
@@ -118,6 +131,10 @@ export default function OrderCard({ order, onOrderUpdate }) {
             </div>
           </div>
         </div>
+
+        {/* Tracking timeline */}
+        {showTracking && <OrderTrackingTimeline order={order} />}
+
       </div>
 
       {/* Cancel confirmation — portal-style, safe on mobile */}

@@ -56,10 +56,14 @@ export function saveOrder(orderData) {
   const orders = readAll();
   const order = {
     ...orderData,
-    id:            generateOrderId(),
-    orderStatus:   "Pending",
-    paymentStatus: orderData.paymentMethod === "cod" ? "Pending" : "Paid",
-    createdAt:     new Date().toISOString(),
+    id:               generateOrderId(),
+    orderStatus:      "Pending",
+    paymentStatus:    orderData.paymentMethod === "cod" ? "Pending" : "Paid",
+    createdAt:        new Date().toISOString(),
+    estimatedDelivery: estimateDelivery(orderData.deliverySlot),
+    statusHistory: [
+      { status: "Pending", timestamp: new Date().toISOString(), note: "Order placed successfully" }
+    ],
   };
   writeAll([order, ...orders]);
 
@@ -74,9 +78,21 @@ export function updateOrderStatus(orderId, newStatus) {
   const orders = readAll();
   let updated  = null;
 
+  const statusNotes = {
+    Accepted:  "Order accepted by farmer",
+    Packed:    "Order packed and ready for dispatch",
+    Shipped:   "Order picked up and on the way",
+    Delivered: "Order delivered successfully",
+    Cancelled: "Order cancelled",
+  };
   const next = orders.map((o) => {
     if (o.id === orderId) {
-      updated = { ...o, orderStatus: newStatus };
+      const history = [...(o.statusHistory || []), {
+        status: newStatus,
+        timestamp: new Date().toISOString(),
+        note: statusNotes[newStatus] || `Status updated to ${newStatus}`,
+      }];
+      updated = { ...o, orderStatus: newStatus, statusHistory: history };
       return updated;
     }
     return o;
@@ -123,6 +139,13 @@ export function clearOrders() {
   localStorage.removeItem(ORDERS_KEY);
 }
 
+/* Estimate delivery date based on slot */
+function estimateDelivery(slot) {
+  const d = new Date();
+  d.setDate(d.getDate() + 2); // 2 days default
+  return d.toISOString();
+}
+
 export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryFee }) {
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.numericPrice ?? item.price) * item.quantity,
@@ -153,5 +176,6 @@ export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryF
     deliveryFee,
     total:         subtotal + deliveryFee,
     paymentMethod,
+    deliverySlot: formData.deliverySlot || "morning",
   };
 }

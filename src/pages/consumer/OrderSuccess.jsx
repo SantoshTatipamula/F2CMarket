@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { CheckCircle2, Package, MapPin, CreditCard } from "lucide-react";
+import { CheckCircle2, Package, MapPin, CreditCard, Clock, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import { getOrders } from "@/services/orderService";
@@ -76,6 +76,28 @@ export default function OrderSuccess() {
                   <span className="capitalize">{order.paymentMethod} · {order.paymentStatus}</span>
                 </div>
               </div>
+
+              {/* Delivery slot + estimated date */}
+              {order.estimatedDelivery && (
+                <div className="rounded-xl bg-green-50 border border-green-200 p-3 flex items-center gap-3">
+                  <Truck size={16} className="text-[var(--primary)] shrink-0" />
+                  <div>
+                    <p className="font-semibold text-green-800 text-xs">Estimated Delivery</p>
+                    <p className="text-green-700 text-xs mt-0.5">
+                      {new Date(order.estimatedDelivery).toLocaleDateString("en-IN", {
+                        weekday: "long", day: "numeric", month: "long",
+                      })}
+                      {order.deliverySlot && (
+                        <span className="ml-1 font-medium">
+                          · {order.deliverySlot === "morning" ? "7 AM – 12 PM"
+                            : order.deliverySlot === "afternoon" ? "12 PM – 5 PM"
+                            : "5 PM – 9 PM"}
+                        </span>
+                      )}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
