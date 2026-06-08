@@ -7,6 +7,7 @@ import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInputField from "@/components/auth/AuthInputField";
 import AuthSelectField from "@/components/auth/AuthSelectField";
 import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
+import { sendWelcomeEmail } from "@/services/emailService";
 
 function StepDots({ step, total }) {
   return (
@@ -101,6 +102,8 @@ export default function Register() {
     setTimeout(() => {
       const saved = register(newUser);
       setLoading(false);
+      /* Send welcome email (non-blocking) */
+      sendWelcomeEmail({ name: saved.name, email: saved.email, role: saved.role });
       if (saved.role === "consumer") navigate("/");
       else setStep(2);
     }, 600);

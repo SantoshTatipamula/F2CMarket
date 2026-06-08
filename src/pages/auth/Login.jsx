@@ -59,9 +59,12 @@ export default function Login() {
       )}
 
       <div className="text-right">
-        <button className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] transition font-medium">
+        <Link
+          to="/forgot-password"
+          className="text-sm text-[var(--primary)] hover:text-[var(--primary-hover)] transition font-medium"
+        >
           Forgot Password?
-        </button>
+        </Link>
       </div>
 
       <Button onClick={handleLogin} disabled={!isValid || loading}

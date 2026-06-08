@@ -22,6 +22,7 @@ const TermsConditions = lazy(() => import("@/pages/common/TermsConditions"));
 const Login               = lazy(() => import("@/pages/auth/Login"));
 const Register            = lazy(() => import("@/pages/auth/Register"));
 const PendingVerification = lazy(() => import("@/pages/auth/PendingVerification"));
+const ForgotPassword      = lazy(() => import("@/pages/auth/ForgotPassword"));
 
 /* ── Consumer ────────────────────────────────────────────── */
 const Cart          = lazy(() => import("@/pages/consumer/Cart"));
@@ -217,6 +218,7 @@ export default function AppRoutes() {
           <Route path="register"              element={<Register />} />
           <Route path="admin/login"            element={<AdminLogin />} />
           <Route path="pending-verification"  element={<PendingVerification />} />
+          <Route path="forgot-password"        element={<ForgotPassword />} />
 
           {/* ── Catch-all ───────────────────────────────── */}
           <Route path="*" element={<Navigate to="/" replace />} />

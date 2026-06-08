@@ -9,6 +9,10 @@ import {
   notifyOrderCancelled,
   notifyOrderStatusChanged,
 } from "@/services/notificationService";
+import {
+  sendOrderConfirmationEmail,
+  sendDeliveryStatusEmail,
+} from "@/services/emailService";
 
 const ORDERS_KEY = "f2c-orders";
 
@@ -67,8 +71,19 @@ export function saveOrder(orderData) {
   };
   writeAll([order, ...orders]);
 
-  /* Notify consumer */
+  /* In-app notification */
   notifyOrderPlaced(order.consumerId, order.id, order.total);
+
+  /* Email confirmation (non-blocking) */
+  const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
+  const consumer = users.find(u => u.id === order.consumerId);
+  if (consumer?.email) {
+    sendOrderConfirmationEmail({
+      order,
+      userEmail: consumer.email,
+      userName:  consumer.name,
+    });
+  }
 
   return order;
 }
@@ -107,6 +122,17 @@ export function updateOrderStatus(orderId, newStatus) {
         notifyOrderCancelled(updated.consumerId, orderId);
       } else {
         notifyOrderStatusChanged(updated.consumerId, orderId, newStatus);
+      }
+      /* Email delivery status update (non-blocking) */
+      const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
+      const consumer = users.find(u => u.id === updated.consumerId);
+      if (consumer?.email) {
+        sendDeliveryStatusEmail({
+          userEmail: consumer.email,
+          userName:  consumer.name,
+          orderId,
+          status:    newStatus,
+        });
       }
     }
   }
