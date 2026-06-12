@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, CheckCircle2, XCircle, ChevronDown, ChevronUp, Sprout } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { sendGenericEmail } from "@/services/emailService";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
 import EmptyState from "@/components/common/ui/EmptyState";
@@ -105,11 +106,25 @@ export default function AdminFarmers() {
     [users, search, activeTab]
   );
 
-  const approveFarmer = (farmer) =>
+  const approveFarmer = (farmer) => {
     updateUserInList({ ...farmer, verificationStatus: "approved", verified: true });
+    sendGenericEmail({
+      name:    farmer.name,
+      email:   farmer.email,
+      subject: "Your Farmer Account is Approved — F2CMARKET",
+      message: `Hi ${farmer.name},\n\nCongratulations! Your farmer account on F2CMARKET has been verified and approved.\n\nYou can now login and start listing your products at: ${window.location.origin}/login\n\nWelcome to the F2CMARKET family! 🌱\n\nF2CMARKET Team`,
+    });
+  };
 
-  const rejectFarmer = (farmer) =>
+  const rejectFarmer = (farmer) => {
     updateUserInList({ ...farmer, verificationStatus: "rejected", verified: false });
+    sendGenericEmail({
+      name:    farmer.name,
+      email:   farmer.email,
+      subject: "Farmer Account Update — F2CMARKET",
+      message: `Hi ${farmer.name},\n\nWe have reviewed your farmer application for F2CMARKET.\n\nUnfortunately, we were unable to verify your account at this time. Please ensure your documents are valid and contact support at support@f2cmarket.com for assistance.\n\nF2CMARKET Team`,
+    });
+  };
 
   return (
     <section className="min-h-screen bg-[var(--surface)] py-8">

@@ -9,13 +9,19 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { sendSupportEmail } from "@/services/emailService";
 
 export default function ContactSection() {
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const data    = new FormData(e.target);
+    const name    = data.get("name")    || "";
+    const email   = data.get("email")   || "";
+    const message = data.get("message") || "";
+
+    await sendSupportEmail({ name, email, message });
 
     toast.success("Your message has been sent successfully.");
-
     e.target.reset();
   };
 

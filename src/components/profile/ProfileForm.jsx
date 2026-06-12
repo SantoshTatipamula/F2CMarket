@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 import { useAuth } from "@/context/AuthContext";
+import { sendGenericEmail } from "@/services/emailService";
 
 import ProfileCard from "@/components/profile/shared/ProfileCard";
 
@@ -83,6 +84,8 @@ export default function ProfileForm() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    /* Email wired below */
+    sendGenericEmail({ name: user?.name||"", email: user?.email||"", subject:"Profile Updated — F2CMARKET", message:`Hi ${user?.name}, your profile was updated.\n\nF2CMARKET Team` });
     updateUser({
       name: form.ownerName,
 

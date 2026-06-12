@@ -6,6 +6,9 @@ import {
 } from "lucide-react";
 
 import { useState } from "react";
+import { useAuth } from "@/context/AuthContext";
+import { sendGenericEmail } from "@/services/emailService";
+import { toast } from "sonner";
 
 import ProfileCard from "@/components/profile/shared/ProfileCard";
 
@@ -14,6 +17,7 @@ import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
 import { Button } from "@/components/ui/button";
 
 export default function Security() {
+  const { user, updateUserInList } = useAuth();
   const [form, setForm] =
     useState({
       currentPassword: "",
@@ -36,10 +40,35 @@ export default function Security() {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log(
-      "Password Updated:",
-      form
-    );
+    if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
+      toast.error("Please fill all fields.");
+      return;
+    }
+    if (user?.password !== form.currentPassword) {
+      toast.error("Current password is incorrect.");
+      return;
+    }
+    if (form.newPassword.length < 6) {
+      toast.error("New password must be at least 6 characters.");
+      return;
+    }
+    if (form.newPassword !== form.confirmPassword) {
+      toast.error("Passwords do not match.");
+      return;
+    }
+
+    updateUserInList({ ...user, password: form.newPassword });
+
+    /* Send security alert email */
+    sendGenericEmail({
+      name:    user?.name || "User",
+      email:   user?.email || "",
+      subject: "Password Changed — F2CMARKET",
+      message: `Hi ${user?.name},\n\nYour F2CMARKET account password was changed successfully.\n\nIf you did not make this change, contact support immediately at support@f2cmarket.com.\n\nF2CMARKET Team`,
+    });
+
+    toast.success("Password updated successfully!");
+    setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
   };
 
   return (

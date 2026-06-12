@@ -79,9 +79,9 @@ export function saveOrder(orderData) {
   const consumer = users.find(u => u.id === order.consumerId);
   if (consumer?.email) {
     sendOrderConfirmationEmail({
+      name:  consumer.name,
+      email: consumer.email,
       order,
-      userEmail: consumer.email,
-      userName:  consumer.name,
     });
   }
 
@@ -128,10 +128,10 @@ export function updateOrderStatus(orderId, newStatus) {
       const consumer = users.find(u => u.id === updated.consumerId);
       if (consumer?.email) {
         sendDeliveryStatusEmail({
-          userEmail: consumer.email,
-          userName:  consumer.name,
+          name:   consumer.name,
+          email:  consumer.email,
           orderId,
-          status:    newStatus,
+          status: newStatus,
         });
       }
     }

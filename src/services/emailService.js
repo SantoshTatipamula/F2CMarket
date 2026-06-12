@@ -1,215 +1,130 @@
+/**
+ * emailService.js
+ * ─────────────────────────────────────────────────────────────────
+ * All emails go through ONE generic EmailJS template.
+ * Template variables: {{to_name}}, {{to_email}}, {{subject}}, {{message}}
+ *
+ * Credentials stored in .env:
+ *   VITE_EMAILJS_SERVICE_ID=service_8wpsoj2
+ *   VITE_EMAILJS_TEMPLATE_ID=template_w7kve6o
+ *   VITE_EMAILJS_PUBLIC_KEY=HTcVeGmKtGMMuds_g
+ */
+
 import emailjs from "@emailjs/browser";
 
-/* ======================================================
-   EMAILJS CONFIG
-====================================================== */
-
-const SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID || "";
-
+const SERVICE_ID  = import.meta.env.VITE_EMAILJS_SERVICE_ID  || "";
 const TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "";
+const PUBLIC_KEY  = import.meta.env.VITE_EMAILJS_PUBLIC_KEY  || "";
 
-const PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "";
-
-/* ======================================================
-   INTERNAL SEND HELPER
-====================================================== */
-
-async function send(params) {
-  if (!SERVICE_ID || !PUBLIC_KEY || !TEMPLATE_ID) {
-    console.warn("EmailJS not configured");
-    return {
-      success: false,
-      reason: "not_configured",
-    };
+/* ── Core send ──────────────────────────────────────────────────── */
+async function send({ name, email, subject, message }) {
+  if (!SERVICE_ID || !TEMPLATE_ID || !PUBLIC_KEY) {
+    console.warn("EmailJS not configured — skipping email to:", email);
+    console.log(`%c📧 [DEV] To: ${email}\nSubject: ${subject}\n${message}`, "color:#16A34A");
+    return { success: false, reason: "not_configured" };
   }
-
   try {
-    await emailjs.send(SERVICE_ID, TEMPLATE_ID, params, PUBLIC_KEY);
-
-    return {
-      success: true,
-    };
-  } catch (error) {
-    console.error("EmailJS Error:", error);
-
-    return {
-      success: false,
-      reason: error?.text || "unknown",
-    };
+    await emailjs.send(
+      SERVICE_ID,
+      TEMPLATE_ID,
+      { to_name: name, to_email: email, subject, message },
+      PUBLIC_KEY
+    );
+    return { success: true };
+  } catch (err) {
+    console.error("EmailJS error:", err);
+    return { success: false, reason: err?.text || "unknown" };
   }
 }
 
-/* ======================================================
-   GENERIC EMAIL
-====================================================== */
+/* ── Public API ─────────────────────────────────────────────────── */
 
-export async function sendGenericEmail({ name, email, subject, message }) {
+/** Generic email — use for any custom message */
+export const sendGenericEmail = ({ name, email, subject, message }) =>
+  send({ name, email, subject, message });
+
+/** Welcome email after registration */
+export function sendWelcomeEmail({ name, email, role }) {
+  const roleMsg = role === "farmer"
+    ? "Your farmer account is under admin verification. You will be notified once approved."
+    : "You can now browse fresh products from verified local farmers.";
+
   return send({
     name,
     email,
-    subject,
-    message,
+    subject: "Welcome to F2CMARKET! 🌱",
+    message: `Hi ${name},\n\nWelcome to F2CMARKET — your direct link to fresh farm produce!\n\n${roleMsg}\n\nVisit us at: ${typeof window !== "undefined" ? window.location.origin : "https://f2cmarket.com"}\n\nHappy shopping!\nF2CMARKET Team`,
   });
 }
 
-/* ======================================================
-   WELCOME EMAIL
-====================================================== */
+/** Order confirmation after checkout */
+export function sendOrderConfirmationEmail({ name, email, order }) {
+  if (!email) return Promise.resolve({ success: false });
 
-export async function sendWelcomeEmail({ name, email, role }) {
-  const roleMessage =
-    role === "farmer"
-      ? "Your farmer account has been received and is currently under review."
-      : "You can now start exploring fresh products from local farmers.";
-
-  return sendGenericEmail({
-    name,
-    email,
-    subject: "Welcome to F2CMARKET 🌿",
-    message: `
-Thank you for joining F2CMARKET.
-
-${roleMessage}
-
-We are excited to connect farmers and consumers directly through our platform.
-
-Happy Shopping!
-
-F2CMARKET Team
-    `,
-  });
-}
-
-/* ======================================================
-   ORDER CONFIRMATION
-====================================================== */
-
-export async function sendOrderConfirmationEmail({ name, email, order }) {
-  const itemsList = (order?.items || [])
-    .map((item) => `${item.name} × ${item.quantity} — ₹${item.subtotal}`)
-    .join("\n");
-
-  return sendGenericEmail({
-    name,
-    email,
-    subject: `Order Confirmation #${order.id}`,
-    message: `
-Your order has been placed successfully.
-
-Order ID:
-${order.id}
-
-Items:
-${itemsList}
-
-Total:
-₹${order.total}
-
-Thank you for shopping with F2CMARKET 🌿
-    `,
-  });
-}
-
-/* ======================================================
-   DELIVERY STATUS
-====================================================== */
-
-export async function sendDeliveryStatusEmail({
-  name,
-  email,
-  orderId,
-  status,
-}) {
-  const messages = {
-    Accepted: "Your order has been accepted and is being prepared.",
-
-    Packed: "Your order has been packed and is ready for dispatch.",
-
-    Shipped: "Your order has been shipped and is on its way.",
-
-    Delivered: "Your order has been delivered successfully.",
-
-    Cancelled: "Your order has been cancelled.",
+  const slotMap = {
+    morning:   "Morning (7 AM – 12 PM)",
+    afternoon: "Afternoon (12 PM – 5 PM)",
+    evening:   "Evening (5 PM – 9 PM)",
   };
 
-  return sendGenericEmail({
+  const itemsList = (order?.items || [])
+    .map(i => `• ${i.name} x${i.quantity} — ₹${i.subtotal}`)
+    .join("\n");
+
+  const estDate = order?.estimatedDelivery
+    ? new Date(order.estimatedDelivery).toLocaleDateString("en-IN", {
+        weekday: "long", day: "numeric", month: "long", year: "numeric",
+      })
+    : "Within 2 business days";
+
+  return send({
     name,
     email,
-    subject: `Order ${status} - #${orderId}`,
-    message: `
-Order ID: ${orderId}
-
-${messages[status] || "Order status updated."}
-
-Thank you for choosing F2CMARKET.
-    `,
+    subject: `Order Confirmed #${order?.id} — F2CMARKET`,
+    message: `Hi ${name},\n\nYour order has been placed successfully! 🎉\n\nOrder ID: ${order?.id}\nTotal: ₹${order?.total}\n\nItems Ordered:\n${itemsList}\n\nDelivery Slot: ${slotMap[order?.deliverySlot] || "Standard"}\nEstimated Delivery: ${estDate}\nDelivery Address: ${order?.consumer?.address || ""}\nPayment: ${(order?.paymentMethod || "").toUpperCase()}\n\nTrack your order at: ${typeof window !== "undefined" ? window.location.origin : ""}/orders\n\nThank you for shopping with F2CMARKET!\nF2CMARKET Team`,
   });
 }
 
-/* ======================================================
-   PASSWORD RESET
-====================================================== */
+/** Delivery status update email */
+export function sendDeliveryStatusEmail({ name, email, orderId, status }) {
+  if (!email) return Promise.resolve({ success: false });
 
-export async function sendPasswordResetEmail({ name, email, resetCode }) {
-  return sendGenericEmail({
+  const messages = {
+    Accepted:  "Great news! Your order has been accepted by the farmer and is being prepared.",
+    Packed:    "Your order is packed and ready for dispatch. It will be picked up soon.",
+    Shipped:   "Your order is out for delivery! Expect it at your doorstep very soon. 🚚",
+    Delivered: "Your order has been delivered successfully. Enjoy your fresh produce! 🌱",
+    Cancelled: "Your order has been cancelled. If you have questions, contact support@f2cmarket.com.",
+  };
+
+  if (!messages[status]) return Promise.resolve({ success: false });
+
+  return send({
     name,
     email,
-    subject: "Password Reset Request",
-    message: `
-Hello ${name},
-
-Use the verification code below to reset your password:
-
-${resetCode}
-
-This code will expire in 15 minutes.
-
-If you did not request this reset, please ignore this email.
-    `,
+    subject: `Order ${status} — #${orderId} | F2CMARKET`,
+    message: `Hi ${name},\n\n${messages[status]}\n\nOrder ID: ${orderId}\n\nTrack all your orders at: ${typeof window !== "undefined" ? window.location.origin : ""}/orders\n\nF2CMARKET Team`,
   });
 }
 
-/* ======================================================
-   FEEDBACK EMAIL
-====================================================== */
-
-export async function sendFeedbackEmail({ name, email }) {
-  return sendGenericEmail({
+/** Password reset code email */
+export function sendPasswordResetEmail({ name, email, resetCode }) {
+  return send({
     name,
     email,
-    subject: "Feedback Received",
-    message: `
-Thank you for sharing your feedback.
-
-We appreciate your support and will use your suggestions to improve F2CMARKET.
-
-Have a wonderful day! 🌿
-    `,
+    subject: "Password Reset Code — F2CMARKET",
+    message: `Hi ${name},\n\nYou requested a password reset for your F2CMARKET account.\n\nYour reset code is:\n\n🔑  ${resetCode}  \n\nThis code expires in 15 minutes.\n\nIf you did not request this, please ignore this email.\n\nF2CMARKET Team`,
   });
 }
 
-/* ======================================================
-   SUPPORT EMAIL
-====================================================== */
-
-export async function sendSupportEmail({ name, email }) {
-  return sendGenericEmail({
+/** Support/contact form email */
+export function sendSupportEmail({ name, email, message }) {
+  return send({
     name,
     email,
-    subject: "Support Request Received",
-    message: `
-We have successfully received your support request.
-
-Our team will review your message and get back to you as soon as possible.
-
-Thank you for contacting F2CMARKET.
-    `,
+    subject: "We received your message — F2CMARKET Support",
+    message: `Hi ${name},\n\nThank you for contacting F2CMARKET support!\n\nWe have received your message and will get back to you within 24-48 hours.\n\nYour message:\n"${message}"\n\nFor urgent issues, email us directly at support@f2cmarket.com.\n\nF2CMARKET Team`,
   });
 }
 
-/* ======================================================
-   CONFIG CHECK
-====================================================== */
-
-export const isEmailConfigured = () =>
-  !!(SERVICE_ID && PUBLIC_KEY && TEMPLATE_ID);
+export const isEmailConfigured = () => !!(SERVICE_ID && TEMPLATE_ID && PUBLIC_KEY);
