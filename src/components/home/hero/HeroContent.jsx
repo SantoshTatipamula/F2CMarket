@@ -1,6 +1,7 @@
 import herbal from "../../../assets/icons/herbs.png";
 
 import HeroSearch from "./HeroSearch";
+import HeroLocation from "./HeroLocation"
 import { Navigate, useNavigate } from "react-router-dom";
 
 
@@ -25,6 +26,9 @@ export default function HeroContent() {
       <p className="mt-6 text-[var(--text-secondary)] text-lg leading-relaxed max-w-xl">
         Buy vegetables, fruits and organic products directly from trusted farmers.
       </p>
+
+      {/* Location */}
+      <HeroLocation />
 
       {/* Search */}
       <HeroSearch />

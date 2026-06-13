@@ -1,5 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import "leaflet/dist/leaflet.css";
+import "./utils/leafletConfig";
 
 import App from "./App";
 
@@ -8,6 +10,7 @@ import { ProductProvider } from "./context/ProductContext";
 import { CartProvider }    from "./context/CartContext";
 import { WishlistProvider} from "./context/WishlistContext";
 import { SearchProvider }  from "./context/SearchContext";
+import { LocationProvider } from "./context/LocationContext";
 
 import { initSeedData } from "@/data/initSeedData";
 
@@ -28,7 +31,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <CartProvider>
           <WishlistProvider>
             <SearchProvider>
-              <App />
+              <LocationProvider>
+                <App />
+              </LocationProvider>
             </SearchProvider>
           </WishlistProvider>
         </CartProvider>
