@@ -22,40 +22,50 @@ export function LocationProvider({ children }) {
   const [addressLoading, setAddressLoading] = useState(true);
 
   useEffect(() => {
-    async function initializeLocation() {
-      if (
-        !location?.latitude ||
-        !location?.longitude ||
-        selectedLocation
-      ) {
-        setAddressLoading(false);
-        return;
-      }
-
-      try {
-        const address = await reverseGeocode(
-          location.latitude,
-          location.longitude
-        );
-
-        setSelectedLocation({
-          latitude: location.latitude,
-          longitude: location.longitude,
-
-          city: address?.city || "",
-          state: address?.state || "",
-          country: address?.country || "",
-          fullAddress: address?.fullAddress || "",
-        });
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setAddressLoading(false);
-      }
+  async function initializeLocation() {
+    // Wait until browser geolocation finishes
+    if (geoLoading) {
+      return;
     }
 
-    initializeLocation();
-  }, [
+    // If permission denied or no coordinates
+    if (!location?.latitude || !location?.longitude) {
+      setAddressLoading(false);
+      return;
+    }
+
+    // Don't fetch again if already initialized
+    if (selectedLocation) {
+      setAddressLoading(false);
+      return;
+    }
+
+    try {
+      const address = await reverseGeocode(
+        location.latitude,
+        location.longitude
+      );
+
+      setSelectedLocation({
+        latitude: location.latitude,
+        longitude: location.longitude,
+
+        city: address?.city || "",
+        state: address?.state || "",
+        country: address?.country || "",
+        district: address?.district || "",
+        fullAddress: address?.fullAddress || "",
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setAddressLoading(false);
+    }
+  }
+
+  initializeLocation();
+}, [
+  geoLoading,
   location?.latitude,
   location?.longitude,
   selectedLocation,
