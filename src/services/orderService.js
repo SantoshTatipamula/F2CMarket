@@ -38,7 +38,7 @@ function writeAll(orders) {
 
 export function getOrders() {
   return readAll().sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
   );
 }
 
@@ -60,13 +60,17 @@ export function saveOrder(orderData) {
   const orders = readAll();
   const order = {
     ...orderData,
-    id:               generateOrderId(),
-    orderStatus:      "Pending",
-    paymentStatus:    orderData.paymentMethod === "cod" ? "Pending" : "Paid",
-    createdAt:        new Date().toISOString(),
+    id: generateOrderId(),
+    orderStatus: "Pending",
+    paymentStatus: orderData.paymentMethod === "cod" ? "Pending" : "Paid",
+    createdAt: new Date().toISOString(),
     estimatedDelivery: estimateDelivery(orderData.deliverySlot),
     statusHistory: [
-      { status: "Pending", timestamp: new Date().toISOString(), note: "Order placed successfully" }
+      {
+        status: "Pending",
+        timestamp: new Date().toISOString(),
+        note: "Order placed successfully",
+      },
     ],
   };
   writeAll([order, ...orders]);
@@ -76,10 +80,10 @@ export function saveOrder(orderData) {
 
   /* Email confirmation (non-blocking) */
   const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
-  const consumer = users.find(u => u.id === order.consumerId);
+  const consumer = users.find((u) => u.id === order.consumerId);
   if (consumer?.email) {
     sendOrderConfirmationEmail({
-      name:  consumer.name,
+      name: consumer.name,
       email: consumer.email,
       order,
     });
@@ -91,22 +95,25 @@ export function saveOrder(orderData) {
 /** Update order status — fires notification to consumer */
 export function updateOrderStatus(orderId, newStatus) {
   const orders = readAll();
-  let updated  = null;
+  let updated = null;
 
   const statusNotes = {
-    Accepted:  "Order accepted by farmer",
-    Packed:    "Order packed and ready for dispatch",
-    Shipped:   "Order picked up and on the way",
+    Accepted: "Order accepted by farmer",
+    Packed: "Order packed and ready for dispatch",
+    Shipped: "Order picked up and on the way",
     Delivered: "Order delivered successfully",
     Cancelled: "Order cancelled",
   };
   const next = orders.map((o) => {
     if (o.id === orderId) {
-      const history = [...(o.statusHistory || []), {
-        status: newStatus,
-        timestamp: new Date().toISOString(),
-        note: statusNotes[newStatus] || `Status updated to ${newStatus}`,
-      }];
+      const history = [
+        ...(o.statusHistory || []),
+        {
+          status: newStatus,
+          timestamp: new Date().toISOString(),
+          note: statusNotes[newStatus] || `Status updated to ${newStatus}`,
+        },
+      ];
       updated = { ...o, orderStatus: newStatus, statusHistory: history };
       return updated;
     }
@@ -116,7 +123,13 @@ export function updateOrderStatus(orderId, newStatus) {
   if (updated) {
     writeAll(next);
     /* Notify consumer on meaningful status changes */
-    const notifyStatuses = ["Accepted", "Packed", "Shipped", "Delivered", "Cancelled"];
+    const notifyStatuses = [
+      "Accepted",
+      "Packed",
+      "Shipped",
+      "Delivered",
+      "Cancelled",
+    ];
     if (notifyStatuses.includes(newStatus)) {
       if (newStatus === "Cancelled") {
         notifyOrderCancelled(updated.consumerId, orderId);
@@ -125,11 +138,11 @@ export function updateOrderStatus(orderId, newStatus) {
       }
       /* Email delivery status update (non-blocking) */
       const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
-      const consumer = users.find(u => u.id === updated.consumerId);
+      const consumer = users.find((u) => u.id === updated.consumerId);
       if (consumer?.email) {
         sendDeliveryStatusEmail({
-          name:   consumer.name,
-          email:  consumer.email,
+          name: consumer.name,
+          email: consumer.email,
           orderId,
           status: newStatus,
         });
@@ -143,7 +156,7 @@ export function updateOrderStatus(orderId, newStatus) {
 /** Consumer cancels their own order (only if Pending or Accepted) */
 export function cancelOrder(orderId) {
   const orders = readAll();
-  let updated  = null;
+  let updated = null;
 
   const next = orders.map((o) => {
     if (o.id === orderId && ["Pending", "Accepted"].includes(o.orderStatus)) {
@@ -172,35 +185,56 @@ function estimateDelivery(slot) {
   return d.toISOString();
 }
 
-export function buildOrder({ cartItems, formData, paymentMethod, user, deliveryFee }) {
+export function buildOrder({
+  cartItems,
+  formData,
+  paymentMethod,
+  user,
+  deliveryFee,
+  deliveryLocation,
+}) {
   const subtotal = cartItems.reduce(
     (sum, item) => sum + (item.numericPrice ?? item.price) * item.quantity,
-    0
+    0,
   );
 
   const items = cartItems.map((item) => ({
-    productId:  String(item.id),
-    farmerId:   String(item.sellerId || item.farmerId || "unknown"),
-    farmerName: item.sellerName || item.farmerName || item.farmer || "Local Farmer",
-    name:       item.name,
-    image:      item.image || "",
-    quantity:   item.quantity,
-    price:      item.numericPrice ?? item.price,
-    subtotal:   (item.numericPrice ?? item.price) * item.quantity,
+    productId: String(item.id),
+    farmerId: String(item.sellerId || item.farmerId || "unknown"),
+    farmerName:
+      item.sellerName || item.farmerName || item.farmer || "Local Farmer",
+    name: item.name,
+    image: item.image || "",
+    quantity: item.quantity,
+    price: item.numericPrice ?? item.price,
+    subtotal: (item.numericPrice ?? item.price) * item.quantity,
   }));
 
   return {
-    consumerId:    user?.id || "guest",
+    consumerId: user?.id || "guest",
     consumer: {
-      name:    formData.fullName,
-      phone:   formData.phone,
+      name: formData.fullName,
+      phone: formData.phone,
       address: `${formData.address}, ${formData.city} - ${formData.pincode}`,
     },
+
+    deliveryLocation: {
+      latitude: deliveryLocation?.latitude || null,
+      longitude: deliveryLocation?.longitude || null,
+
+      city: deliveryLocation?.city || "",
+      district: deliveryLocation?.district || "",
+      state: deliveryLocation?.state || "",
+      country: deliveryLocation?.country || "",
+
+      fullAddress: deliveryLocation?.fullAddress || "",
+    },
+    
     items,
-    totalItems:    items.reduce((s, i) => s + i.quantity, 0),
+    totalItems: items.reduce((s, i) => s + i.quantity, 0),
     subtotal,
     deliveryFee,
-    total:         subtotal + deliveryFee,
+    total: subtotal + deliveryFee,
     paymentMethod,
     deliverySlot: formData.deliverySlot || "morning",
   };

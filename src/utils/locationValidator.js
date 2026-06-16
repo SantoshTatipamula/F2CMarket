@@ -3,7 +3,7 @@ import { SERVICEABLE_LOCATIONS } from "@/data/serviceableLocations";
 export function isServiceableLocation(location) {
   if (!location) return false;
 
-  const searchableText = [
+  const valuesToCheck = [
     location.city,
     location.mandal,
     location.district,
@@ -11,14 +11,13 @@ export function isServiceableLocation(location) {
     location.fullAddress,
   ]
     .filter(Boolean)
-    .join(" ")
-    .toLowerCase()
-    .replace(/\s+/g, " ")
-    .trim();
+    .map((value) => value.toLowerCase());
 
   return SERVICEABLE_LOCATIONS.some((serviceArea) =>
-    searchableText.includes(
-      serviceArea.toLowerCase().replace(/\s+/g, " ").trim()
+    serviceArea.aliases.some((alias) =>
+      valuesToCheck.some((value) =>
+        value.includes(alias.toLowerCase())
+      )
     )
   );
 }

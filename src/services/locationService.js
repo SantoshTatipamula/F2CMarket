@@ -112,6 +112,8 @@ export async function searchLocation(query) {
 
       country: item.address?.country || "",
 
+      postcode: item.address?.postcode || "",
+
       displayName: item.display_name,
     }));
   } catch (error) {

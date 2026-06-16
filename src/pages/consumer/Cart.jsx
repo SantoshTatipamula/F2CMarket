@@ -1,14 +1,30 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, MapPin } from "lucide-react";
 
 import { useCart } from "@/context/CartContext";
 import { parsePrice } from "@/utils/parsePrice";
+
+import { useLocation } from "@/context/LocationContext";
+import LocationDialog from "@/components/home/hero/LocationDialog";
+
 import EmptyState from "@/components/common/ui/EmptyState";
 import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 export default function Cart() {
-  const { cartItems, cartTotal, increaseQty, decreaseQty, removeFromCart, clearCart } = useCart();
+  const {
+    cartItems,
+    cartTotal,
+    increaseQty,
+    decreaseQty,
+    removeFromCart,
+    clearCart,
+  } = useCart();
+
+  const { selectedLocation } = useLocation();
+
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
   return (
     <section className="min-h-screen bg-[var(--surface)] py-6 sm:py-10">
@@ -38,16 +54,19 @@ export default function Cart() {
               }
             />
 
-            <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
+            
 
+            <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
               {/* Cart Items */}
               <div className="space-y-3">
                 {cartItems.map((item) => {
                   const price = parsePrice(item.price);
                   return (
-                    <div key={item.id} className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm">
+                    <div
+                      key={item.id}
+                      className="rounded-2xl border border-[var(--border)] bg-white p-4 shadow-sm"
+                    >
                       <div className="flex items-start gap-3 sm:gap-4">
-
                         {/* Image */}
                         <img
                           src={item.image}
@@ -57,9 +76,15 @@ export default function Cart() {
 
                         {/* Details */}
                         <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-[var(--text-primary)] text-sm sm:text-base leading-tight truncate">{item.name}</h3>
-                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">{item.farmer}</p>
-                          <p className="font-bold text-[var(--primary)] mt-1 text-sm sm:text-base">₹{price}</p>
+                          <h3 className="font-bold text-[var(--text-primary)] text-sm sm:text-base leading-tight truncate">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-[var(--text-secondary)] mt-0.5">
+                            {item.farmer}
+                          </p>
+                          <p className="font-bold text-[var(--primary)] mt-1 text-sm sm:text-base">
+                            ₹{price}
+                          </p>
 
                           {/* Qty + Delete row — always visible on mobile */}
                           <div className="flex items-center justify-between mt-3">
@@ -71,7 +96,9 @@ export default function Cart() {
                               >
                                 <Minus size={14} />
                               </button>
-                              <span className="min-w-[28px] text-center font-bold text-sm sm:text-base">{item.quantity}</span>
+                              <span className="min-w-[28px] text-center font-bold text-sm sm:text-base">
+                                {item.quantity}
+                              </span>
                               <button
                                 onClick={() => increaseQty(item.id)}
                                 className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center rounded-xl bg-[var(--surface)] border border-[var(--border)] transition hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] active:scale-95"
@@ -102,20 +129,33 @@ export default function Cart() {
 
               {/* Order Summary — stacks below on mobile, sticky on desktop */}
               <div className="h-fit rounded-2xl border border-[var(--border)] bg-white p-5 shadow-sm lg:sticky lg:top-24">
-                <h2 className="text-lg font-bold text-[var(--text-primary)] mb-5">Order Summary</h2>
+                <h2 className="text-lg font-bold text-[var(--text-primary)] mb-5">
+                  Order Summary
+                </h2>
 
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-secondary)]">Subtotal ({cartItems.reduce((s, i) => s + i.quantity, 0)} items)</span>
-                    <span className="font-semibold">₹{cartTotal.toFixed(0)}</span>
+                    <span className="text-[var(--text-secondary)]">
+                      Subtotal ({cartItems.reduce((s, i) => s + i.quantity, 0)}{" "}
+                      items)
+                    </span>
+                    <span className="font-semibold">
+                      ₹{cartTotal.toFixed(0)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-[var(--text-secondary)]">Delivery</span>
+                    <span className="text-[var(--text-secondary)]">
+                      Delivery
+                    </span>
                     <span className="font-semibold text-green-600">Free</span>
                   </div>
                   <div className="border-t border-[var(--border)] pt-3 flex justify-between">
-                    <span className="font-bold text-base text-[var(--text-primary)]">Total</span>
-                    <span className="text-xl font-bold text-[var(--primary)]">₹{cartTotal.toFixed(0)}</span>
+                    <span className="font-bold text-base text-[var(--text-primary)]">
+                      Total
+                    </span>
+                    <span className="text-xl font-bold text-[var(--primary)]">
+                      ₹{cartTotal.toFixed(0)}
+                    </span>
                   </div>
                 </div>
 
@@ -125,7 +165,10 @@ export default function Cart() {
                   </button>
                 </Link>
 
-                <Link to="/products" className="mt-3 block text-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+                <Link
+                  to="/products"
+                  className="mt-3 block text-center text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+                >
                   ← Continue Shopping
                 </Link>
               </div>
@@ -133,6 +176,11 @@ export default function Cart() {
           </>
         )}
       </div>
+
+      <LocationDialog
+        open={locationDialogOpen}
+        onOpenChange={setLocationDialogOpen}
+      />
     </section>
   );
 }

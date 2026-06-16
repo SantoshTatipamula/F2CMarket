@@ -66,6 +66,8 @@ export default function LocationDialog({ open, onOpenChange }) {
       state: location.state,
       country: location.country,
 
+      postcode: location.postcode || "",
+
       fullAddress: location.displayName,
     });
   };
