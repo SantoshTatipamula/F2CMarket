@@ -3,19 +3,19 @@ import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { saveUser, updateStoredUser } from "@/services/profileService";
 
 const ADMIN = {
-  id:                 "admin-001",
-  name:               "Admin",
-  email:              "admin@f2cmarket.com",
-  password:           "admin123",
-  role:               "admin",
-  verified:           true,
+  id: "admin-001",
+  name: "Admin",
+  email: "admin@f2cmarket.com",
+  password: "admin123",
+  role: "admin",
+  verified: true,
   verificationStatus: "approved",
 };
 
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user,  setUser]  = useLocalStorage("f2c-user",  null);
+  const [user, setUser] = useLocalStorage("f2c-user", null);
   const [users, setUsers] = useLocalStorage("f2c-users", []);
 
   const isAuthenticated = !!user;
@@ -31,20 +31,23 @@ export function AuthProvider({ children }) {
     const found = users.find(
       (u) =>
         u.email.toLowerCase() === email.toLowerCase() &&
-        u.password === password
+        u.password === password,
     );
 
-    if (!found)
-      return { success: false, error: "Invalid email or password." };
+    if (!found) return { success: false, error: "Invalid email or password." };
 
     if (found.banned)
-      return { success: false, error: "Your account has been suspended. Contact support." };
+      return {
+        success: false,
+        error: "Your account has been suspended. Contact support.",
+      };
 
     /* Rejected farmers cannot log in */
     if (found.role === "farmer" && found.verificationStatus === "rejected") {
       return {
         success: false,
-        error: "Your farmer application was rejected. Please contact support@f2cmarket.com.",
+        error:
+          "Your farmer application was rejected. Please contact support@f2cmarket.com.",
       };
     }
 
@@ -62,11 +65,11 @@ export function AuthProvider({ children }) {
   const register = (newUser) => {
     const userToSave = {
       ...newUser,
-      id:                 `user-${Date.now()}`,
-      createdAt:          new Date().toISOString(),
+      id: `user-${Date.now()}`,
+      createdAt: new Date().toISOString(),
       verificationStatus: newUser.role === "farmer" ? "pending" : "approved",
-      verified:           newUser.role !== "farmer",
-      banned:             false,
+      verified: newUser.role !== "farmer",
+      banned: false,
     };
 
     setUsers((prev) => [...prev, userToSave]);
@@ -83,9 +86,30 @@ export function AuthProvider({ children }) {
   /* ── Update logged-in user ── */
   const updateUser = (updatedData) => {
     const updatedUser = updateStoredUser(updatedData);
+
+    if (!updatedUser) return;
+
     setUser(updatedUser);
+
     setUsers((prev) =>
-      prev.map((u) => (u.id === updatedUser.id ? updatedUser : u))
+      prev.map((existingUser) =>
+        existingUser.id === updatedUser.id
+          ? {
+              ...existingUser,
+              ...updatedUser,
+
+              profile: {
+                ...(existingUser.profile || {}),
+                ...(updatedUser.profile || {}),
+              },
+
+              farmerProfile: {
+                ...(existingUser.farmerProfile || {}),
+                ...(updatedUser.farmerProfile || {}),
+              },
+            }
+          : existingUser,
+      ),
     );
   };
 
@@ -96,16 +120,41 @@ export function AuthProvider({ children }) {
   };
 
   /* ── Admin helpers ── */
-  const getAllUsers       = ()        => users;
+  const getAllUsers = () => users;
   const updateUserInList = (updated) =>
-    setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)));
+  setUsers((prev) =>
+    prev.map((existingUser) =>
+      existingUser.id === updated.id
+        ? {
+            ...existingUser,
+            ...updated,
+
+            profile: {
+              ...(existingUser.profile || {}),
+              ...(updated.profile || {}),
+            },
+
+            farmerProfile: {
+              ...(existingUser.farmerProfile || {}),
+              ...(updated.farmerProfile || {}),
+            },
+          }
+        : existingUser
+    )
+  );
 
   return (
     <AuthContext.Provider
       value={{
-        user, users, isAuthenticated,
-        login, register, updateUser, logout,
-        getAllUsers, updateUserInList,
+        user,
+        users,
+        isAuthenticated,
+        login,
+        register,
+        updateUser,
+        logout,
+        getAllUsers,
+        updateUserInList,
       }}
     >
       {children}
