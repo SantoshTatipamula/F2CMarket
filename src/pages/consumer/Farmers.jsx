@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
-import { farmersData } from "@/data/farmersData";
+import { useAuth } from "@/context/AuthContext";
 import FarmersPageHeader from "@/components/farmer/FarmersPageHeader";
 import FarmersGrid from "@/components/farmer/farmersGrid";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
@@ -14,12 +14,19 @@ const STATS = [
 ];
 
 export default function Farmers() {
+
+  const { users } = useAuth();
+
   const [searchQuery, setSearchQuery] = useState("");
 
-  const filteredFarmers = useMemo(
-    () => farmersData.filter((f) => f.name.toLowerCase().includes(searchQuery.toLowerCase())),
-    [searchQuery]
+  const filteredFarmers = useMemo(() => {
+  return users.filter(
+    (user) =>
+      user.role === "farmer" &&
+      user.verificationStatus === "approved" &&
+      user.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
+}, [users, searchQuery]);
 
   return (
     <div className="min-h-screen bg-[var(--surface)]">
