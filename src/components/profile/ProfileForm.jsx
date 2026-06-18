@@ -19,64 +19,68 @@ import ProfileCard from "@/components/profile/shared/ProfileCard";
 
 import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
 
+import LocationDialog from "../home/hero/LocationDialog";
+
 export default function ProfileForm() {
-  const { user, updateUser } =
-    useAuth();
+  const { user, updateUser } = useAuth();
 
-  const isFarmer =
-    user?.role === "farmer";
+  const isFarmer = user?.role === "farmer";
 
-  const [form, setForm] =
-    useState({
-      farmName: "",
+  const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
-      ownerName: "",
+  const [form, setForm] = useState({
+    farmName: "",
 
-      email: "",
+    ownerName: "",
 
-      phone: "",
+    email: "",
 
-      location: "",
+    phone: "",
 
-      bio: "",
-    });
+    location: "",
+
+    bio: "",
+
+    // Farmer only
+    farmLocation: null,
+  });
 
   // Sync form with user
   useEffect(() => {
     if (!user) return;
 
     setForm({
-      farmName:
-        user?.farmerProfile
-          ?.farmName || "",
+      farmName: user?.farmerProfile?.farmName || "",
 
-      ownerName:
-        user?.name || "",
+      ownerName: user?.name || "",
 
-      email:
-        user?.email || "",
+      email: user?.email || "",
 
-      phone:
-        user?.phone || "",
+      phone: user?.phone || "",
 
-      location:
-        user?.profile
-          ?.location || "",
+      location: user?.profile?.location || "",
 
-      bio:
-        user?.profile?.bio ||
-        "",
+      bio: user?.profile?.bio || "",
+
+      // Farmer only
+      farmLocation: user?.farmerProfile?.location || null,
     });
   }, [user]);
 
   // Handle Change
   const handleChange = (e) => {
-    const { name, value } =
-      e.target;
+    const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const handleFarmLocationSelect = (location) => {
+    setForm((prev) => ({
+      ...prev,
+      farmLocation: location,
     }));
   };
 
@@ -85,7 +89,12 @@ export default function ProfileForm() {
     e.preventDefault();
 
     /* Email wired below */
-    sendGenericEmail({ name: user?.name||"", email: user?.email||"", subject:"Profile Updated — F2CMARKET", message:`Hi ${user?.name}, your profile was updated.\n\nF2CMARKET Team` });
+    sendGenericEmail({
+      name: user?.name || "",
+      email: user?.email || "",
+      subject: "Profile Updated — F2CMARKET",
+      message: `Hi ${user?.name}, your profile was updated.\n\nF2CMARKET Team`,
+    });
     updateUser({
       name: form.ownerName,
 
@@ -96,8 +105,7 @@ export default function ProfileForm() {
       profile: {
         ...user.profile,
 
-        location:
-          form.location,
+        location: form.location,
 
         bio: form.bio,
       },
@@ -106,27 +114,20 @@ export default function ProfileForm() {
         farmerProfile: {
           ...user.farmerProfile,
 
-          farmName:
-            form.farmName,
+          farmName: form.farmName,
+
+          location: form.farmLocation,
         },
       }),
     });
 
-    console.log(
-      "Updated Profile:",
-      form
-    );
+    console.log("Updated Profile:", form);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-8"
-    >
-      
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* Profile Image */}
       <ProfileCard>
-        
         <ProfileCardHeader
           title="Profile Image"
           description="Manage your public marketplace identity image."
@@ -139,7 +140,6 @@ export default function ProfileForm() {
             sm:flex-row
           "
         >
-          
           {/* Avatar */}
           <div
             className="
@@ -151,12 +151,8 @@ export default function ProfileForm() {
               bg-[var(--surface-2)]
             "
           >
-            
             <img
-              src={
-                user?.avatar ||
-                "https://ui-avatars.com/api/?name=User"
-              }
+              src={user?.avatar || "https://ui-avatars.com/api/?name=User"}
               alt={user?.name}
               className="
                 h-full w-full
@@ -181,7 +177,6 @@ export default function ProfileForm() {
 
           {/* Text */}
           <div>
-            
             <h3
               className="
                 text-lg font-semibold
@@ -198,9 +193,7 @@ export default function ProfileForm() {
                 text-[var(--text-secondary)]
               "
             >
-              Your profile picture
-              represents your identity
-              across the F2CMARKET
+              Your profile picture represents your identity across the F2CMARKET
               platform.
             </p>
           </div>
@@ -209,7 +202,6 @@ export default function ProfileForm() {
 
       {/* Basic Information */}
       <ProfileCard>
-        
         <ProfileCardHeader
           title="Basic Information"
           description="Manage your personal account details."
@@ -222,7 +214,6 @@ export default function ProfileForm() {
             md:grid-cols-2
           "
         >
-          
           {isFarmer && (
             <InputField
               icon={Store}
@@ -256,31 +247,18 @@ export default function ProfileForm() {
             value={form.phone}
             onChange={handleChange}
           />
-
-          <div className="md:col-span-2">
-            <InputField
-              icon={MapPin}
-              label="Location"
-              name="location"
-              value={form.location}
-              onChange={handleChange}
-            />
-          </div>
         </div>
       </ProfileCard>
 
       {/* Bio */}
       <ProfileCard>
-        
         <ProfileCardHeader
           title="Profile Bio"
           description="Tell people more about yourself and your marketplace identity."
         />
 
         <div className="mt-8">
-          
           <label className="block">
-            
             <span
               className="
                 mb-3 flex items-center gap-2
@@ -289,7 +267,6 @@ export default function ProfileForm() {
               "
             >
               <FileText size={18} />
-
               Bio Information
             </span>
 
@@ -318,9 +295,61 @@ export default function ProfileForm() {
         </div>
       </ProfileCard>
 
+      {isFarmer && (
+        <ProfileCard>
+          <ProfileCardHeader
+            title="Farm Location"
+            description="Set your farm location to help customers identify where your products are grown."
+          />
+
+          <div className="mt-8 space-y-6">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <div className="flex items-start gap-3">
+                <MapPin size={22} className="mt-0.5 text-[var(--primary)]" />
+
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[var(--text-primary)]">
+                    Farm Address
+                  </h3>
+
+                  {form.farmLocation ? (
+                    <>
+                      <p className="mt-2 break-words text-sm text-[var(--text-secondary)]">
+                        {form.farmLocation.fullAddress}
+                      </p>
+
+                      <p className="mt-3 text-xs text-[var(--text-muted)]">
+                        Latitude: {form.farmLocation.latitude?.toFixed(6)}
+                      </p>
+
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Longitude: {form.farmLocation.longitude?.toFixed(6)}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                      No farm location selected.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              onClick={() => setLocationDialogOpen(true)}
+              variant="outline"
+            >
+              {form.farmLocation
+                ? "Change Farm Location"
+                : "Select Farm Location"}
+            </Button>
+          </div>
+        </ProfileCard>
+      )}
+
       {/* Submit */}
       <div className="flex justify-end">
-        
         <Button
           type="submit"
           className="
@@ -332,21 +361,21 @@ export default function ProfileForm() {
           Save Changes
         </Button>
       </div>
+
+      <LocationDialog
+        open={locationDialogOpen}
+        onOpenChange={setLocationDialogOpen}
+        value={form.farmLocation}
+        onConfirm={handleFarmLocationSelect}
+      />
     </form>
   );
 }
 
 /* Reusable Input */
-function InputField({
-  icon: Icon,
-  label,
-  name,
-  value,
-  onChange,
-}) {
+function InputField({ icon: Icon, label, name, value, onChange }) {
   return (
     <label className="block">
-      
       <span
         className="
           mb-3 flex items-center gap-2
