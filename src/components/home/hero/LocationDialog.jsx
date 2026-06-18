@@ -14,21 +14,29 @@ import {
 
 import MapView from "@/components/map/MapView";
 
-export default function LocationDialog({ open, onOpenChange }) {
-  const { selectedLocation: currentLocation, setSelectedLocation } =
-    useLocation();
+export default function LocationDialog({
+  open,
+  onOpenChange,
+  value = null,
+  onConfirm = null,
+}) {
+  const {
+    selectedLocation: currentLocation,
+    setSelectedLocation,
+  } = useLocation();
 
-  const [selectedLocation, setLocalSelectedLocation] =
-    useState(currentLocation);
+  const [selectedLocation, setLocalSelectedLocation] = useState(
+    value || currentLocation
+  );
 
   const [serviceError, setServiceError] = useState("");
 
   useEffect(() => {
     if (open) {
-      setLocalSelectedLocation(currentLocation);
+      setLocalSelectedLocation(value || currentLocation);
       setServiceError("");
     }
-  }, [open, currentLocation]);
+  }, [open, value, currentLocation]);
 
   const handleConfirm = () => {
     if (!selectedLocation) {
@@ -40,14 +48,20 @@ export default function LocationDialog({ open, onOpenChange }) {
 
     if (!isValid) {
       setServiceError(
-        "Sorry! F2CMARKET currently delivers only to selected serviceable areas.",
+        "Sorry! F2CMARKET currently delivers only to selected serviceable areas."
       );
       return;
     }
 
     setServiceError("");
 
-    setSelectedLocation(selectedLocation);
+    // Custom handler (Farmer, Admin, etc.)
+    if (onConfirm) {
+      onConfirm(selectedLocation);
+    } else {
+      // Default behavior (Consumer delivery location)
+      setSelectedLocation(selectedLocation);
+    }
 
     onOpenChange(false);
   };
@@ -74,15 +88,14 @@ export default function LocationDialog({ open, onOpenChange }) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex h-[90vh] max-w-2xl flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-white shadow-2xl p-0">
+      <DialogContent className="flex h-[90vh] max-w-2xl flex-col overflow-hidden rounded-3xl border border-[var(--border)] bg-white p-0 shadow-2xl">
         <DialogHeader className="flex-shrink-0 px-6 pt-6 pb-4">
           <DialogTitle className="text-xl font-bold">
-            Choose Delivery Location
+            Choose Location
           </DialogTitle>
 
           <DialogDescription>
-            Search your location or drag the marker to fine-tune your delivery
-            address.
+            Search your location or drag the marker to fine-tune it.
           </DialogDescription>
         </DialogHeader>
 
@@ -111,10 +124,13 @@ export default function LocationDialog({ open, onOpenChange }) {
                 {selectedLocation?.fullAddress}
               </p>
 
-              <p className="mt-2 text-xs text-[var(--text-secondary)]">
-                {selectedLocation?.latitude?.toFixed(6)},{" "}
-                {selectedLocation?.longitude?.toFixed(6)}
-              </p>
+              {selectedLocation?.latitude &&
+                selectedLocation?.longitude && (
+                  <p className="mt-2 text-xs text-[var(--text-secondary)]">
+                    {selectedLocation.latitude.toFixed(6)},{" "}
+                    {selectedLocation.longitude.toFixed(6)}
+                  </p>
+                )}
             </div>
 
             {serviceError && (
