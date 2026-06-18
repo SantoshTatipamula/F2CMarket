@@ -4,10 +4,17 @@ import {
 } from "lucide-react";
 
 import { Link } from "react-router-dom";
+// import { useAuth } from "@/context/AuthContext";
+// import FarmInformation from "@/components/farmer/profile/FarmInformation";
 
 import ProfileForm from "@/components/profile/ProfileForm";
 
+
 export default function EditProfile() {
+
+  // const { user } = useAuth();
+
+
   return (
     <main className="min-h-screen bg-[var(--bg)]">
       
@@ -119,6 +126,7 @@ export default function EditProfile() {
           {/* Form */}
           <div className="p-6 md:p-8">
             <ProfileForm />
+            {/* <FarmInformation /> */}
           </div>
         </div>
       </section>
