@@ -8,7 +8,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Jagtial Rural",
     state: "Telangana",
-    postcode: "",
+    postcode: "505455",
     aliases: ["Mothe", "మోతే"],
   },
   {
@@ -17,7 +17,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Jagtial Rural",
     state: "Telangana",
-    postcode: "",
+    postcode: "505455",
     aliases: ["Narsingapur", "నర్సింగాపూర్"],
   },
   {
@@ -26,7 +26,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Jagtial Rural",
     state: "Telangana",
-    postcode: "",
+    postcode: "505455",
     aliases: ["Veldurthi", "వెల్దుర్తి"],
   },
   {
@@ -35,7 +35,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Mallial",
     state: "Telangana",
-    postcode: "",
+    postcode: "505452",
     aliases: ["Mallial", "మల్లియాల్"],
   },
   {
@@ -44,7 +44,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Mallial",
     state: "Telangana",
-    postcode: "",
+    postcode: "55452",
     aliases: ["Muthyampeta", "ముత్యంపేట"],
   },
   {
@@ -53,7 +53,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Mallial",
     state: "Telangana",
-    postcode: "",
+    postcode: "505452",
     aliases: ["Nookapalle", "నూకపల్లి"],
   },
   {
@@ -62,7 +62,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Mallial",
     state: "Telangana",
-    postcode: "",
+    postcode: "505452",
     aliases: ["Potharam", "పోతారం"],
   },
   {
@@ -71,7 +71,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Jagtial",
     mandal: "Mallial",
     state: "Telangana",
-    postcode: "",
+    postcode: "505452",
     aliases: ["Rajaram", "రాజారం"],
   },
 
@@ -84,7 +84,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505445",
     aliases: ["Gangadhara", "గంగాధర"],
   },
   {
@@ -93,7 +93,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505445",
     aliases: ["Burgupalle", "బూర్గుపల్లి"],
   },
   {
@@ -102,7 +102,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505445",
     aliases: ["Islampur", "ఇస్లాంపూర్"],
   },
   {
@@ -120,7 +120,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Ryalapalle", "ర్యాలపల్లి"],
   },
   {
@@ -129,7 +129,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Sarvareddipalle", "సర్వారెడ్డిపల్లి"],
   },
   {
@@ -138,10 +138,12 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Gangadhara",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: [
       "Muppidinarsaiyya Palle",
       "Muppidinarsaiyyapalle",
+      "Muppidipally",
+      "Muppidipalle",
       "ముప్పిడినర్సయ్యపల్లి",
     ],
   },
@@ -155,7 +157,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Ramadugu", "రామడుగు"],
   },
   {
@@ -164,7 +166,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: [
       "Gopalraopet",
       "Gopal Rao Pet",
@@ -178,7 +180,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Gundi", "గుండి"],
   },
   {
@@ -187,7 +189,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Chippakurthi", "చిప్పకుర్తి"],
   },
   {
@@ -196,7 +198,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505451",
     aliases: ["Deshrajpalle", "దేశరాజ్‌పల్లి"],
   },
   {
@@ -205,7 +207,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Rudraram", "రుద్రారం"],
   },
   {
@@ -214,7 +216,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Shanagar", "శానగర్"],
   },
   {
@@ -223,7 +225,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Sriramulapalle", "శ్రీరాములపల్లి"],
   },
   {
@@ -232,7 +234,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505531",
     aliases: ["Thirmalapur", "తిర్మలాపూర్"],
   },
   {
@@ -241,7 +243,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505451",
     aliases: ["Vedira", "వేదిర"],
   },
   {
@@ -250,7 +252,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Ramadugu",
     state: "Telangana",
-    postcode: "",
+    postcode: "505451",
     aliases: ["Velichal", "వెలిచాల"],
   },
 
@@ -263,7 +265,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Karimnagar",
     state: "Telangana",
-    postcode: "",
+    postcode: "505001",
     aliases: ["Karimnagar", "కరీంనగర్"],
   },
   {
@@ -272,7 +274,7 @@ export const SERVICEABLE_LOCATIONS = [
     district: "Karimnagar",
     mandal: "Kothapalli",
     state: "Telangana",
-    postcode: "",
+    postcode: "505451",
     aliases: ["Rekurthi", "రేకుర్తి"],
   },
 ];
