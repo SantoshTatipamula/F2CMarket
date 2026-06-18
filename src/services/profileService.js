@@ -2,9 +2,7 @@ const STORAGE_KEY = "f2c-user";
 
 /* Get current user */
 export function getStoredUser() {
-  return JSON.parse(
-    localStorage.getItem(STORAGE_KEY)
-  );
+  return JSON.parse(localStorage.getItem(STORAGE_KEY));
 }
 
 /* Save updated user */
@@ -18,17 +16,26 @@ export function saveUser(user) {
 }
 
 /* Update user */
-export function updateStoredUser(
-  updatedData
-) {
-  const currentUser =
-    getStoredUser();
+export function updateStoredUser(updatedData) {
+  const currentUser = getStoredUser();
 
   if (!currentUser) return null;
 
   const updatedUser = {
     ...currentUser,
     ...updatedData,
+
+    // Merge profile object safely
+    profile: {
+      ...(currentUser.profile || {}),
+      ...(updatedData.profile || {}),
+    },
+
+    // Merge farmerProfile object safely
+    farmerProfile: {
+      ...(currentUser.farmerProfile || {}),
+      ...(updatedData.farmerProfile || {}),
+    },
   };
 
   saveUser(updatedUser);
