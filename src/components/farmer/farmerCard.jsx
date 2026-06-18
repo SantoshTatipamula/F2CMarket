@@ -1,8 +1,27 @@
 import { MapPin, Star } from "lucide-react";
+import farmerImage from "@/assets/images/farmer.webp";
 
-export default function FarmerCard({
-  farmer,
-}) {
+export default function FarmerCard({ farmer }) {
+  const image =
+    farmer.image || farmer.profileImage || farmerImage;
+
+  const location =
+    farmer.farmLocation ||
+    farmer.location ||
+    "Location not provided";
+
+  const description =
+    farmer.description ||
+    farmer.specialty ||
+    "Verified farmer on F2CMARKET.";
+
+  const rating = farmer.rating ?? 4.5;
+
+  const productsCount =
+    farmer.productsCount ??
+    farmer.products ??
+    0;
+
   return (
     <article
       className="
@@ -15,12 +34,10 @@ export default function FarmerCard({
         hover:shadow-2xl
       "
     >
-      
       {/* Cover Image */}
       <div className="relative h-56 overflow-hidden">
-        
         <img
-          src={farmer.image}
+          src={image}
           alt={farmer.name}
           className="
             h-full w-full object-cover
@@ -50,7 +67,6 @@ export default function FarmerCard({
 
       {/* Content */}
       <div className="p-5 space-y-4">
-        
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)]">
@@ -58,13 +74,12 @@ export default function FarmerCard({
           </h2>
 
           <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
-            {farmer.description}
+            {description}
           </p>
         </div>
 
         {/* Meta */}
         <div className="flex flex-wrap items-center gap-3 text-sm">
-          
           {/* Location */}
           <div
             className="
@@ -76,8 +91,7 @@ export default function FarmerCard({
             "
           >
             <MapPin size={14} />
-
-            <span>{farmer.location}</span>
+            <span>{location}</span>
           </div>
 
           {/* Rating */}
@@ -95,22 +109,19 @@ export default function FarmerCard({
               className="fill-yellow-400 text-yellow-400"
             />
 
-            <span>
-              {farmer.rating} Rating
-            </span>
+            <span>{rating} Rating</span>
           </div>
         </div>
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-2">
-          
           <div>
             <p className="text-xs text-[var(--text-secondary)]">
               Products
             </p>
 
             <p className="font-semibold text-[var(--text-primary)]">
-              {farmer.productsCount}
+              {productsCount}
             </p>
           </div>
 
