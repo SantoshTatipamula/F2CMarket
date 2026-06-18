@@ -38,7 +38,6 @@ const FarmerProducts= lazy(() => import("@/pages/farmer/Products"));
 const AddProduct    = lazy(() => import("@/pages/farmer/AddProduct"));
 const EditProduct   = lazy(() => import("@/pages/farmer/EditProduct"));
 const FarmerOrders  = lazy(() => import("@/pages/farmer/Orders"));
-const FarmerProfile          = lazy(() => import("@/pages/farmer/Profile"));
 const FarmerPendingDashboard = lazy(() => import("@/pages/farmer/FarmerPendingDashboard"));
 
 /* ── Admin ───────────────────────────────────────────────── */
@@ -181,11 +180,6 @@ export default function AppRoutes() {
             <Route path="farmer/orders" element={
               <ProtectedRoute allowedRoles={["farmer"]}>
                 <FarmerOrders />
-              </ProtectedRoute>
-            }/>
-            <Route path="farmer/profile" element={
-              <ProtectedRoute allowedRoles={["farmer"]}>
-                <FarmerProfile />
               </ProtectedRoute>
             }/>
 
