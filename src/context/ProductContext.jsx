@@ -30,19 +30,11 @@ export function ProductProvider({ children }) {
   };
 
   // Create Product
-  const createProduct = (productData) => {
-    createProductService({
-      ...productData,
+const createProduct = (productData) => {
+  createProductService(productData);
 
-      sellerId: user?.id,
-
-      sellerName: user?.farmerProfile?.farmName || user?.name,
-
-      sellerRole: user?.role,
-    });
-
-    refreshProducts();
-  };
+  refreshProducts();
+};
 
   // Update Product
   const updateProduct = (productId, updatedData) => {

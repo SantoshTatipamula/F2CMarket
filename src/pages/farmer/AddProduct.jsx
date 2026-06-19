@@ -12,17 +12,38 @@ export default function AddProduct() {
   const { createProduct } = useProducts();
 
   const handleAddProduct = (newProduct) => {
-    /* Tag product with farmer identity so orders and analytics match correctly */
-    createProduct({
-      ...newProduct,
-      farmerId:   user?.id,
-      sellerId:   user?.id,
-      sellerName: user?.name,
-      farmer:     user?.farmName || user?.name,
-      location:   user?.farmLocation || "",
-    });
-    navigate("/farmer/products");
-  };
+  createProduct({
+    ...newProduct,
+
+    // Ownership
+    sellerId: user?.id,
+    sellerName: user?.name,
+
+    // Farmer details
+    farmerId: user?.id,
+    farmerName: user?.name,
+
+    farmName:
+      user?.farmerProfile?.farmName || "",
+
+    farmLocation:
+      user?.farmerProfile?.location || null,
+
+    farmerAvatar:
+      user?.avatar || "",
+
+    // Backward compatibility
+    farmer:
+      user?.farmerProfile?.farmName ||
+      user?.name,
+
+    location:
+      user?.farmerProfile?.location?.city ||
+      "",
+  });
+
+  navigate("/farmer/products");
+};
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">

@@ -110,9 +110,27 @@ export function createProduct(productData) {
   const newProduct = {
     ...productData,
 
-    location: productData.location || "Karimnagar",
+    // Backward compatibility
+    location:
+      productData.location || productData.farmLocation?.city || "Karimnagar",
 
-    farmer: productData.farmer || "Local Farmer",
+    farmer: productData.farmer || productData.farmerName || "Local Farmer",
+
+    // New standardized fields
+    farmerId: productData.farmerId || "",
+
+    farmerName: productData.farmerName || productData.farmer || "",
+
+    farmName: productData.farmName || "",
+
+    farmLocation: productData.farmLocation || null,
+
+    farmerAvatar: productData.farmerAvatar || "",
+
+    // Product stock
+    stock: productData.stock || 0,
+
+    stockUnit: productData.stockUnit || "kg",
 
     rating: 4.5,
 
