@@ -1,10 +1,15 @@
 // src/components/productDetails/ProductActions.jsx
 
 import { ShoppingCart, Heart, Share2, Zap } from "lucide-react";
-import { useState } from "react";
 
-export default function ProductActions({ onAddToCart, onBuyNow }) {
-  const [isFavorite, setIsFavorite] = useState(false);
+import { useWishlist } from "@/context/WishlistContext";
+
+import { toast } from "sonner";
+
+export default function ProductActions({ product, onAddToCart, onBuyNow }) {
+  const { toggleWishlist, isInWishlist } = useWishlist();
+
+  const isFavorite = isInWishlist(product.id);
 
   return (
     <div className="space-y-3">
@@ -36,7 +41,15 @@ export default function ProductActions({ onAddToCart, onBuyNow }) {
       {/* Save / Share */}
       <div className="grid grid-cols-2 gap-3">
         <button
-          onClick={() => setIsFavorite(!isFavorite)}
+          onClick={() => {
+            toggleWishlist(product);
+
+            if (isFavorite) {
+              toast.error(`${product.name} removed from wishlist`);
+            } else {
+              toast.success(`${product.name} added to wishlist`);
+            }
+          }}
           className={`flex items-center justify-center gap-2 rounded-2xl border-2 px-6 py-3 font-semibold transition-all ${
             isFavorite
               ? "border-red-500 bg-red-50 text-red-600"
