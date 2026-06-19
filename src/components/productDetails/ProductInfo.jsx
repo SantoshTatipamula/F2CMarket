@@ -60,11 +60,24 @@ export default function ProductInfo({ product }) {
       {/* Quantity */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-semibold text-[var(--text-primary)]">
-            Select Quantity
-          </p>
-          <p className="text-sm font-medium text-green-600">✓ In Stock</p>
-        </div>
+  <div>
+    <p className="text-sm font-semibold text-[var(--text-primary)]">
+      Select Quantity
+    </p>
+
+    <p className="mt-1 text-xs text-[var(--text-secondary)]">
+      Available:
+      <span className="font-medium text-[var(--text-primary)]">
+        {" "}
+        {product?.stock || 0} {product?.stockUnit || "kg"}
+      </span>
+    </p>
+  </div>
+
+  <p className="text-sm font-medium text-green-600">
+    ✓ In Stock
+  </p>
+</div>
 
         <QuantitySelector
           min={1}
@@ -80,6 +93,7 @@ export default function ProductInfo({ product }) {
 
       {/* Actions (Add to Cart + Buy Now + Save/Share) */}
       <ProductActions
+        product={product}
         onAddToCart={handleAddToCart}
         onBuyNow={handleBuyNow}
       />

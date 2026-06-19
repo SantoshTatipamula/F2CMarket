@@ -2,7 +2,12 @@ import { PackageCheck, AlertTriangle } from "lucide-react";
 
 import ProductActions from "./ProductActions";
 
-export default function FarmerProductCard({ product, onEdit, onDelete, canManage=false }) {
+export default function FarmerProductCard({
+  product,
+  onEdit,
+  onDelete,
+  canManage = false,
+}) {
   const lowStock = Number(product.stock) <= 10;
 
   return (
@@ -134,8 +139,11 @@ export default function FarmerProductCard({ product, onEdit, onDelete, canManage
             <p className="text-xs text-[var(--text-secondary)]">Stock</p>
 
             <p className="mt-1 text-lg font-semibold text-[var(--text-primary)]">
-              {product.stock}
-            </p>
+  {product.stock}{" "}
+  <span className="text-sm font-medium text-[var(--text-secondary)]">
+    {product.stockUnit || "kg"}
+  </span>
+</p>
           </div>
 
           <div
@@ -157,15 +165,13 @@ export default function FarmerProductCard({ product, onEdit, onDelete, canManage
         {/* Actions */}
         <div className="mt-5">
           {canManage && (
-  <div className="mt-5">
-    <ProductActions
-      onEdit={() => onEdit(product)}
-      onDelete={() =>
-        onDelete(product.id)
-      }
-    />
-  </div>
-)}
+            <div className="mt-5">
+              <ProductActions
+                onEdit={() => onEdit(product)}
+                onDelete={() => onDelete(product.id)}
+              />
+            </div>
+          )}
         </div>
       </div>
     </article>

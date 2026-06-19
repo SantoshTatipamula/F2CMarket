@@ -90,7 +90,14 @@ export default function ProductCard({
           {/* Unit */}
           {isCatalog && (
             <p className="mt-1 text-sm text-[var(--text-muted)]">
-              {product.unit || "1 Kg"}
+              {`1 ${product.stockUnit || "kg"}`}
+            </p>
+          )}
+
+          {/* Available Stock */}
+          {product.stock && (
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              Available: {product.stock} {product.stockUnit || "kg"}
             </p>
           )}
 

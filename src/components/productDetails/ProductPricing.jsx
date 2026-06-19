@@ -24,7 +24,7 @@ export default function ProductPricing({ product, price }) {
       </div>
 
       <p className="mt-2 text-sm text-[var(--text-secondary)]">
-        Per {product?.unit || "1 Kg"} | Inclusive of all taxes
+        Per {product.stockUnit || "kg"} | Inclusive of all taxes
       </p>
     </div>
   );
