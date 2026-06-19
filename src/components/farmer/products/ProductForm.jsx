@@ -10,6 +10,8 @@ import {
   X,
 } from "lucide-react";
 
+import { useAuth } from "@/context/AuthContext";
+
 import { Button } from "@/components/ui/button";
 
 import { Input } from "@/components/ui/input";
@@ -31,20 +33,18 @@ export default function ProductForm({
   onSubmit,
   submitLabel = "Save Product",
 }) {
+  const { user } = useAuth();
+
+  const farmLocation = user?.farmerProfile?.location;
+
   const [form, setForm] = useState({
     name: initialData.name || "",
-
     category: initialData.category || "",
-
     price: initialData.price || "",
-
     stock: initialData.stock || "",
-
+    stockUnit: initialData.stockUnit || "kg",
     image: initialData.image || "",
-
     description: initialData.description || "",
-
-    location: initialData.location || "",
   });
 
   const [uploading, setUploading] = useState(false);
@@ -276,43 +276,137 @@ export default function ProductForm({
             Stock
           </Label>
 
-          <div className="relative">
-            <Boxes
-              size={18}
-              className="
-                absolute left-4 top-1/2
-                -translate-y-1/2
-                text-[var(--text-secondary)]
-              "
-            />
+          <div
+            className="
+                        flex h-12 overflow-hidden
 
-            <Input
-              type="number"
-              name="stock"
-              value={form.stock}
-              onChange={handleChange}
-              placeholder="100"
-              className={fieldStyles}
-              required
-            />
+                        rounded-2xl
+                        border border-black/5
+                        bg-white
+                        shadow-sm
+
+                        transition-all duration-200
+                        hover:border-black/10
+
+                        focus-within:border-[var(--primary)]/20
+                        focus-within:ring-2
+                        focus-within:ring-[var(--primary)]/15
+                      "
+          >
+            {/* Stock Quantity */}
+            <div className="relative flex-1">
+              <Boxes
+                size={18}
+                className="
+                            absolute left-4 top-1/2
+                            -translate-y-1/2
+                            text-[var(--text-secondary)]
+                          "
+              />
+
+              <Input
+                type="number"
+                name="stock"
+                value={form.stock}
+                onChange={handleChange}
+                placeholder="100"
+                required
+                className="
+                h-full
+                w-full
+
+                border-0
+                bg-transparent
+                shadow-none
+
+                pl-11
+                pr-4
+
+                focus-visible:ring-0
+                focus-visible:border-0
+              "
+              />
+            </div>
+
+            {/* Divider */}
+            <div className="h-full w-px bg-black/5" />
+
+            {/* Stock Unit */}
+            <Select
+              value={form.stockUnit}
+              onValueChange={(value) =>
+                setForm((prev) => ({
+                  ...prev,
+                  stockUnit: value,
+                }))
+              }
+            >
+              <SelectTrigger
+                className="
+          
+
+                rounded-none
+                border-0
+
+                bg-transparent
+                shadow-none
+
+                px-4
+
+                focus:ring-0
+                focus:outline-none
+
+                
+              "
+              >
+                <SelectValue placeholder="Unit" />
+              </SelectTrigger>
+
+              <SelectContent
+                position="popper"
+                sideOffset={4}
+                className="
+                max-h-48
+                overflow-y-auto
+
+                rounded-2xl
+                border border-black/5
+                bg-white
+                shadow-xl
+              "
+              >
+                <SelectItem value="kg">kg</SelectItem>
+                <SelectItem value="g">g</SelectItem>
+                <SelectItem value="pieces">pieces</SelectItem>
+                <SelectItem value="dozen">dozen</SelectItem>
+                <SelectItem value="bundle">bundle</SelectItem>
+                <SelectItem value="litre">litre</SelectItem>
+                <SelectItem value="ml">ml</SelectItem>
+                <SelectItem value="packet">packet</SelectItem>
+                <SelectItem value="box">box</SelectItem>
+                <SelectItem value="bag">bag</SelectItem>
+                <SelectItem value="quintal">quintal</SelectItem>
+                <SelectItem value="ton">ton</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
-        {/* Location */}
-        <div className="space-y-2.5">
+        <div className="space-y-2.5 md:col-span-2">
           <Label className="text-sm font-medium text-[var(--text-primary)]">
-            Location
+            Farm Location
           </Label>
 
-          <Input
-            type="text"
-            name="location"
-            value={form.location}
-            onChange={handleChange}
-            placeholder="Karimnagar"
-            className={fieldStyles}
-            required
-          />
+          <div className="rounded-2xl border border-black/5 bg-[var(--surface)] px-4 py-3">
+            <p className="font-medium text-[var(--text-primary)]">
+              {farmLocation?.city || "No farm location set"}
+            </p>
+
+            <p className="mt-1 text-xs text-[var(--text-secondary)]">
+              {farmLocation?.fullAddress ||
+                "Please update your farm location in your profile."}
+            </p>
+          </div>
         </div>
       </div>
 
