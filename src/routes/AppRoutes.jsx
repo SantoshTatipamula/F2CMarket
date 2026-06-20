@@ -11,6 +11,7 @@ const Home            = lazy(() => import("@/pages/consumer/Home"));
 const Products        = lazy(() => import("@/pages/consumer/Products"));
 const ProductDetails  = lazy(() => import("@/pages/consumer/ProductDetails"));
 const Farmers         = lazy(() => import("@/pages/consumer/Farmers"));
+const FarmerProfile   = lazy(() => import("@/pages/consumer/FarmerProfile"));
 const About           = lazy(() => import("@/pages/common/About"));
 const Contact         = lazy(() => import("@/pages/common/Contact"));
 const Faq             = lazy(() => import("@/pages/common/FAQ"));
@@ -72,6 +73,7 @@ export default function AppRoutes() {
             <Route path="products"   element={<Products />} />
             <Route path="products/:id" element={<ProductDetails />} />
             <Route path="farmers"    element={<Farmers />} />
+            <Route path="farmers/:farmerId" element={<FarmerProfile />} />
             <Route path="about"      element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq/>} />

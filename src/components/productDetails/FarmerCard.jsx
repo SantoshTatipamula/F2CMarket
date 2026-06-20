@@ -1,8 +1,16 @@
 // src/components/productDetails/FarmerCard.jsx
 
 import { User, MessageCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { FaWhatsapp } from "react-icons/fa";
+import { useAuth } from "@/context/AuthContext";
 
 export default function FarmerCard({ product }) {
+  const { users } = useAuth();
+
+  const farmer = users.find((user) => user.id === product?.farmerId);
+
+  const navigate = useNavigate();
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
       <div className="flex items-center gap-4">
@@ -23,13 +31,34 @@ export default function FarmerCard({ product }) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <button className="rounded-xl border border-green-200 bg-white px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50">
+          <button
+            onClick={() => navigate(`/farmers/${product?.farmerId}`)}
+            className="rounded-xl border border-green-200 bg-white px-4 py-2 text-sm font-medium text-green-700 transition hover:bg-green-50"
+          >
             View Profile
           </button>
-          <button className="flex items-center justify-center gap-1.5 rounded-xl border border-[var(--border)] bg-white px-4 py-2 text-sm font-medium text-[var(--text-secondary)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]">
-            <MessageCircle size={14} />
+          <a
+            href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
+              `Hi! I'm interested in your product "${product.name}" on F2CMARKET.`,
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="
+                      flex items-center justify-center gap-2
+                      rounded-xl
+                      
+                      bg-white
+                      px-4 py-2
+                      text-sm font-medium
+                      text-green-700
+                      transition
+                      hover:bg-green-50
+                      hover:border-green-500
+                    "
+          >
+            <FaWhatsapp size={16} className="text-[#25D366]" />
             <span>Contact</span>
-          </button>
+          </a>
         </div>
       </div>
     </div>
