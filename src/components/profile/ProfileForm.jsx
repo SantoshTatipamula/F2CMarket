@@ -117,11 +117,13 @@ export default function ProfileForm() {
           farmName: form.farmName,
 
           location: form.farmLocation,
+          
         },
       }),
     });
 
     console.log("Updated Profile:", form);
+    
   };
 
   return (
@@ -361,7 +363,7 @@ export default function ProfileForm() {
           Save Changes
         </Button>
       </div>
-
+      
       <LocationDialog
         open={locationDialogOpen}
         onOpenChange={setLocationDialogOpen}

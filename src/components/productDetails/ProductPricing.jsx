@@ -9,9 +9,15 @@ export default function ProductPricing({ product, price }) {
       <div className="flex items-end gap-3">
         <div>
           <p className="text-sm font-medium text-[var(--text-muted)]">Price</p>
-          <p className="text-4xl font-bold text-[var(--primary)] lg:text-5xl">
-            ₹{price}
-          </p>
+          <div className="flex items-center gap-0.5">
+            <span className="text-4xl font-bold text-orange-500 lg:text-5xl">
+              ₹
+            </span>
+
+            <span className="text-4xl font-bold text-[var(--primary)] lg:text-5xl">
+              {String(price).replace(/^₹/, "")}
+            </span>
+          </div>
         </div>
 
         {discount > 0 && (

@@ -11,6 +11,31 @@ export default function ProductActions({ product, onAddToCart, onBuyNow }) {
 
   const isFavorite = isInWishlist(product.id);
 
+  const handleShare = async () => {
+  const productUrl = `${window.location.origin}/products/${product.id}`;
+
+  try {
+    if (navigator.share) {
+      await navigator.share({
+        title: product.name,
+        text: `Check out this product on F2CMARKET`,
+        url: productUrl,
+      });
+
+      return;
+    }
+
+    await navigator.clipboard.writeText(productUrl);
+
+    toast.success("Product link copied to clipboard");
+  } catch (error) {
+    console.error("Share failed:", error);
+
+    toast.error("Unable to share product");
+  }
+};
+
+
   return (
     <div className="space-y-3">
       {/* Add to Cart */}
@@ -62,10 +87,25 @@ export default function ProductActions({ product, onAddToCart, onBuyNow }) {
           </span>
         </button>
 
-        <button className="flex items-center justify-center gap-2 rounded-2xl border-2 border-[var(--border)] bg-white px-6 py-3 font-semibold text-[var(--text-secondary)] transition-all hover:border-[var(--primary)] hover:bg-[var(--primary)]/5 hover:text-[var(--primary)]">
-          <Share2 size={18} />
-          <span className="hidden sm:inline">Share</span>
-        </button>
+        <button
+  onClick={handleShare}
+  className="
+    flex items-center justify-center gap-2
+    rounded-2xl
+    border-2 border-[var(--border)]
+    bg-white
+    px-6 py-3
+    font-semibold
+    text-[var(--text-secondary)]
+    transition-all
+    hover:border-[var(--primary)]
+    hover:bg-[var(--primary)]/5
+    hover:text-[var(--primary)]
+  "
+>
+  <Share2 size={18} />
+  <span className="hidden sm:inline">Share</span>
+</button>
       </div>
     </div>
   );

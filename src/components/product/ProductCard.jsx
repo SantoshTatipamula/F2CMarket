@@ -118,9 +118,13 @@ export default function ProductCard({
             </button>
 
             <div className="text-right">
-              <span className="text-2xl font-bold text-[var(--primary)]">
-                {product.price}
-              </span>
+              <div className="flex items-center justify-end">
+                <span className="text-2xl font-bold text-orange-500">₹</span>
+
+                <span className="text-2xl font-bold text-[var(--primary)]">
+                  {String(product.price).replace(/^₹/, "")}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -103,13 +103,14 @@ export default function LocationDialog({
           <div className="space-y-5">
             <LocationSearch onSelect={handleLocationSelect} />
 
-            {selectedLocation && (
-              <MapView
-                latitude={selectedLocation.latitude}
-                longitude={selectedLocation.longitude}
-                onLocationChange={setLocalSelectedLocation}
-              />
-            )}
+            {selectedLocation?.latitude != null &&
+  selectedLocation?.longitude != null && (
+    <MapView
+      latitude={selectedLocation.latitude}
+      longitude={selectedLocation.longitude}
+      onLocationChange={setLocalSelectedLocation}
+    />
+  )}
 
             <div className="rounded-xl bg-[var(--surface)] p-4">
               <p className="text-sm font-semibold text-[var(--text-primary)]">
