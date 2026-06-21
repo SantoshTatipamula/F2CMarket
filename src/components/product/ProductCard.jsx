@@ -23,12 +23,17 @@ export default function ProductCard({
         <div className="relative h-56 rounded-2xl overflow-hidden bg-[var(--surface-2)]">
           {/* Top Left Badge */}
           {isCatalog ? (
-            <span className="absolute top-3 left-3 z-10 text-xs font-semibold bg-white/95 text-[var(--text-secondary)] px-3 py-1 rounded-full flex items-center gap-1 shadow-sm">
+            <span className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm">
               <MapPin size={12} className="text-[var(--primary)]" />
-              {product.location}
+
+              {product.location ||
+                (typeof product.farmLocation === "string"
+                  ? product.farmLocation
+                  : product.farmLocation?.city) ||
+                "Location not available"}
             </span>
           ) : (
-            <span className="absolute top-3 left-3 z-10 text-xs font-semibold bg-[var(--primary)] text-white px-3 py-1 rounded-full">
+            <span className="absolute top-3 left-3 z-10 rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold text-white">
               {product.badge}
             </span>
           )}
@@ -60,18 +65,27 @@ export default function ProductCard({
           </button>
 
           {/* Image */}
-          <img
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-          />
+          {/* Image */}
+          {product.image ? (
+            <img
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+              className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[var(--surface)] text-sm text-[var(--text-secondary)]">
+              No Image Available
+            </div>
+          )}
         </div>
 
         {/* Content */}
         <div className="mt-4">
           {/* Farmer */}
-          <p className="text-sm text-[var(--text-muted)]">{product.farmer}</p>
+          <p className="text-sm text-[var(--text-muted)]">
+            {product.farmName || product.farmer}
+          </p>
 
           {/* Name + Rating */}
           <div className="mt-2 flex items-start justify-between gap-3">

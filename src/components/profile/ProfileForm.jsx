@@ -30,18 +30,16 @@ export default function ProfileForm() {
 
   const [form, setForm] = useState({
     farmName: "",
-
     ownerName: "",
-
     email: "",
-
     phone: "",
 
-    location: "",
+    // Consumer
+    profileLocation: null,
 
     bio: "",
 
-    // Farmer only
+    // Farmer
     farmLocation: null,
   });
 
@@ -58,7 +56,7 @@ export default function ProfileForm() {
 
       phone: user?.phone || "",
 
-      location: user?.profile?.location || "",
+      profileLocation: user?.profile?.location || null,
 
       bio: user?.profile?.bio || "",
 
@@ -84,6 +82,13 @@ export default function ProfileForm() {
     }));
   };
 
+  const handleProfileLocationSelect = (location) => {
+    setForm((prev) => ({
+      ...prev,
+      profileLocation: location,
+    }));
+  };
+
   // Submit
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -95,6 +100,39 @@ export default function ProfileForm() {
       subject: "Profile Updated — F2CMARKET",
       message: `Hi ${user?.name}, your profile was updated.\n\nF2CMARKET Team`,
     });
+
+    // Sync all products with latest farmer details
+    // Sync all farmer products with updated profile information
+    if (isFarmer) {
+      const products = JSON.parse(localStorage.getItem("f2c-products")) || [];
+
+      const updatedProducts = products.map((product) => {
+        if (product.farmerId !== user?.id) {
+          return product;
+        }
+
+        return {
+          ...product,
+
+          // Farmer information
+          farmer: form.ownerName,
+          farmerName: form.ownerName,
+
+          // Farm information
+          farmName: form.farmName,
+          farmLocation: form.farmLocation,
+
+          // Marketplace location
+          location: form.farmLocation?.city || "",
+
+          // Keep avatar synchronized (for future profile image support)
+          farmerAvatar: user?.avatar || product.farmerAvatar,
+        };
+      });
+
+      localStorage.setItem("f2c-products", JSON.stringify(updatedProducts));
+    }
+
     updateUser({
       name: form.ownerName,
 
@@ -105,7 +143,7 @@ export default function ProfileForm() {
       profile: {
         ...user.profile,
 
-        location: form.location,
+        location: form.profileLocation,
 
         bio: form.bio,
       },
@@ -117,13 +155,11 @@ export default function ProfileForm() {
           farmName: form.farmName,
 
           location: form.farmLocation,
-          
         },
       }),
     });
 
     console.log("Updated Profile:", form);
-    
   };
 
   return (
@@ -297,6 +333,59 @@ export default function ProfileForm() {
         </div>
       </ProfileCard>
 
+      {!isFarmer && (
+        <ProfileCard>
+          <ProfileCardHeader
+            title="Profile Location"
+            description="Manage your residential location."
+          />
+
+          <div className="mt-8 space-y-6">
+            <div className="rounded-2xl border border-[var(--border)] bg-[var(--surface-2)] p-5">
+              <div className="flex items-start gap-3">
+                <MapPin size={22} className="mt-0.5 text-[var(--primary)]" />
+
+                <div className="flex-1">
+                  <h3 className="font-semibold text-[var(--text-primary)]">
+                    Residential Address
+                  </h3>
+
+                  {form.profileLocation ? (
+                    <>
+                      <p className="mt-2 break-words text-sm text-[var(--text-secondary)]">
+                        {form.profileLocation.fullAddress}
+                      </p>
+
+                      <p className="mt-3 text-xs text-[var(--text-muted)]">
+                        Latitude: {form.profileLocation.latitude?.toFixed(6)}
+                      </p>
+
+                      <p className="text-xs text-[var(--text-muted)]">
+                        Longitude: {form.profileLocation.longitude?.toFixed(6)}
+                      </p>
+                    </>
+                  ) : (
+                    <p className="mt-2 text-sm text-[var(--text-secondary)]">
+                      No profile location selected.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setLocationDialogOpen(true)}
+            >
+              {form.profileLocation
+                ? "Change Profile Location"
+                : "Select Profile Location"}
+            </Button>
+          </div>
+        </ProfileCard>
+      )}
+
       {isFarmer && (
         <ProfileCard>
           <ProfileCardHeader
@@ -363,13 +452,21 @@ export default function ProfileForm() {
           Save Changes
         </Button>
       </div>
-      
+
       <LocationDialog
-        open={locationDialogOpen}
-        onOpenChange={setLocationDialogOpen}
-        value={form.farmLocation}
-        onConfirm={handleFarmLocationSelect}
-      />
+  open={locationDialogOpen}
+  onOpenChange={setLocationDialogOpen}
+  value={
+    isFarmer
+      ? form.farmLocation
+      : form.profileLocation
+  }
+  onConfirm={
+    isFarmer
+      ? handleFarmLocationSelect
+      : handleProfileLocationSelect
+  }
+/>
     </form>
   );
 }

@@ -16,6 +16,7 @@ import ProfileInfoRow from "@/components/profile/shared/ProfileInfoRow";
 
 export default function AccountInformation() {
   const { user } = useAuth();
+  const isFarmer = user?.role === "farmer";
 
   return (
     <ProfileCard>
@@ -57,13 +58,16 @@ export default function AccountInformation() {
         />
 
         <ProfileInfoRow
-          icon={MapPin}
-          label="Location"
-          value={
-            user?.profile?.location ||
-            "India"
-          }
-        />
+  icon={MapPin}
+  label="Location"
+  value={
+  isFarmer
+    ? user?.farmerProfile?.location?.city || "Location not set"
+    : user?.profile?.location?.city ||
+      user?.profile?.location ||
+      "Location not set"
+}
+/>
 
         <ProfileInfoRow
           icon={CalendarDays}

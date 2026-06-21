@@ -1,9 +1,4 @@
-import {
-  Camera,
-  MapPin,
-  CalendarDays,
-  Pencil,
-} from "lucide-react";
+import { Camera, MapPin, CalendarDays, Pencil } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -12,8 +7,7 @@ import ProfileActionButton from "@/components/profile/shared/ProfileActionButton
 export default function ProfileHeader() {
   const { user } = useAuth();
 
-  const isFarmer =
-    user?.role === "farmer";
+  const isFarmer = user?.role === "farmer";
 
   return (
     <section
@@ -25,7 +19,6 @@ export default function ProfileHeader() {
         shadow-sm
       "
     >
-      
       {/* Cover */}
       <div
         className="
@@ -36,7 +29,6 @@ export default function ProfileHeader() {
           to-emerald-500
         "
       >
-        
         {/* Overlay */}
         <div
           className="
@@ -66,7 +58,6 @@ export default function ProfileHeader() {
 
       {/* Content */}
       <div className="relative px-6 pb-8">
-        
         {/* Avatar */}
         <div
           className="
@@ -80,12 +71,8 @@ export default function ProfileHeader() {
             shadow-xl
           "
         >
-          
           <img
-            src={
-              user?.avatar ||
-              "https://ui-avatars.com/api/?name=User"
-            }
+            src={user?.avatar || "https://ui-avatars.com/api/?name=User"}
             alt={user?.name}
             className="
               h-full w-full
@@ -121,10 +108,8 @@ export default function ProfileHeader() {
             xl:justify-between
           "
         >
-          
           {/* Left */}
           <div className="max-w-3xl">
-            
             {/* Role Badge */}
             <div
               className="
@@ -161,8 +146,7 @@ export default function ProfileHeader() {
                 text-[var(--text-secondary)]
               "
             >
-              {user?.profile?.bio ||
-                "Welcome to your F2CMARKET profile."}
+              {user?.profile?.bio || "Welcome to your F2CMARKET profile."}
             </p>
 
             {/* Meta */}
@@ -174,14 +158,17 @@ export default function ProfileHeader() {
                 text-[var(--text-secondary)]
               "
             >
-              
+              {/* Location */}
               {/* Location */}
               <div className="flex items-center gap-2">
                 <MapPin size={16} />
 
                 <span>
-                  {user?.profile?.location ||
-                    "India"}
+                  {isFarmer
+                    ? user?.farmerProfile?.location?.city || "Location not set"
+                    : user?.profile?.location?.city ||
+                      user?.profile?.location ||
+                      "Location not set"}
                 </span>
               </div>
 
@@ -189,11 +176,7 @@ export default function ProfileHeader() {
               <div className="flex items-center gap-2">
                 <CalendarDays size={16} />
 
-                <span>
-                  Joined{" "}
-                  {user?.profile?.joinedAt ||
-                    "2025"}
-                </span>
+                <span>Joined {user?.profile?.joinedAt || "2025"}</span>
               </div>
             </div>
 
@@ -211,8 +194,7 @@ export default function ProfileHeader() {
                   text-emerald-700
                 "
               >
-                {user?.farmerProfile?.farmName ||
-                  "Verified Farmer"}
+                {user?.farmerProfile?.farmName || "Verified Farmer"}
               </div>
             )}
           </div>
@@ -223,21 +205,14 @@ export default function ProfileHeader() {
               flex flex-wrap items-center gap-4
             "
           >
-            
-            <ProfileActionButton
-              to="/profile/edit"
-            >
+            <ProfileActionButton to="/profile/edit">
               <span className="flex items-center gap-2">
                 <Pencil size={16} />
-
                 Edit Profile
               </span>
             </ProfileActionButton>
 
-            <ProfileActionButton
-              to="/profile/settings"
-              variant="secondary"
-            >
+            <ProfileActionButton to="/profile/settings" variant="secondary">
               Account Settings
             </ProfileActionButton>
           </div>

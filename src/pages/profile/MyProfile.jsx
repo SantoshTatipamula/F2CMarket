@@ -9,7 +9,6 @@ import ProfileNavigationCard from "@/components/profile/ProfileNavigationCard";
 export default function MyProfile() {
   return (
     <main className="min-h-screen bg-[var(--bg)]">
-      
       <section
         className="
           mx-auto
@@ -18,31 +17,29 @@ export default function MyProfile() {
           lg:px-8
         "
       >
-        
         {/* Profile Hero */}
         <ProfileHeader />
 
         {/* Main Grid */}
-<div
-  className="
+        <div  
+          className="
     mt-8
     grid grid-cols-1
     gap-8
     xl:grid-cols-[1.2fr_0.8fr]
   "
->
-  
-  {/* Account Info */}
-  <AccountInformation />
+        >
+          {/* Account Info */}
+          <AccountInformation />
 
-  {/* Completion */}
-  <ProfileCompletion />
-</div>
+          {/* Completion */}
+          <ProfileCompletion />
+        </div>
 
-{/* Navigation */}
-<div className="mt-8">
-  <ProfileNavigationCard />
-</div>
+        {/* Navigation */}
+        <div className="mt-8">
+          <ProfileNavigationCard />
+        </div>
       </section>
     </main>
   );
