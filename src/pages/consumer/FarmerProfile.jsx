@@ -15,9 +15,8 @@ export default function FarmerProfile() {
 
   const farmer = users.find((user) => user.id === farmerId);
   const farmerProducts = getProducts().filter(
-  (product) => product.farmerId === farmer.id,
-);
-  console.log(farmer);
+    (product) => product.farmerId === farmer.id,
+  );
 
   if (!farmer) {
     return (
@@ -127,13 +126,13 @@ export default function FarmerProfile() {
                 </div>
 
                 <div className="mt-5">
-  <a
-    href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
-      `Hi ${farmer.name}, I'm interested in your products on F2CMARKET.`
-    )}`}
-    target="_blank"
-    rel="noopener noreferrer"
-    className="
+                  <a
+                    href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
+                      `Hi ${farmer.name}, I'm interested in your products on F2CMARKET.`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="
       inline-flex items-center gap-2
       rounded-xl
       bg-[#25D366]
@@ -143,11 +142,11 @@ export default function FarmerProfile() {
       transition
       hover:bg-[#1ebe5d]
     "
-  >
-    <FaWhatsapp size={18} />
-    <span>Contact on WhatsApp</span>
-  </a>
-</div>
+                  >
+                    <FaWhatsapp size={18} />
+                    <span>Contact on WhatsApp</span>
+                  </a>
+                </div>
               </div>
             </div>
           </div>
@@ -155,33 +154,33 @@ export default function FarmerProfile() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 pb-10 lg:px-8">
-  <div className="mb-6">
-    <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-      Products from {farmer.farmerProfile?.farmName}
-    </h2>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-[var(--text-primary)]">
+            Products from {farmer.farmerProfile?.farmName}
+          </h2>
 
-    <p className="mt-2 text-sm text-[var(--text-secondary)]">
-      Browse all fresh products offered by this farmer.
-    </p>
-  </div>
+          <p className="mt-2 text-sm text-[var(--text-secondary)]">
+            Browse all fresh products offered by this farmer.
+          </p>
+        </div>
 
-  {farmerProducts.length === 0 ? (
-    <div
-      className="
+        {farmerProducts.length === 0 ? (
+          <div
+            className="
         rounded-3xl
         border border-[var(--border)]
         bg-[var(--surface)]
         p-10
         text-center
       "
-    >
-      <p className="text-[var(--text-secondary)]">
-        No products available.
-      </p>
-    </div>
-  ) : (
-    <div
-      className="
+          >
+            <p className="text-[var(--text-secondary)]">
+              No products available.
+            </p>
+          </div>
+        ) : (
+          <div
+            className="
         grid
         grid-cols-1
         sm:grid-cols-2
@@ -189,17 +188,17 @@ export default function FarmerProfile() {
         xl:grid-cols-4
         gap-6
       "
-    >
-      {farmerProducts.map((product) => (
-        <ProductCard
-          key={product.id}
-          product={product}
-          variant="catalog"
-        />
-      ))}
-    </div>
-  )}
-</section>
+          >
+            {farmerProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                product={product}
+                variant="catalog"
+              />
+            ))}
+          </div>
+        )}
+      </section>
     </main>
   );
 }

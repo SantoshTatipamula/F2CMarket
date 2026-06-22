@@ -74,6 +74,7 @@ export default function AppRoutes() {
             <Route path="products/:id" element={<ProductDetails />} />
             <Route path="farmers"    element={<Farmers />} />
             <Route path="farmers/:farmerId" element={<FarmerProfile />} />
+            
             <Route path="about"      element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<Faq/>} />

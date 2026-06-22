@@ -1,26 +1,32 @@
 import { MapPin, Star } from "lucide-react";
 import farmerImage from "@/assets/images/farmer.webp";
+import { useNavigate } from "react-router-dom";
 
 export default function FarmerCard({ farmer }) {
+  const navigate = useNavigate();
   const image =
-    farmer.image || farmer.profileImage || farmerImage;
+    farmer.avatar || farmer.profileImage || farmer.image || farmerImage;
 
   const location =
+    farmer.farmerProfile?.location?.city ||
+    (typeof farmer.farmerProfile?.location === "string"
+      ? farmer.farmerProfile.location
+      : null) ||
+    farmer.farmLocation?.city ||
     farmer.farmLocation ||
+    farmer.location?.city ||
     farmer.location ||
-    "Location not provided";
+    "Location ";
 
   const description =
+    farmer.profile?.bio ||
     farmer.description ||
     farmer.specialty ||
     "Verified farmer on F2CMARKET.";
 
   const rating = farmer.rating ?? 4.5;
 
-  const productsCount =
-    farmer.productsCount ??
-    farmer.products ??
-    0;
+  const productsCount = farmer.productsCount ?? farmer.products ?? 0;
 
   return (
     <article
@@ -70,7 +76,7 @@ export default function FarmerCard({ farmer }) {
         {/* Header */}
         <div>
           <h2 className="text-2xl font-bold text-[var(--text-primary)]">
-            {farmer.name}
+            {farmer.farmerProfile?.farmName || farmer.name}
           </h2>
 
           <p className="mt-2 text-sm leading-relaxed text-[var(--text-secondary)]">
@@ -104,10 +110,7 @@ export default function FarmerCard({ farmer }) {
               text-[var(--text-secondary)]
             "
           >
-            <Star
-              size={14}
-              className="fill-yellow-400 text-yellow-400"
-            />
+            <Star size={14} className="fill-yellow-400 text-yellow-400" />
 
             <span>{rating} Rating</span>
           </div>
@@ -116,9 +119,7 @@ export default function FarmerCard({ farmer }) {
         {/* Footer */}
         <div className="flex items-center justify-between pt-2">
           <div>
-            <p className="text-xs text-[var(--text-secondary)]">
-              Products
-            </p>
+            <p className="text-xs text-[var(--text-secondary)]">Products</p>
 
             <p className="font-semibold text-[var(--text-primary)]">
               {productsCount}
@@ -126,12 +127,15 @@ export default function FarmerCard({ farmer }) {
           </div>
 
           <button
+            onClick={() => {
+              navigate(`/farmers/${farmer.id}`);
+            }}
             className="
-              h-11 px-5 rounded-xl
-              bg-[var(--primary)]
-              text-white text-sm font-medium
-              transition hover:opacity-90
-            "
+    h-11 px-5 rounded-xl
+    bg-[var(--primary)]
+    text-white text-sm font-medium
+    transition hover:opacity-90
+  "
           >
             View Profile
           </button>

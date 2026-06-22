@@ -29,6 +29,8 @@ export default function Farmers() {
 }, [users, searchQuery]);
 
   return (
+    
+    
     <div className="min-h-screen bg-[var(--surface)]">
       <FarmersPageHeader
         totalFarmers={filteredFarmers.length}

@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FaWhatsapp } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 
+
 export default function FarmerCard({ product }) {
   const { users } = useAuth();
 
