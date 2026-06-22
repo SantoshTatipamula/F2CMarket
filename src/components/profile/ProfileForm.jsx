@@ -7,7 +7,6 @@ import {
   MapPin,
   FileText,
   Store,
-  Camera,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -165,78 +164,7 @@ export default function ProfileForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       {/* Profile Image */}
-      <ProfileCard>
-        <ProfileCardHeader
-          title="Profile Image"
-          description="Manage your public marketplace identity image."
-        />
-
-        <div
-          className="
-            mt-8
-            flex flex-col items-center gap-6
-            sm:flex-row
-          "
-        >
-          {/* Avatar */}
-          <div
-            className="
-              relative
-              h-28 w-28
-              overflow-hidden
-              rounded-[28px]
-              border border-black/5
-              bg-[var(--surface-2)]
-            "
-          >
-            <img
-              src={user?.avatar || "https://ui-avatars.com/api/?name=User"}
-              alt={user?.name}
-              className="
-                h-full w-full
-                object-cover
-              "
-            />
-
-            <button
-              type="button"
-              className="
-                absolute bottom-2 right-2
-                flex h-9 w-9
-                items-center justify-center
-                rounded-xl
-                bg-black/70
-                text-white
-              "
-            >
-              <Camera size={16} />
-            </button>
-          </div>
-
-          {/* Text */}
-          <div>
-            <h3
-              className="
-                text-lg font-semibold
-                text-[var(--text-primary)]
-              "
-            >
-              Update Profile Photo
-            </h3>
-
-            <p
-              className="
-                mt-2 max-w-md
-                text-sm leading-relaxed
-                text-[var(--text-secondary)]
-              "
-            >
-              Your profile picture represents your identity across the F2CMARKET
-              platform.
-            </p>
-          </div>
-        </div>
-      </ProfileCard>
+      
 
       {/* Basic Information */}
       <ProfileCard>

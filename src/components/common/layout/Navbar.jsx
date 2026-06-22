@@ -1,27 +1,47 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
-  Menu, X, Search, ShoppingCart, User, Settings,
-  LogOut, Heart, Plus, BarChart2, LayoutDashboard,
-  Package, ClipboardList, Home, Store, Users, Info,
+  Menu,
+  X,
+  Search,
+  ShoppingCart,
+  User,
+  Settings,
+  LogOut,
+  Heart,
+  Plus,
+  BarChart2,
+  LayoutDashboard,
+  Package,
+  ClipboardList,
+  Home,
+  Store,
+  Users,
+  Info,
 } from "lucide-react";
 import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { useSearch }    from "@/context/SearchContext";
-import { useCart }      from "@/context/CartContext";
-import { useAuth }      from "@/context/AuthContext";
-import { useWishlist }  from "@/context/WishlistContext";
+import { useSearch } from "@/context/SearchContext";
+import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import { useWishlist } from "@/context/WishlistContext";
 import NotificationBell from "@/components/common/ui/NotificationBell";
-import logo             from "@/assets/logos/Logo.png";
+import logo from "@/assets/logos/Logo.png";
 
 /* ── NavBadge ──────────────────────────────────────────── */
 function NavBadge({ count, color = "bg-orange-500" }) {
   if (!count) return null;
   return (
-    <span className={`absolute -top-1.5 -right-1.5 ${color} text-white text-[9px] font-bold leading-none min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full ring-2 ring-[var(--bg)]`}>
+    <span
+      className={`absolute -top-1.5 -right-1.5 ${color} text-white text-[9px] font-bold leading-none min-w-[18px] h-[18px] flex items-center justify-center px-1 rounded-full ring-2 ring-[var(--bg)]`}
+    >
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -29,16 +49,32 @@ function NavBadge({ count, color = "bg-orange-500" }) {
 
 /* ── IconButton ────────────────────────────────────────── */
 function IconButton({ to, onClick, children, title }) {
-  const cls = "relative p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-all duration-150 flex items-center justify-center";
-  if (to) return <Link to={to} className={cls} title={title}>{children}</Link>;
-  return <button onClick={onClick} className={cls} title={title}>{children}</button>;
+  const cls =
+    "relative p-2.5 rounded-xl text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-2)] transition-all duration-150 flex items-center justify-center";
+  if (to)
+    return (
+      <Link to={to} className={cls} title={title}>
+        {children}
+      </Link>
+    );
+  return (
+    <button onClick={onClick} className={cls} title={title}>
+      {children}
+    </button>
+  );
 }
 
 /* ── SearchBar (desktop) ───────────────────────────────── */
 function SearchBar({ value, onChange, onSubmit }) {
   return (
-    <form onSubmit={onSubmit} className="flex items-center gap-2 h-9 px-3 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--primary)]/20 transition-all">
-      <button type="submit" className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--primary)] transition">
+    <form
+      onSubmit={onSubmit}
+      className="flex items-center gap-2 h-9 px-3 rounded-xl border border-[var(--border-strong)] bg-[var(--surface)] focus-within:border-[var(--primary)] focus-within:ring-2 focus-within:ring-[var(--primary)]/20 transition-all"
+    >
+      <button
+        type="submit"
+        className="shrink-0 text-[var(--text-secondary)] hover:text-[var(--primary)] transition"
+      >
         <Search size={14} />
       </button>
       <input
@@ -56,12 +92,14 @@ function SearchBar({ value, onChange, onSubmit }) {
 function RoleChip({ role }) {
   const map = {
     consumer: "bg-emerald-100 text-emerald-700",
-    farmer:   "bg-amber-100 text-amber-700",
-    admin:    "bg-violet-100 text-violet-700",
+    farmer: "bg-amber-100 text-amber-700",
+    admin: "bg-violet-100 text-violet-700",
   };
   if (!map[role]) return null;
   return (
-    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${map[role]}`}>
+    <span
+      className={`text-[10px] font-semibold px-2 py-0.5 rounded-full uppercase tracking-wide ${map[role]}`}
+    >
       {role}
     </span>
   );
@@ -84,30 +122,38 @@ function useNavLinks(role, user) {
       case "farmer":
         if (user?.verificationStatus === "pending") {
           return [
-            { label: "Home",       to: "/",               icon: Home            },
-            { label: "My Account", to: "/farmer/pending", icon: LayoutDashboard },
+            { label: "Home", to: "/", icon: Home },
+            {
+              label: "My Account",
+              to: "/farmer/pending",
+              icon: LayoutDashboard,
+            },
           ];
         }
         return [
-          { label: "Home",        to: "/",                    icon: Home            },
-          { label: "Marketplace", to: "/products",            icon: Store           },
-          { label: "Dashboard",   to: "/farmer/dashboard",    icon: LayoutDashboard },
-          { label: "Add Product", to: "/farmer/products/add", icon: Plus            },
+          { label: "Home", to: "/", icon: Home },
+          { label: "Marketplace", to: "/products", icon: Store },
+          {
+            label: "Dashboard",
+            to: "/farmer/dashboard",
+            icon: LayoutDashboard,
+          },
+          { label: "Add Product", to: "/farmer/products/add", icon: Plus },
         ];
       case "admin":
         return [
-          { label: "Home",      to: "/",                icon: Home            },
+          { label: "Home", to: "/", icon: Home },
           { label: "Dashboard", to: "/admin/dashboard", icon: LayoutDashboard },
-          { label: "Users",     to: "/admin/users",     icon: Users           },
-          { label: "Farmers",   to: "/admin/farmers",   icon: Store           },
-          { label: "Products",  to: "/admin/products",  icon: Package         },
+          { label: "Users", to: "/admin/users", icon: Users },
+          { label: "Farmers", to: "/admin/farmers", icon: Store },
+          { label: "Products", to: "/admin/products", icon: Package },
         ];
       default: // guest + consumer
         return [
-          { label: "Home",        to: "/",        icon: Home  },
+          { label: "Home", to: "/", icon: Home },
           { label: "Marketplace", to: "/products", icon: Store },
-          { label: "Farmers",     to: "/farmers",  icon: Users },
-          { label: "About",       to: "/about",    icon: Info  },
+          { label: "Farmers", to: "/farmers", icon: Users },
+          { label: "About", to: "/about", icon: Info },
         ];
     }
   }, [role, user?.verificationStatus]);
@@ -120,27 +166,27 @@ function useDropdownItems(role, user) {
       case "farmer":
         if (user?.verificationStatus === "pending") {
           return [
-            { label: "My Account", to: "/farmer/pending",   icon: User     },
-            { label: "Settings",   to: "/profile/settings", icon: Settings },
+            { label: "My Account", to: "/farmer/pending", icon: User },
+            { label: "Settings", to: "/profile/settings", icon: Settings },
           ];
         }
         return [
-          { label: "Profile",     to: "/profile",          icon: User         },
-          { label: "My Products", to: "/farmer/products",  icon: Package      },
-          { label: "Orders",      to: "/farmer/orders",    icon: ClipboardList },
-          { label: "Analytics",   to: "/farmer/analytics", icon: BarChart2    },
-          { label: "Settings",    to: "/profile/settings", icon: Settings     },
+          { label: "Profile", to: "/profile", icon: User },
+          { label: "My Products", to: "/farmer/products", icon: Package },
+          { label: "Orders", to: "/farmer/orders", icon: ClipboardList },
+          { label: "Analytics", to: "/farmer/analytics", icon: BarChart2 },
+          { label: "Settings", to: "/profile/settings", icon: Settings },
         ];
       case "admin":
         return [
-          { label: "Profile",  to: "/profile",         icon: User     },
+          { label: "Profile", to: "/profile", icon: User },
           { label: "Settings", to: "/profile/settings", icon: Settings },
         ];
       default: // consumer
         return [
-          { label: "Profile",  to: "/profile",         icon: User         },
-          { label: "Orders",   to: "/orders",          icon: ClipboardList },
-          { label: "Settings", to: "/profile/settings", icon: Settings     },
+          { label: "Profile", to: "/profile", icon: User },
+          { label: "Orders", to: "/orders", icon: ClipboardList },
+          { label: "Settings", to: "/profile/settings", icon: Settings },
         ];
     }
   }, [role, user?.verificationStatus]);
@@ -148,31 +194,32 @@ function useDropdownItems(role, user) {
 
 /* ── Main Navbar ───────────────────────────────────────── */
 export default function Navbar() {
-  const { user, logout }                = useAuth();
-  const { cartCount }                   = useCart();
-  const { wishlistCount }               = useWishlist();
+  const { user, logout } = useAuth();
+  const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const { searchQuery, setSearchQuery } = useSearch();
-  const navigate                        = useNavigate();
-  const location                        = useLocation();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const [menuOpen, setMenuOpen] = useState(false);
-  const mobileSearchRef         = useRef(null);
+  const mobileSearchRef = useRef(null);
 
   /* Close drawer on every route change */
   useEffect(() => {
     setMenuOpen(false);
   }, [location.pathname]);
 
-  const role     = user?.role;
-  const isAdmin  = role === "admin";
+  const role = user?.role;
+  const isAdmin = role === "admin";
   const showCartWishlist = !isAdmin;
 
-  const navLinks     = useNavLinks(role);
+  const navLinks = useNavLinks(role);
   const dropdownItems = useDropdownItems(role, user);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
+    if (searchQuery.trim())
+      navigate(`/products?search=${encodeURIComponent(searchQuery.trim())}`);
   };
 
   const navLinkCls = ({ isActive }) =>
@@ -189,17 +236,21 @@ export default function Navbar() {
         : "text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--text-primary)]"
     }`;
 
-  const drawerLinkCls = "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--primary)] transition-all min-h-[44px]";
+  const drawerLinkCls =
+    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-[15px] font-medium text-[var(--text-secondary)] hover:bg-[var(--surface-2)] hover:text-[var(--primary)] transition-all min-h-[44px]";
 
   return (
     <>
       {/* ══ Header ════════════════════════════════════════ */}
       <header className="sticky top-0 z-50 bg-[var(--bg)]/95 backdrop-blur-2xl border-b border-[var(--border)] shadow-sm">
         <nav className="max-w-7xl mx-auto px-4 lg:px-8 h-[60px] flex items-center justify-between gap-2">
-
           {/* Logo */}
           <Link to="/" className="shrink-0">
-            <img src={logo} alt="F2CMARKET" className="h-10 w-auto object-contain" />
+            <img
+              src={logo}
+              alt="F2CMARKET"
+              className="h-10 w-auto object-contain"
+            />
           </Link>
 
           {/* ── Desktop Nav Links ── */}
@@ -224,10 +275,16 @@ export default function Navbar() {
             {/* Guest buttons */}
             {!user && (
               <>
-                <Link to="/login" className="h-9 px-3 rounded-xl border border-[var(--border-strong)] text-sm font-medium flex items-center gap-1.5 hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all">
+                <Link
+                  to="/login"
+                  className="h-9 px-3 rounded-xl border border-[var(--border-strong)] text-sm font-medium flex items-center gap-1.5 hover:bg-[var(--primary)] hover:text-white hover:border-[var(--primary)] transition-all"
+                >
                   <User size={14} /> Login
                 </Link>
-                <Link to="/register" className="h-9 px-3 rounded-xl bg-[var(--primary)] text-white text-sm font-medium flex items-center hover:bg-[var(--primary-hover)] transition-all">
+                <Link
+                  to="/register"
+                  className="h-9 px-3 rounded-xl bg-[var(--primary)] text-white text-sm font-medium flex items-center hover:bg-[var(--primary-hover)] transition-all"
+                >
                   Register
                 </Link>
               </>
@@ -254,26 +311,56 @@ export default function Navbar() {
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button className="h-8 w-8 rounded-full bg-[var(--primary)] text-white flex items-center justify-center text-sm font-bold hover:opacity-90 transition focus:outline-none focus:ring-2 focus:ring-[var(--primary)]/40 focus:ring-offset-2 ml-0.5">
-                    {(user.name || user.email)?.charAt(0).toUpperCase()}
+                  <button
+                    className="
+    h-9 w-9
+    overflow-hidden
+    rounded-full
+    border border-[var(--border)]
+    bg-[var(--surface-2)]
+    hover:opacity-90
+    transition
+    focus:outline-none
+  "
+                  >
+                    <img
+                      src={
+                        user?.avatar ||
+                        `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                          user?.name || "User",
+                        )}`
+                      }
+                      alt={user?.name}
+                      className="h-full w-full object-cover"
+                    />
                   </button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-52 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl p-1">
+                <DropdownMenuContent
+                  align="end"
+                  className="w-52 rounded-2xl border border-[var(--border)] bg-[var(--bg)] shadow-xl p-1"
+                >
                   {/* User info */}
                   <DropdownMenuLabel className="px-3 py-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-semibold leading-tight truncate">{user.name || "My Account"}</p>
+                      <p className="text-sm font-semibold leading-tight truncate">
+                        {user.name || "My Account"}
+                      </p>
                       <RoleChip role={role} />
                     </div>
-                    <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">{user.email}</p>
+                    <p className="text-xs text-[var(--text-secondary)] truncate mt-0.5">
+                      {user.email}
+                    </p>
                   </DropdownMenuLabel>
 
                   <DropdownMenuSeparator />
 
                   {dropdownItems.map(({ label, to, icon: Icon }) => (
                     <DropdownMenuItem key={to} asChild>
-                      <Link to={to} className="flex items-center gap-2 cursor-pointer rounded-xl">
+                      <Link
+                        to={to}
+                        className="flex items-center gap-2 cursor-pointer rounded-xl"
+                      >
                         <Icon size={15} /> {label}
                       </Link>
                     </DropdownMenuItem>
@@ -281,7 +368,10 @@ export default function Navbar() {
 
                   <DropdownMenuSeparator />
 
-                  <DropdownMenuItem onClick={logout} className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer rounded-xl">
+                  <DropdownMenuItem
+                    onClick={logout}
+                    className="flex items-center gap-2 text-red-500 focus:text-red-500 cursor-pointer rounded-xl"
+                  >
                     <LogOut size={15} /> Logout
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -323,10 +413,11 @@ export default function Navbar() {
       />
 
       {/* ══ Drawer ════════════════════════════════════════ */}
-      <div className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
-        menuOpen ? "translate-x-0" : "translate-x-full"
-      }`}>
-
+      <div
+        className={`fixed top-0 right-0 h-full w-[280px] bg-[var(--bg)] z-50 shadow-2xl flex flex-col transition-transform duration-300 ease-in-out ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
           <img src={logo} alt="F2CMARKET" className="h-9 w-auto" />
@@ -341,10 +432,16 @@ export default function Navbar() {
         {/* Search inside drawer */}
         <div className="px-3 pt-3">
           <form
-            onSubmit={(e) => { handleSearch(e); setMenuOpen(false); }}
+            onSubmit={(e) => {
+              handleSearch(e);
+              setMenuOpen(false);
+            }}
             className="flex items-center gap-2 h-11 px-3 rounded-xl border border-[var(--border)] bg-[var(--surface)] focus-within:border-[var(--primary)] transition"
           >
-            <Search size={15} className="shrink-0 text-[var(--text-secondary)]" />
+            <Search
+              size={15}
+              className="shrink-0 text-[var(--text-secondary)]"
+            />
             <input
               ref={mobileSearchRef}
               type="text"
@@ -358,7 +455,6 @@ export default function Navbar() {
 
         {/* Drawer Body */}
         <div className="flex-1 overflow-y-auto p-3 pt-2 space-y-0.5">
-
           {/* Nav links */}
           {navLinks.map(({ label, to, icon: Icon }) => (
             <NavLink key={to} to={to} end={to === "/"} className={drawerNavCls}>
@@ -395,10 +491,16 @@ export default function Navbar() {
           {/* Guest CTA */}
           {!user && (
             <div className="pt-4 px-1 space-y-2">
-              <Link to="/login" className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[var(--border-strong)] text-sm font-medium hover:bg-[var(--surface-2)] transition">
+              <Link
+                to="/login"
+                className="flex items-center justify-center gap-2 h-11 rounded-xl border border-[var(--border-strong)] text-sm font-medium hover:bg-[var(--surface-2)] transition"
+              >
                 <User size={16} /> Login
               </Link>
-              <Link to="/register" className="flex items-center justify-center gap-2 h-11 rounded-xl bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-hover)] transition">
+              <Link
+                to="/register"
+                className="flex items-center justify-center gap-2 h-11 rounded-xl bg-[var(--primary)] text-white text-sm font-medium hover:bg-[var(--primary-hover)] transition"
+              >
                 Register
               </Link>
             </div>
@@ -408,18 +510,30 @@ export default function Navbar() {
         {/* Drawer Footer — logged-in user */}
         {user && (
           <div className="border-t border-[var(--border)] p-3 space-y-0.5">
-
             {/* Avatar + name + role */}
             <div className="flex items-center gap-3 px-3 py-2 mb-1">
-              <div className="h-10 w-10 rounded-full bg-[var(--primary)] text-white flex items-center justify-center font-bold text-sm shrink-0">
-                {(user.name || user.email)?.charAt(0).toUpperCase()}
+              <div className="h-10 w-10 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface-2)]">
+                <img
+                  src={
+                    user?.avatar ||
+                    `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                      user?.name || "User",
+                    )}`
+                  }
+                  alt={user?.name}
+                  className="h-full w-full object-cover"
+                />
               </div>
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{user.name || "My Account"}</p>
+                  <p className="text-sm font-semibold text-[var(--text-primary)] truncate">
+                    {user.name || "My Account"}
+                  </p>
                   <RoleChip role={role} />
                 </div>
-                <p className="text-xs text-[var(--text-secondary)] truncate">{user.email}</p>
+                <p className="text-xs text-[var(--text-secondary)] truncate">
+                  {user.email}
+                </p>
               </div>
             </div>
 

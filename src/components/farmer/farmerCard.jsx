@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function FarmerCard({ farmer }) {
   const navigate = useNavigate();
+  console.log("Farmer Avatar:", farmer.avatar);
   const image =
     farmer.avatar || farmer.profileImage || farmer.image || farmerImage;
 

@@ -83,35 +83,66 @@ export function AuthProvider({ children }) {
     return userToSave;
   };
 
-  /* ── Update logged-in user ── */
-  const updateUser = (updatedData) => {
-    const updatedUser = updateStoredUser(updatedData);
+ /* ── Update logged-in user ── */
+const updateUser = (updatedData) => {
+  const updatedUser = updateStoredUser(updatedData);
 
-    if (!updatedUser) return;
+  if (!updatedUser) return;
 
-    setUser(updatedUser);
+  setUser(updatedUser);
 
-    setUsers((prev) =>
-      prev.map((existingUser) =>
-        existingUser.id === updatedUser.id
-          ? {
-              ...existingUser,
-              ...updatedUser,
+  setUsers((prevUsers) => {
+    const updatedUsers = prevUsers.map((existingUser) =>
+      existingUser.id === updatedUser.id
+        ? {
+            ...existingUser,
+            ...updatedUser,
 
-              profile: {
-                ...(existingUser.profile || {}),
-                ...(updatedUser.profile || {}),
-              },
+            profile: {
+              ...(existingUser.profile || {}),
+              ...(updatedUser.profile || {}),
+            },
 
-              farmerProfile: {
-                ...(existingUser.farmerProfile || {}),
-                ...(updatedUser.farmerProfile || {}),
-              },
-            }
-          : existingUser,
-      ),
+            farmerProfile: {
+              ...(existingUser.farmerProfile || {}),
+              ...(updatedUser.farmerProfile || {}),
+            },
+          }
+        : existingUser
     );
-  };
+
+    /* Sync farmer details to all products */
+    const products =
+      JSON.parse(localStorage.getItem("f2c-products")) || [];
+
+    const updatedProducts = products.map((product) =>
+      product.farmerId === updatedUser.id
+        ? {
+            ...product,
+
+            farmerName: updatedUser.name,
+
+            farmerAvatar: updatedUser.avatar || "",
+
+            farmName:
+              updatedUser.farmerProfile?.farmName ||
+              product.farmName,
+
+            farmLocation:
+              updatedUser.farmerProfile?.location ||
+              product.farmLocation,
+          }
+        : product
+    );
+
+    localStorage.setItem(
+      "f2c-products",
+      JSON.stringify(updatedProducts)
+    );
+
+    return updatedUsers;
+  });
+};
 
   /* ── Logout ── */
   const logout = () => {

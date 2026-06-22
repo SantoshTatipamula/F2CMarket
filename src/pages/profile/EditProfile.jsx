@@ -1,23 +1,17 @@
-import {
-  ArrowLeft,
-  Pencil,
-} from "lucide-react";
+import { ArrowLeft, Pencil } from "lucide-react";
 
 import { Link } from "react-router-dom";
 // import { useAuth } from "@/context/AuthContext";
 // import FarmInformation from "@/components/farmer/profile/FarmInformation";
 
 import ProfileForm from "@/components/profile/ProfileForm";
-
+import ProfileImageUpload from "@/components/profile/ProfileImageUpload";
 
 export default function EditProfile() {
-
   // const { user } = useAuth();
-
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
-      
       <section
         className="
           mx-auto
@@ -26,7 +20,6 @@ export default function EditProfile() {
           lg:px-8
         "
       >
-        
         {/* Back Navigation */}
         <Link
           to="/profile"
@@ -39,7 +32,6 @@ export default function EditProfile() {
           "
         >
           <ArrowLeft size={18} />
-
           Back to Profile
         </Link>
 
@@ -54,7 +46,6 @@ export default function EditProfile() {
             shadow-sm
           "
         >
-          
           {/* Banner */}
           <div
             className="
@@ -66,7 +57,6 @@ export default function EditProfile() {
               text-white
             "
           >
-            
             <div
               className="
                 inline-flex items-center
@@ -81,7 +71,6 @@ export default function EditProfile() {
             </div>
 
             <div className="mt-6 flex items-start gap-4">
-              
               <div
                 className="
                   flex h-14 w-14
@@ -95,7 +84,6 @@ export default function EditProfile() {
               </div>
 
               <div>
-                
                 <h1
                   className="
                     text-3xl font-bold
@@ -113,20 +101,25 @@ export default function EditProfile() {
                     text-white/80
                   "
                 >
-                  Manage your personal
-                  identity, marketplace
-                  profile, and seller
-                  information across
-                  F2CMARKET.
+                  Manage your personal identity, marketplace profile, and seller
+                  information across F2CMARKET.
                 </p>
               </div>
             </div>
           </div>
 
+          {/* Upload Section */}
+          {/* Upload Section */}
+          <div className="p-6 md:p-8">
+            <ProfileImageUpload />
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-[var(--border)]" />
+
           {/* Form */}
           <div className="p-6 md:p-8">
             <ProfileForm />
-            {/* <FarmInformation /> */}
           </div>
         </div>
       </section>

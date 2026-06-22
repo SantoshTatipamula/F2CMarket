@@ -1,4 +1,4 @@
-import { Camera, MapPin, CalendarDays, Pencil } from "lucide-react";
+import {  MapPin, CalendarDays, Pencil } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -20,41 +20,25 @@ export default function ProfileHeader() {
       "
     >
       {/* Cover */}
-      <div
-        className="
-          relative h-56
-          bg-gradient-to-br
-          from-[var(--primary)]
-          via-[var(--primary)]/90
-          to-emerald-500
-        "
-      >
-        {/* Overlay */}
-        <div
-          className="
-            absolute inset-0
-            bg-black/10
-          "
-        />
-
-        {/* Edit Cover */}
-        <button
-          className="
-            absolute right-5 top-5
-            flex h-11 w-11
-            items-center justify-center
-            rounded-2xl
-            border border-white/20
-            bg-white/10
-            text-white
-            backdrop-blur-md
-            transition-all duration-300
-            hover:bg-white/20
-          "
-        >
-          <Camera size={18} />
-        </button>
-      </div>
+      <div className="relative h-56 overflow-hidden">
+  {user?.coverImage ? (
+    <img
+      src={user.coverImage}
+      alt="Cover"
+      className="h-full w-full object-cover"
+    />
+  ) : (
+    <div
+      className="
+        h-full w-full
+        bg-gradient-to-br
+        from-[var(--primary)]
+        via-[var(--primary)]/90
+        to-emerald-500
+      "
+    />
+  )}
+</div>
 
       {/* Content */}
       <div className="relative px-6 pb-8">
@@ -80,22 +64,7 @@ export default function ProfileHeader() {
             "
           />
 
-          {/* Edit Avatar */}
-          <button
-            className="
-              absolute bottom-3 right-3
-              flex h-9 w-9
-              items-center justify-center
-              rounded-xl
-              bg-black/70
-              text-white
-              backdrop-blur-md
-              transition-all duration-300
-              hover:bg-black
-            "
-          >
-            <Camera size={16} />
-          </button>
+          
         </div>
 
         {/* Main Content */}

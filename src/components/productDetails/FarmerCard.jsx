@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom";
 import { FaWhatsapp } from "react-icons/fa";
 import { useAuth } from "@/context/AuthContext";
 
-
 export default function FarmerCard({ product }) {
   const { users } = useAuth();
 
@@ -15,8 +14,17 @@ export default function FarmerCard({ product }) {
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
       <div className="flex items-center gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg">
-          <User size={22} />
+        <div className="h-14 w-14 overflow-hidden rounded-full border-2 border-white shadow-lg bg-[var(--surface-2)]">
+          <img
+            src={
+              farmer?.avatar ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                farmer?.name || "Farmer",
+              )}`
+            }
+            alt={farmer?.name}
+            className="h-full w-full object-cover"
+          />
         </div>
 
         <div className="flex-1">
@@ -24,10 +32,14 @@ export default function FarmerCard({ product }) {
             Sold by Farmer
           </p>
           <p className="text-lg font-bold text-[var(--text-primary)]">
-            {product?.farmer}
+            {farmer?.farmerProfile?.farmName || farmer?.name || product?.farmer}
           </p>
           <p className="text-xs text-[var(--text-secondary)]">
-            {product?.location}
+            {farmer?.farmerProfile?.location?.city ||
+              (typeof farmer?.farmerProfile?.location === "string"
+                ? farmer.farmerProfile.location
+                : null) ||
+              product?.location}
           </p>
         </div>
 

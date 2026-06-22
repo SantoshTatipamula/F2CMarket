@@ -39,100 +39,111 @@ export default function FarmerProfile() {
         "
         >
           {/* Hero */}
-          <div
-            className="
-            bg-gradient-to-r
-            from-[var(--primary)]/10
-            via-transparent
-            to-transparent
-            p-8
-          "
-          >
-            <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
-              {/* Avatar */}
+          <div className="relative overflow-hidden">
+            {farmer.coverImage ? (
+              <img
+                src={farmer.coverImage}
+                alt="Farm Banner"
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+            ) : (
               <div
                 className="
-                flex h-28 w-28
-                items-center justify-center
-                rounded-full
-                bg-[var(--primary)]
-                text-white
-                shadow-lg
-              "
-              >
-                <User size={42} />
-              </div>
+        absolute inset-0
+        bg-gradient-to-r
+        from-[var(--primary)]/10
+        via-transparent
+        to-transparent
+      "
+              />
+            )}
 
-              {/* Details */}
-              <div className="flex-1 space-y-4">
-                <div>
-                  <p className="text-sm text-[var(--text-secondary)]">
-                    Farmer Profile
-                  </p>
-
-                  <h1 className="mt-1 text-4xl font-bold text-[var(--text-primary)]">
-                    {farmer.farmerProfile?.farmName || "Farm"}
-                  </h1>
+            <div className="relative p-8">
+              <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
+                {/* Avatar */}
+                <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
+                  <img
+                    src={
+                      farmer.avatar ||
+                      `https://ui-avatars.com/api/?name=${encodeURIComponent(
+                        farmer.name || "Farmer",
+                      )}`
+                    }
+                    alt={farmer.name}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {/* Owner */}
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                    <User size={16} />
+                {/* Details */}
+                <div className="flex-1 space-y-4">
+                  <div>
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      Farmer Profile
+                    </p>
 
-                    <span>{farmer.name}</span>
+                    <h1 className="mt-1 text-4xl font-bold text-[var(--text-primary)]">
+                      {farmer.farmerProfile?.farmName || "Farm"}
+                    </h1>
                   </div>
 
-                  {/* Farm */}
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                    <Store size={16} />
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {/* Owner */}
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <User size={16} />
 
-                    <span>{farmer.farmerProfile?.farmName}</span>
+                      <span>{farmer.name}</span>
+                    </div>
+
+                    {/* Farm */}
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <Store size={16} />
+
+                      <span>{farmer.farmerProfile?.farmName}</span>
+                    </div>
+
+                    {/* Location */}
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <MapPin size={16} />
+
+                      <span>
+                        {farmer.farmerProfile?.location?.city ||
+                          "Location not available"}
+                      </span>
+                    </div>
+
+                    {/* Phone */}
+                    <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                      <Phone size={16} />
+
+                      <span>{farmer.phone}</span>
+                    </div>
                   </div>
 
-                  {/* Location */}
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                    <MapPin size={16} />
-
-                    <span>
-                      {farmer.farmerProfile?.location?.city ||
-                        "Location not available"}
-                    </span>
-                  </div>
-
-                  {/* Phone */}
-                  <div className="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
-                    <Phone size={16} />
-
-                    <span>{farmer.phone}</span>
-                  </div>
-                </div>
-
-                {/* Bio */}
-                <div className="flex items-start gap-2">
-                  <FileText
-                    size={18}
-                    className="
+                  {/* Bio */}
+                  <div className="flex items-start gap-2">
+                    <FileText
+                      size={18}
+                      className="
                     mt-0.5
                     shrink-0
                     text-[var(--text-secondary)]
                   "
-                  />
+                    />
 
-                  <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
-                    {farmer.profile?.bio ||
-                      "Passionate farmer providing fresh produce directly to consumers through F2CMARKET."}
-                  </p>
-                </div>
+                    <p className="max-w-3xl text-sm leading-relaxed text-[var(--text-secondary)]">
+                      {farmer.profile?.bio ||
+                        "Passionate farmer providing fresh produce directly to consumers through F2CMARKET."}
+                    </p>
+                  </div>
 
-                <div className="mt-5">
-                  <a
-                    href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
-                      `Hi ${farmer.name}, I'm interested in your products on F2CMARKET.`,
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="
+                  <div className="mt-5">
+                    <a
+                      href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
+                        `Hi ${farmer.name}, I'm interested in your products on F2CMARKET.`,
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="
       inline-flex items-center gap-2
       rounded-xl
       bg-[#25D366]
@@ -142,10 +153,11 @@ export default function FarmerProfile() {
       transition
       hover:bg-[#1ebe5d]
     "
-                  >
-                    <FaWhatsapp size={18} />
-                    <span>Contact on WhatsApp</span>
-                  </a>
+                    >
+                      <FaWhatsapp size={18} />
+                      <span>Contact on WhatsApp</span>
+                    </a>
+                  </div>
                 </div>
               </div>
             </div>
