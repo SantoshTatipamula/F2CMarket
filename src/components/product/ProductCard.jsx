@@ -34,7 +34,7 @@ export default function ProductCard({
             </span>
           ) : (
             <span className="absolute top-3 left-3 z-10 rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold text-white">
-              {product.badge}
+              {product.category || "Featured"}
             </span>
           )}
 
