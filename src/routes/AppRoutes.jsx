@@ -6,6 +6,7 @@ import ScrollToTop    from "@/components/common/layout/ScrollToTop";
 import ProtectedRoute from "./ProtectedRoute";
 import PageLoader     from "@/components/common/ui/PageLoader";
 
+
 /* ── Public ──────────────────────────────────────────────── */
 const Home            = lazy(() => import("@/pages/consumer/Home"));
 const Products        = lazy(() => import("@/pages/consumer/Products"));
@@ -18,6 +19,8 @@ const Faq             = lazy(() => import("@/pages/common/FAQ"));
 const HelpCenter      = lazy(() => import("@/pages/common/HelpCenter"));
 const PrivacyPolicy   = lazy(() => import("@/pages/common/PrivacyPolicy"));
 const TermsConditions = lazy(() => import("@/pages/common/TermsConditions"));
+const Feedback        = lazy(() => import("@/pages/common/Feedback"));
+
 
 /* ── Auth ────────────────────────────────────────────────── */
 const Login               = lazy(() => import("@/pages/auth/Login"));
@@ -81,6 +84,7 @@ export default function AppRoutes() {
             <Route path="/helpCenter" element={<HelpCenter/>} />
             <Route path="/privacyPolicy" element={<PrivacyPolicy/>} />
             <Route path="/termsConditions" element={<TermsConditions/>} />
+            <Route path="/feedback" element={<Feedback />} />
 
             {/* Cart + Wishlist — consumers AND farmers */}
             <Route path="cart" element={
