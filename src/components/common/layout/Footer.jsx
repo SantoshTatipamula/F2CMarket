@@ -22,6 +22,7 @@ const supportLinks = [
   { label: "Privacy Policy", path: "/privacyPolicy" },
   { label: "Terms & Conditions", path: "/termsConditions" },
   { label: "FAQs", path: "/faq" },
+  { label: "Feedback", path: "/feedback"}
 ];
 
 export default function Footer() {
