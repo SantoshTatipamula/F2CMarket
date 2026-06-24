@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import FarmersPageHeader from "@/components/farmer/FarmersPageHeader";
+import FarmersPageHeader from "@/components/farmer/farmersPageHeader";
 import FarmersGrid from "@/components/farmer/farmersGrid";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import { revealUp, viewport } from "@/utils/scrollReveal";
