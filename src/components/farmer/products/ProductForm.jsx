@@ -28,6 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import { uploadImage } from "@/services/cloudinaryService";
+import { toast } from "sonner";
+
 export default function ProductForm({
   initialData = {},
   onSubmit,
@@ -60,26 +63,43 @@ export default function ProductForm({
     }));
   };
 
+  const preventNumberScroll = (e) => {
+    e.currentTarget.blur();
+  };
+
   const handleImageUpload = async (e) => {
     const file = e.target.files?.[0];
 
     if (!file) return;
 
-    setUploading(true);
+    try {
+      setUploading(true);
 
-    // Fake Upload Delay
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+      toast.loading("Uploading product image...", {
+        id: "product-upload",
+      });
 
-    const imageUrl = URL.createObjectURL(file);
+      const imageUrl = await uploadImage(file, "f2cmarket/products");
 
-    setPreview(imageUrl);
+      setPreview(imageUrl);
 
-    setForm((prev) => ({
-      ...prev,
-      image: imageUrl,
-    }));
+      setForm((prev) => ({
+        ...prev,
+        image: imageUrl,
+      }));
 
-    setUploading(false);
+      toast.success("Image uploaded successfully!", {
+        id: "product-upload",
+      });
+    } catch (error) {
+      console.error(error);
+
+      toast.error("Failed to upload image.", {
+        id: "product-upload",
+      });
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleSubmit = (e) => {
@@ -263,6 +283,7 @@ export default function ProductForm({
               name="price"
               value={form.price}
               onChange={handleChange}
+              onWheel={preventNumberScroll}
               placeholder="40"
               className={fieldStyles}
               required
@@ -309,22 +330,20 @@ export default function ProductForm({
                 name="stock"
                 value={form.stock}
                 onChange={handleChange}
+                onWheel={preventNumberScroll}
                 placeholder="100"
                 required
                 className="
-                h-full
-                w-full
-
-                border-0
-                bg-transparent
-                shadow-none
-
-                pl-11
-                pr-4
-
-                focus-visible:ring-0
-                focus-visible:border-0
-              "
+    h-full
+    w-full
+    border-0
+    bg-transparent
+    shadow-none
+    pl-11
+    pr-4
+    focus-visible:ring-0
+    focus-visible:border-0
+  "
               />
             </div>
 
