@@ -1,4 +1,4 @@
-import FarmerCard from "./FarmerCard";
+import FarmerCard from "./farmerCard";
 
 export default function FarmersGrid({
   farmers = [],
