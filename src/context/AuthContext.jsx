@@ -1,6 +1,7 @@
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { saveUser, updateStoredUser } from "@/services/profileService";
 import { useEffect, createContext, useContext, useState } from "react";
+import { saveUserToFirestore } from "@/services/useService";
 
 import {
   registerWithEmail,
@@ -128,6 +129,8 @@ const register = async (newUser) => {
   };
 
   setUsers((prev) => [...prev, userToSave]);
+
+  await saveUserToFirestore(userToSave);
 
   // Save profile data for all users
   saveUser(userToSave);
