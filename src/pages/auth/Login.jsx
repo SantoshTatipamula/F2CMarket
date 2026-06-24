@@ -32,16 +32,33 @@ export default function Login() {
     if (error) setError("");
   };
 
-  const handleLogin = () => {
-    if (!isValid || loading) return;
-    setLoading(true);
-    setTimeout(() => {
-      const result = login(form.email.trim(), form.password);
-      if (!result.success) { setError(result.error); setLoading(false); return; }
-      navigate(from || getRoleRedirect(result), { replace: true });
-      setLoading(false);
-    }, 500);
-  };
+  const handleLogin = async () => {
+  if (!isValid || loading) return;
+
+  setLoading(true);
+  setError("");
+
+  try {
+    const result = await login(
+      form.email.trim(),
+      form.password
+    );
+
+    if (!result.success) {
+      setError(result.error);
+      return;
+    }
+
+    navigate(
+      from || getRoleRedirect(result),
+      { replace: true }
+    );
+  } catch (error) {
+    setError(error.message || "Login failed");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleKeyDown = (e) => { if (e.key === "Enter") handleLogin(); };
 

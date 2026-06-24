@@ -139,54 +139,54 @@ export default function Register() {
     submitRegistration();
   };
 
-  const submitRegistration = () => {
-    setLoading(true);
-    const newUser = {
-      name: form.name.trim(),
+const submitRegistration = async () => {
+  setLoading(true);
+  setError("");
 
-      email: form.email.trim(),
+  const newUser = {
+    name: form.name.trim(),
+    email: form.email.trim(),
+    password: form.password,
+    role: form.role,
+    phone: form.phone,
+    specialty: form.specialty,
+    experience: form.experience,
+    govId: form.govId,
+    farmRegNo: form.farmRegNo,
 
-      password: form.password,
+    profile: {
+      bio: "",
+      location: "",
+    },
 
-      role: form.role,
-
-      phone: form.phone,
-
-      specialty: form.specialty,
-
-      experience: form.experience,
-
-      govId: form.govId,
-
-      farmRegNo: form.farmRegNo,
-
-      profile: {
-        bio: "",
-        location: "",
-      },
-
-      farmerProfile: {
-        farmName: form.farmName,
-
-        location: form.farmLocation,
-
-        documents: [],
-      },
-    };
-    setTimeout(() => {
-      console.log(newUser);
-      const saved = register(newUser);
-      setLoading(false);
-      /* Send welcome email (non-blocking) */
-      sendWelcomeEmail({
-        name: saved.name,
-        email: saved.email,
-        role: saved.role,
-      });
-      if (saved.role === "consumer") navigate("/");
-      else setStep(2);
-    }, 600);
+    farmerProfile: {
+      farmName: form.farmName,
+      location: form.farmLocation,
+      documents: [],
+    },
   };
+
+  try {
+    const saved = await register(newUser);
+
+    // Send welcome email (non-blocking)
+    sendWelcomeEmail({
+      name: saved.name,
+      email: saved.email,
+      role: saved.role,
+    });
+
+    if (saved.role === "consumer") {
+      navigate("/");
+    } else {
+      setStep(2);
+    }
+  } catch (error) {
+    setError(error.message || "Registration failed.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   const isFarmer = form.role === "farmer";
   const totalSteps = isFarmer ? 2 : 1;

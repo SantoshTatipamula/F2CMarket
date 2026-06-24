@@ -1,6 +1,15 @@
-import { createContext, useContext } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { saveUser, updateStoredUser } from "@/services/profileService";
+import { useEffect, createContext, useContext, useState } from "react";
+
+import {
+  registerWithEmail,
+  loginWithEmail,
+  logoutUser,
+  onAuthStateChanged,
+} from "@/services/firebaseAuth";
+
+import { auth } from "@/config/firebase";
 
 const ADMIN = {
   id: "admin-001",
@@ -15,164 +24,206 @@ const ADMIN = {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useLocalStorage("f2c-user", null);
+  const [user, setUser] = useState(null);
   const [users, setUsers] = useLocalStorage("f2c-users", []);
 
   const isAuthenticated = !!user;
 
+useEffect(() => {
+  const unsubscribe = onAuthStateChanged(
+    auth,
+    (firebaseUser) => {
+      if (firebaseUser) {
+        const storedUser = users.find(
+          (u) => u.id === firebaseUser.uid
+        );
+
+        if (storedUser) {
+          setUser(storedUser);
+        }
+      } else {
+        setUser(null);
+      }
+    }
+  );
+
+  return unsubscribe;
+}, [users]);
+
   /* ── Login ── */
-  const login = (email, password) => {
+  const login = async (email, password) => {
+    // Admin Login
     if (email === ADMIN.email && password === ADMIN.password) {
       setUser(ADMIN);
       saveUser(ADMIN);
-      return { success: true, role: "admin" };
-    }
 
-    const found = users.find(
-      (u) =>
-        u.email.toLowerCase() === email.toLowerCase() &&
-        u.password === password,
-    );
-
-    if (!found) return { success: false, error: "Invalid email or password." };
-
-    if (found.banned)
       return {
-        success: false,
-        error: "Your account has been suspended. Contact support.",
-      };
-
-    /* Rejected farmers cannot log in */
-    if (found.role === "farmer" && found.verificationStatus === "rejected") {
-      return {
-        success: false,
-        error:
-          "Your farmer application was rejected. Please contact support@f2cmarket.com.",
+        success: true,
+        role: "admin",
       };
     }
 
-    /* Pending farmers CAN log in — into a restricted workspace */
-    setUser(found);
-    saveUser(found);
-    return {
-      success: true,
-      role: found.role,
-      verificationStatus: found.verificationStatus || "pending",
-    };
-  };
+    try {
+      const credentials = await loginWithEmail(email, password);
 
-  /* ── Register ── */
-  const register = (newUser) => {
-    const userToSave = {
-      ...newUser,
-      id: `user-${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      verificationStatus: newUser.role === "farmer" ? "pending" : "approved",
-      verified: newUser.role !== "farmer",
-      banned: false,
-    };
+      // Find complete profile from localStorage
+      const foundUser = users.find((u) => u.id === credentials.user.uid);
 
-    setUsers((prev) => [...prev, userToSave]);
+      if (!foundUser) {
+        return {
+          success: false,
+          error: "User profile not found.",
+        };
+      }
 
-    /* Consumers log in immediately; farmers wait for approval */
-    if (newUser.role === "consumer") {
-      setUser(userToSave);
-      saveUser(userToSave);
+      if (foundUser.banned) {
+        return {
+          success: false,
+          error: "Your account has been suspended. Contact support.",
+        };
+      }
+
+      if (
+        foundUser.role === "farmer" &&
+        foundUser.verificationStatus === "rejected"
+      ) {
+        return {
+          success: false,
+          error:
+            "Your farmer application was rejected. Please contact support.",
+        };
+      }
+
+      setUser(foundUser);
+      saveUser(foundUser);
+
+      return {
+        success: true,
+        role: foundUser.role,
+        verificationStatus: foundUser.verificationStatus || "pending",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.message,
+      };
     }
-
-    return userToSave;
   };
 
- /* ── Update logged-in user ── */
-const updateUser = (updatedData) => {
-  const updatedUser = updateStoredUser(updatedData);
+/* ── Register ── */
+const register = async (newUser) => {
+  const credentials = await registerWithEmail(
+    newUser.email,
+    newUser.password
+  );
 
-  if (!updatedUser) return;
+  const userToSave = {
+    ...newUser,
+    id: credentials.user.uid,
+    createdAt: new Date().toISOString(),
+    verificationStatus:
+      newUser.role === "farmer" ? "pending" : "approved",
+    verified: newUser.role !== "farmer",
+    banned: false,
+  };
 
-  setUser(updatedUser);
+  setUsers((prev) => [...prev, userToSave]);
 
-  setUsers((prevUsers) => {
-    const updatedUsers = prevUsers.map((existingUser) =>
-      existingUser.id === updatedUser.id
-        ? {
-            ...existingUser,
-            ...updatedUser,
+  // Save profile data for all users
+  saveUser(userToSave);
 
-            profile: {
-              ...(existingUser.profile || {}),
-              ...(updatedUser.profile || {}),
-            },
+  // Consumers log in immediately
+  if (newUser.role === "consumer") {
+    setUser(userToSave);
+  }
 
-            farmerProfile: {
-              ...(existingUser.farmerProfile || {}),
-              ...(updatedUser.farmerProfile || {}),
-            },
-          }
-        : existingUser
-    );
-
-    /* Sync farmer details to all products */
-    const products =
-      JSON.parse(localStorage.getItem("f2c-products")) || [];
-
-    const updatedProducts = products.map((product) =>
-      product.farmerId === updatedUser.id
-        ? {
-            ...product,
-
-            farmerName: updatedUser.name,
-
-            farmerAvatar: updatedUser.avatar || "",
-
-            farmName:
-              updatedUser.farmerProfile?.farmName ||
-              product.farmName,
-
-            farmLocation:
-              updatedUser.farmerProfile?.location ||
-              product.farmLocation,
-          }
-        : product
-    );
-
-    localStorage.setItem(
-      "f2c-products",
-      JSON.stringify(updatedProducts)
-    );
-
-    return updatedUsers;
-  });
+  return userToSave;
 };
 
-  /* ── Logout ── */
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("f2c-user");
+  /* ── Update logged-in user ── */
+  const updateUser = (updatedData) => {
+    const updatedUser = updateStoredUser(updatedData);
+
+    if (!updatedUser) return;
+
+    setUser(updatedUser);
+
+    setUsers((prevUsers) => {
+      const updatedUsers = prevUsers.map((existingUser) =>
+        existingUser.id === updatedUser.id
+          ? {
+              ...existingUser,
+              ...updatedUser,
+
+              profile: {
+                ...(existingUser.profile || {}),
+                ...(updatedUser.profile || {}),
+              },
+
+              farmerProfile: {
+                ...(existingUser.farmerProfile || {}),
+                ...(updatedUser.farmerProfile || {}),
+              },
+            }
+          : existingUser,
+      );
+
+      /* Sync farmer details to all products */
+      const products = JSON.parse(localStorage.getItem("f2c-products")) || [];
+
+      const updatedProducts = products.map((product) =>
+        product.farmerId === updatedUser.id
+          ? {
+              ...product,
+
+              farmerName: updatedUser.name,
+
+              farmerAvatar: updatedUser.avatar || "",
+
+              farmName: updatedUser.farmerProfile?.farmName || product.farmName,
+
+              farmLocation:
+                updatedUser.farmerProfile?.location || product.farmLocation,
+            }
+          : product,
+      );
+
+      localStorage.setItem("f2c-products", JSON.stringify(updatedProducts));
+
+      return updatedUsers;
+    });
   };
+
+  /* ── Logout ── */
+const logout = async () => {
+  await logoutUser();
+  setUser(null);
+  localStorage.removeItem("f2c-user");
+};
 
   /* ── Admin helpers ── */
   const getAllUsers = () => users;
   const updateUserInList = (updated) =>
-  setUsers((prev) =>
-    prev.map((existingUser) =>
-      existingUser.id === updated.id
-        ? {
-            ...existingUser,
-            ...updated,
+    setUsers((prev) =>
+      prev.map((existingUser) =>
+        existingUser.id === updated.id
+          ? {
+              ...existingUser,
+              ...updated,
 
-            profile: {
-              ...(existingUser.profile || {}),
-              ...(updated.profile || {}),
-            },
+              profile: {
+                ...(existingUser.profile || {}),
+                ...(updated.profile || {}),
+              },
 
-            farmerProfile: {
-              ...(existingUser.farmerProfile || {}),
-              ...(updated.farmerProfile || {}),
-            },
-          }
-        : existingUser
-    )
-  );
+              farmerProfile: {
+                ...(existingUser.farmerProfile || {}),
+                ...(updated.farmerProfile || {}),
+              },
+            }
+          : existingUser,
+      ),
+    );
 
   return (
     <AuthContext.Provider
