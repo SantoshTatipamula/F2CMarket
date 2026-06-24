@@ -1,6 +1,8 @@
 import { useRef } from "react";
 import { Camera } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { uploadImage } from "@/services/cloudinaryService";
+import { toast } from "sonner";
 
 export default function ProfileImageUpload() {
   const { user, updateUser } = useAuth();
@@ -9,38 +11,68 @@ export default function ProfileImageUpload() {
   const avatarInputRef = useRef(null);
 
   /* Upload Avatar */
-  const handleAvatarUpload = (event) => {
-    const file = event.target.files?.[0];
+ const handleAvatarUpload = async (event) => {
+  const file = event.target.files?.[0];
 
-    if (!file) return;
+  if (!file) return;
 
-    const reader = new FileReader();
+  try {
+    toast.loading("Uploading profile photo...", {
+      id: "avatar-upload",
+    });
 
-    reader.onload = () => {
-      updateUser({
-        avatar: reader.result,
-      });
-    };
+    const imageUrl = await uploadImage(
+      file,
+      "f2cmarket/profiles/avatars"
+    );
 
-    reader.readAsDataURL(file);
-  };
+    updateUser({
+      avatar: imageUrl,
+    });
+
+    toast.success("Profile photo updated!", {
+      id: "avatar-upload",
+    });
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Failed to upload profile photo.", {
+      id: "avatar-upload",
+    });
+  }
+};
 
   /* Upload Banner */
-  const handleBannerUpload = (event) => {
-    const file = event.target.files?.[0];
+ const handleBannerUpload = async (event) => {
+  const file = event.target.files?.[0];
 
-    if (!file) return;
+  if (!file) return;
 
-    const reader = new FileReader();
+  try {
+    toast.loading("Uploading banner...", {
+      id: "banner-upload",
+    });
 
-    reader.onload = () => {
-      updateUser({
-        coverImage: reader.result,
-      });
-    };
+    const imageUrl = await uploadImage(
+      file,
+      "f2cmarket/profiles/banners"
+    );
 
-    reader.readAsDataURL(file);
-  };
+    updateUser({
+      coverImage: imageUrl,
+    });
+
+    toast.success("Banner updated!", {
+      id: "banner-upload",
+    });
+  } catch (error) {
+    console.error(error);
+
+    toast.error("Failed to upload banner.", {
+      id: "banner-upload",
+    });
+  }
+};
 
   const bannerImage =
     user?.coverImage ||
