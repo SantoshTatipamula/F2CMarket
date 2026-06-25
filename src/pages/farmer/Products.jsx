@@ -20,11 +20,11 @@ export default function Products() {
   // Global Search
   const { searchQuery } = useSearch();
 
-  const { products, deleteProduct } = useProducts();
+  const { products, loading, deleteProduct } = useProducts();
 
   // Delete Product
-  const handleDelete = (productId) => {
-    deleteProduct(productId);
+  const handleDelete = async (productId) => {
+    await deleteProduct(productId);
   };
 
   // Edit Product
@@ -32,11 +32,11 @@ export default function Products() {
     navigate(`/farmer/products/edit/${product.id}`);
   };
 
-  const sellerProducts =
-  products.filter(
-    (product) =>
-      product.sellerId === user?.id
+  const sellerProducts = useMemo(() => {
+  return products.filter(
+    (product) => product.sellerId === user?.id
   );
+}, [products, user]);
 
   // Search Filter
   const filteredProducts = useMemo(() => {
@@ -124,12 +124,21 @@ export default function Products() {
         </div>
       </div>
 
+      {/* Loading */}
+      {loading && (
+        <div className="text-center text-sm text-[var(--text-secondary)]">
+          Loading products…
+        </div>
+      )}
+
       {/* Products */}
-      <ProductList
-        products={filteredProducts}
-        onDelete={handleDelete}
-        onEdit={handleEdit}
-      />
+      {!loading && (
+  <ProductList
+    products={filteredProducts}
+    onDelete={handleDelete}
+    onEdit={handleEdit}
+  />
+)}
     </section>
   );
 }

@@ -1,28 +1,32 @@
 import { useState } from "react";
 import { Search, Trash2, Package } from "lucide-react";
-import { getProducts, saveProducts } from "@/services/productService";
+import { useProducts } from "@/context/ProductContext";
+import { deleteProductAsAdmin } from "@/services/productService";
 import { parsePrice } from "@/utils/parsePrice";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
 import EmptyState from "@/components/common/ui/EmptyState";
+import { useState, useMemo } from "react";
 
 export default function AdminProducts() {
-  const [products, setProducts] = useState(() => getProducts());
+  const { products, loading, refreshProducts } = useProducts();
   const [search, setSearch] = useState("");
   const [confirm, setConfirm] = useState(null);
 
-  const filtered = products.filter(
+
+const filtered = useMemo(() => {
+  return products.filter(
     (p) =>
       p.name?.toLowerCase().includes(search.toLowerCase()) ||
       p.sellerName?.toLowerCase().includes(search.toLowerCase()) ||
       p.farmer?.toLowerCase().includes(search.toLowerCase()) ||
-      p.category?.toLowerCase().includes(search.toLowerCase()),
+      p.category?.toLowerCase().includes(search.toLowerCase())
   );
+}, [products, search]);
 
-  const handleDelete = (id) => {
-    const updated = products.filter((p) => String(p.id) !== String(id));
-    saveProducts(updated);
-    setProducts(updated);
+  const handleDelete = async (id) => {
+    await deleteProductAsAdmin(id);
+    await refreshProducts();
     setConfirm(null);
   };
 
@@ -51,7 +55,13 @@ export default function AdminProducts() {
           />
         </div>
 
-        {filtered.length === 0 ? (
+        {loading && (
+          <p className="text-sm text-[var(--text-muted)] py-4 text-center">
+            Loading products…
+          </p>
+        )}
+
+        {filtered.length === 0 && !loading ? (
           <EmptyState
             icon={Package}
             title="No Products Found"

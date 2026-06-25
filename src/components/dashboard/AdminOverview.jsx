@@ -2,22 +2,22 @@ import { Link } from "react-router-dom";
 import { Users, Sprout, Package, ShoppingCart, ArrowUpRight } from "lucide-react";
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 import { getOrders } from "@/services/orderService";
-import { getProducts } from "@/services/productService";
 import DashboardCard from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
 export default function AdminOverview() {
   const { users } = useAuth();
+  const { products: allProducts } = useProducts();
 
   const stats = useMemo(() => {
     const allOrders   = getOrders();
-    const allProducts = getProducts();
     const consumers   = (users || []).filter(u => u.role === "consumer");
     const farmers     = (users || []).filter(u => u.role === "farmer");
     const pending     = farmers.filter(f => f.verificationStatus === "pending");
     return { allOrders, allProducts, consumers, farmers, pending };
-  }, [users]);
+  }, [users, allProducts]);
 
   const overview = [
     { label: "Consumers",           value: String(stats.consumers.length),   icon: Users,        href: "/admin/users"    },

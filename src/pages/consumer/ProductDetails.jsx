@@ -1,7 +1,8 @@
 import { Link, useParams } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 
-import { getProductById, initializeProducts } from "@/services/productService";
+import { useProducts } from "@/context/ProductContext";
+
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 import ProductGallery from "@/components/productDetails/ProductGallery";
@@ -13,9 +14,19 @@ import RelatedProducts from "@/components/productDetails/RelatedProducts";
 export default function ProductDetails() {
   const { id } = useParams();
 
-  initializeProducts();
-  
-  const product = getProductById(id);
+  const { products, loading } = useProducts();
+
+  const product = products.find((p) => String(p.id) === String(id));
+
+  if (loading) {
+    return (
+      <section className="min-h-screen bg-gradient-to-b from-[var(--bg)] to-white px-4 py-20">
+        <div className="mx-auto max-w-lg text-center">
+          <p className="text-[var(--text-secondary)]">Loading product…</p>
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return (

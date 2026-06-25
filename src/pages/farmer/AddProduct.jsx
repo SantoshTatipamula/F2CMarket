@@ -11,8 +11,8 @@ export default function AddProduct() {
   const { user }  = useAuth();
   const { createProduct } = useProducts();
 
-  const handleAddProduct = (newProduct) => {
-  createProduct({
+  const handleAddProduct = async (newProduct) => {
+  await createProduct({
     ...newProduct,
 
     // Ownership
@@ -38,8 +38,7 @@ export default function AddProduct() {
       user?.name,
 
     location:
-      user?.farmerProfile?.location?.city ||
-      "",
+      user?.farmerProfile?.location?.city || "",
   });
 
   navigate("/farmer/products");

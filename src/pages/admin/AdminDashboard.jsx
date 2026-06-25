@@ -13,8 +13,8 @@ import {
 } from "recharts";
 
 import { useAuth }      from "@/context/AuthContext";
+import { useProducts }  from "@/context/ProductContext";
 import { getOrders }    from "@/services/orderService";
-import { getProducts }  from "@/services/productService";
 import Breadcrumb       from "@/components/common/ui/Breadcrumb";
 
 /* ── Helpers ─────────────────────────────────────────────────────── */
@@ -70,10 +70,10 @@ const COLORS = ["#16A34A", "#3B82F6", "#F59E0B", "#EF4444", "#8B5CF6"];
 /* ── Main ────────────────────────────────────────────────────────── */
 export default function AdminDashboard() {
   const { users } = useAuth();
+  const { products: allProducts } = useProducts();
 
   const data = useMemo(() => {
     const allOrders   = getOrders();
-    const allProducts = getProducts();
     const consumers   = users.filter((u) => u.role === "consumer");
     const farmers     = users.filter((u) => u.role === "farmer");
     const pending     = farmers.filter((f) => f.verificationStatus === "pending");
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
       revenueByMonth, ordersByMonth, ordersByStatus,
       topProducts, userGrowth, categoryData,
     };
-  }, [users]);
+  }, [users, allProducts]);
 
   const recentOrders = getOrders().slice(0, 8);
 
@@ -344,17 +344,10 @@ export default function AdminDashboard() {
                         <td className="px-4 py-3 font-medium text-[var(--text-primary)]">{order.consumer?.name || "—"}</td>
                         <td className="px-4 py-3 font-bold text-[var(--primary)]">₹{order.total}</td>
                         <td className="px-4 py-3">
-                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${
-                            order.paymentStatus === "Paid" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
-                          }`}>{order.paymentStatus || "Pending"}</span>
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${order.paymentStatus === "Paid" ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"}`}>{order.paymentStatus || "Pending"}</span>
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
-                            order.orderStatus === "Delivered" ? "bg-green-100 text-green-700"
-                            : order.orderStatus === "Cancelled" ? "bg-red-100 text-red-700"
-                            : order.orderStatus === "Shipped"  ? "bg-blue-100 text-blue-700"
-                            : "bg-orange-100 text-orange-700"
-                          }`}>{order.orderStatus}</span>
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${order.orderStatus === "Delivered" ? "bg-green-100 text-green-700" : order.orderStatus === "Cancelled" ? "bg-red-100 text-red-700" : order.orderStatus === "Shipped" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"}`}>{order.orderStatus}</span>
                         </td>
                       </tr>
                     ))}

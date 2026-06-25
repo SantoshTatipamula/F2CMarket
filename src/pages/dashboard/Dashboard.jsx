@@ -1,8 +1,8 @@
 import { Package, ShoppingCart, Wallet, Users } from "lucide-react";
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 import { getFarmerOrders } from "@/services/orderService";
-import { getProducts } from "@/services/productService";
 
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardStats from "@/components/dashboard/DashboardStats";
@@ -15,6 +15,7 @@ import RevenuePreviewChart from "@/components/dashboard/analytics/RevenuePreview
 
 export default function Dashboard() {
   const { user } = useAuth();
+  const { products } = useProducts();
 
   const isFarmer = user?.role === "farmer";
 
@@ -22,26 +23,6 @@ export default function Dashboard() {
 
   const isAdmin = user?.role === "admin";
 
-  /* Dashboard Stats — real data */
-  const stats = useMemo(() => {
-    const myProducts = getProducts().filter(
-      (p) => String(p.farmerId || p.sellerId) === String(user?.id)
-    );
-    const myOrders  = user?.id ? getFarmerOrders(user.id) : [];
-    const revenue   = myOrders
-      .filter((o) => o.orderStatus === "Delivered")
-      .reduce((sum, o) =>
-        sum + (o.items || []).reduce((s, i) => s + (i.subtotal || 0), 0), 0);
-    const customers = [...new Set(myOrders.map((o) => o.consumerId))].length;
-    const pending   = myOrders.filter((o) => o.orderStatus === "Pending").length;
-
-    return [
-      { title: "My Products", value: String(myProducts.length),                  icon: Package,      trend: "",               trendLabel: "listed"               },
-      { title: "Orders",      value: String(myOrders.length),                    icon: ShoppingCart, trend: `${pending} pending`, trendLabel: "total received"    },
-      { title: "Revenue",     value: `₹${revenue.toLocaleString("en-IN")}`,      icon: Wallet,       trend: "",               trendLabel: "from delivered orders" },
-      { title: "Customers",   value: String(customers),                          icon: Users,        trend: "",               trendLabel: "unique buyers"         },
-    ];
-  }, [user]);
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
@@ -62,7 +43,7 @@ export default function Dashboard() {
         <DashboardHeader />
 
         {/* Stats */}
-        <DashboardStats stats={stats} />
+        <DashboardStats />
 
         {/* Main Grid */}
         <div

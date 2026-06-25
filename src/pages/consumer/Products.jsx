@@ -18,19 +18,22 @@ export default function Products() {
   // Global Search
   const { searchQuery } = useSearch();
 
-const { products } = useProducts();
+  const { products } = useProducts();
 
   /* Dynamic categories */
-  
+
   const categories = useMemo(
     () => ["All", ...new Set(products.map((item) => item.category))],
-    [],
+    [products],
   );
 
   /* Dynamic max price */
   const maxLimit = useMemo(
-    () => Math.max(...products.map((item) => parsePrice(item.price))),
-    [],
+    () =>
+      products.length > 0
+        ? Math.max(...products.map((item) => parsePrice(item.price)))
+        : 1000,
+    [products],
   );
 
   const [selectedLocation, setSelectedLocation] = useState("All");
@@ -60,11 +63,11 @@ const { products } = useProducts();
     });
 
     return ["All", ...new Set(locs.filter(Boolean))];
-  }, []);
+  }, [products]);
 
   /* Final filtering */
   const finalProducts = useMemo(() => {
-    const searchTerm = searchQuery.toLowerCase().trim();
+    const searchTerm = searchQuery?.toLowerCase().trim() || "";
 
     return filteredProducts.filter((product) => {
       const matchesLocation =
@@ -75,6 +78,7 @@ const { products } = useProducts();
       const matchesSearch =
         product.name?.toLowerCase().includes(searchTerm) ||
         product.category?.toLowerCase().includes(searchTerm) ||
+        product.farmerName?.toLowerCase().includes(searchTerm) ||
         product.farmer?.toLowerCase().includes(searchTerm) ||
         product.location?.toLowerCase().includes(searchTerm);
 

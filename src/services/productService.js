@@ -1,110 +1,59 @@
-import { productsData } from "@/data/productsData";
+// import { productsData } from "@/data/productsData";
+import {
+  fetchProducts,
+  addProductToFirestore,
+  updateProductInFirestore,
+  deleteProductFromFirestore,
+} from "@/services/productFirestoreService";
 
 const STORAGE_KEY = "f2c-products";
 
-/* Initialize products */
+/* Initialize local cache only */
 export function initializeProducts() {
-  const existingProducts = localStorage.getItem(STORAGE_KEY);
-
-  if (!existingProducts) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(productsData));
+  if (!localStorage.getItem(STORAGE_KEY)) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
   }
 }
 
-/* Get all products */
+/* Get all products from localStorage cache */
 export function getProducts() {
   return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
 }
 
-/* Save all products */
+/* Save all products to localStorage cache */
 export function saveProducts(products) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
 }
 
-/* Add product */
+/* Add product (legacy localStorage only) */
 export function addProduct(newProduct) {
   const products = getProducts();
-
   const updatedProducts = [newProduct, ...products];
-
   saveProducts(updatedProducts);
-
   return updatedProducts;
 }
 
-/* Update product */
-export function updateProduct(productId, updatedData, currentUserId) {
-  const products = getProducts();
-
-  const existingProduct = products.find(
-    (product) => product.id.toString() === productId.toString(),
-  );
-
-  // Authorization check
-  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
-    return null;
-  }
-
-  const updatedProducts = products.map((product) =>
-    product.id.toString() === productId.toString()
-      ? {
-          ...product,
-          ...updatedData,
-
-          id: product.id,
-
-          sellerId: product.sellerId,
-
-          sellerName: product.sellerName,
-
-          sellerRole: product.sellerRole,
-        }
-      : product,
-  );
-
-  saveProducts(updatedProducts);
-
-  return updatedProducts.find(
-    (product) => product.id.toString() === productId.toString(),
+/* Get single product from cache */
+export function getProductById(productId) {
+  return getProducts().find(
+    (product) => String(product.id) === String(productId),
   );
 }
 
-/* Delete product */
-export function deleteProduct(productId, currentUserId) {
-  const products = getProducts();
-
-  const existingProduct = products.find(
-    (product) => product.id.toString() === productId.toString(),
-  );
-
-  // Authorization check
-  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
-    return products;
-  }
-
-  const updatedProducts = products.filter(
-    (product) => product.id.toString() !== productId.toString(),
-  );
-
-  saveProducts(updatedProducts);
-
-  return updatedProducts;
-}
-
-/* Get seller products */
+/* Get seller products from cache */
 export function getSellerProducts(sellerId) {
   return getProducts().filter((product) => product.sellerId === sellerId);
 }
 
-/* Get single product */
-export function getProductById(productId) {
-  return getProducts().find(
-    (product) => product.id.toString() === productId.toString(),
-  );
+/* Load products from Firestore and cache to localStorage */
+export async function loadProducts() {
+  const products = await fetchProducts();
+  saveProducts(products);
+  return products;
 }
 
-/* Create product */
-export function createProduct(productData) {
+/* Create product in Firestore + cache */
+export async function createProduct(productData) {
   const products = getProducts();
 
   const newProduct = {
@@ -134,18 +83,95 @@ export function createProduct(productData) {
 
     rating: 4.5,
 
-    id: crypto.randomUUID(),
+    id: productData.id || crypto.randomUUID(),
 
-    createdAt: new Date().toISOString(),
+    createdAt: productData.createdAt || new Date().toISOString(),
 
     status: "active",
 
     totalOrders: 0,
   };
 
-  const updatedProducts = [newProduct, ...products];
+  await addProductToFirestore(newProduct);
 
+  const updatedProducts = [newProduct, ...products];
   saveProducts(updatedProducts);
 
   return newProduct;
+}
+
+/* Update product in Firestore + cache */
+export async function updateProduct(productId, updatedData, currentUserId) {
+  const products = getProducts();
+
+  const existingProduct = products.find(
+    (product) => String(product.id) === String(productId),
+  );
+
+  // Authorization check
+  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
+    return null;
+  }
+
+  const merged = {
+    ...existingProduct,
+    ...updatedData,
+
+    id: existingProduct.id,
+
+    sellerId: existingProduct.sellerId,
+
+    sellerName: existingProduct.sellerName,
+
+    sellerRole: existingProduct.sellerRole,
+  };
+
+  await updateProductInFirestore(productId, merged);
+
+  const updatedProducts = products.map((product) =>
+    String(product.id) === String(productId) ? merged : product,
+  );
+
+  saveProducts(updatedProducts);
+
+  return merged;
+}
+
+/* Delete product in Firestore + cache */
+export async function deleteProduct(productId, currentUserId) {
+  const products = getProducts();
+
+  const existingProduct = products.find(
+    (product) => String(product.id) === String(productId),
+  );
+
+  // Authorization check
+  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
+    return products;
+  }
+
+  await deleteProductFromFirestore(productId);
+
+  const updatedProducts = products.filter(
+    (product) => String(product.id) !== String(productId),
+  );
+
+  saveProducts(updatedProducts);
+
+  return updatedProducts;
+}
+
+/* Admin delete without ownership check */
+export async function deleteProductAsAdmin(productId) {
+  const products = getProducts();
+
+  await deleteProductFromFirestore(productId);
+
+  const updatedProducts = products.filter(
+    (product) => String(product.id) !== String(productId),
+  );
+
+  saveProducts(updatedProducts);
+
+  return updatedProducts;
 }

@@ -1,7 +1,6 @@
-import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { saveUser, updateStoredUser } from "@/services/profileService";
 import { useEffect, createContext, useContext, useState } from "react";
-import { saveUserToFirestore } from "@/services/useService";
+import { saveUserToFirestore, getAllUsersFromFirestore, } from "@/services/userService";
 
 import {
   registerWithEmail,
@@ -26,7 +25,7 @@ const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
-  const [users, setUsers] = useLocalStorage("f2c-users", []);
+  const [users, setUsers] = useState([]);
 
   const isAuthenticated = !!user;
 
@@ -48,8 +47,23 @@ useEffect(() => {
     }
   );
 
+  
+
   return unsubscribe;
 }, [users]);
+
+useEffect(() => {
+  const loadUsers = async () => {
+    try {
+      const firestoreUsers = await getAllUsersFromFirestore();
+      setUsers(firestoreUsers);
+    } catch (error) {
+      console.error("Failed to load users:", error);
+    }
+  };
+
+  loadUsers();
+}, []);
 
   /* ── Login ── */
   const login = async (email, password) => {
@@ -128,9 +142,10 @@ const register = async (newUser) => {
     banned: false,
   };
 
+  await saveUserToFirestore(userToSave);
+  
   setUsers((prev) => [...prev, userToSave]);
 
-  await saveUserToFirestore(userToSave);
 
   // Save profile data for all users
   saveUser(userToSave);

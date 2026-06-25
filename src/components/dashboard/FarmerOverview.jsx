@@ -2,23 +2,27 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Package, ShoppingCart, TrendingUp, AlertTriangle } from "lucide-react";
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 import { getFarmerOrders } from "@/services/orderService";
-import { getProducts } from "@/services/productService";
 import DashboardCard from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
 export default function FarmerOverview() {
   const { user } = useAuth();
+  const { products } = useProducts();
 
   const stats = useMemo(() => {
-    const myProducts  = getProducts().filter(p => String(p.farmerId || p.sellerId) === String(user?.id));
+    const myProducts  = products.filter(p => String(p.farmerId || p.sellerId) === String(user?.id));
     const myOrders    = user?.id ? getFarmerOrders(user.id) : [];
     const pending     = myOrders.filter(o => o.orderStatus === "Pending").length;
     const lowStock    = myProducts.filter(p => (p.stock ?? 999) < 10).length;
-    const topProduct  = myProducts.sort((a, b) => (b.totalOrders || 0) - (a.totalOrders || 0))[0];
+    const topProduct = [...myProducts]
+  .sort(
+    (a, b) => (b.totalOrders || 0) - (a.totalOrders || 0)
+  )[0];
 
     return { myProducts, myOrders, pending, lowStock, topProduct };
-  }, [user]);
+  }, [user, products]);
 
   const overview = [
     { label: "Active Products",  value: String(stats.myProducts.length), icon: Package,       href: "/farmer/products"  },

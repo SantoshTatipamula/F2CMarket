@@ -5,28 +5,25 @@ import cart from "../../assets/icons/shopping-cart.png";
 import ProductCard from "../product/ProductCard";
 import SectionHeader from "../common/sections/SectionHeader";
 
-import { getProducts, initializeProducts } from "@/services/productService";
+import { useProducts } from "@/context/ProductContext";
 import { useLocation } from "@/context/LocationContext";
 
 export default function FeaturedProducts() {
 
-  initializeProducts();
-
+  const { products } = useProducts();
   const { selectedLocation } = useLocation();
 
-  const products = getProducts();
-
-const nearbyProducts = products.filter(
+  const nearbyProducts = products.filter(
   (product) =>
+    selectedLocation?.city &&
     product.farmLocation?.city?.toLowerCase() ===
-    selectedLocation?.city?.toLowerCase()
+      selectedLocation.city.toLowerCase()
 );
 
-const featuredProducts =
-  nearbyProducts.length >= 4
-    ? nearbyProducts.slice(0, 4)
-    : products.slice(0, 4);
-
+  const featuredProducts =
+    nearbyProducts.length >= 4
+      ? nearbyProducts.slice(0, 4)
+      : products.slice(0, 4);
 
   return (
     <motion.section
@@ -45,24 +42,32 @@ const featuredProducts =
         className="max-w-7xl mx-auto px-4 lg:px-8 relative z-10"
       >
         <SectionHeader
-  badge="Featured Products"
-  icon={cart}
-  title="Fresh Picks From"
-  highlight={selectedLocation?.city || "Local Farmers"}
-  description={`Fresh products available near ${
-    selectedLocation?.city || "you"
-  }.`}
-/>
+          badge="Featured Products"
+          icon={cart}
+          title="Fresh Picks From"
+          highlight={selectedLocation?.city || "Local Farmers"}
+          description={`Fresh products available near ${
+            selectedLocation?.city || "you"
+          }.`}
+        />
 
         <motion.div
           variants={staggerContainer}
           className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6"
         >
-          {featuredProducts.map((item) => (
-            <motion.div key={item.id} variants={fadeUp}>
-              <ProductCard product={item} />
-            </motion.div>
-          ))}
+          {featuredProducts.length > 0 ? (
+  featuredProducts.map((item) => (
+    <motion.div key={item.id} variants={fadeUp}>
+      <ProductCard product={item} />
+    </motion.div>
+  ))
+) : (
+  <div className="col-span-full text-center py-12">
+    <p className="text-[var(--text-secondary)]">
+      No products available yet.
+    </p>
+  </div>
+)}
         </motion.div>
       </motion.div>
     </motion.section>

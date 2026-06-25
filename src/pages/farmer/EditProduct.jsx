@@ -1,5 +1,5 @@
-
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 
 import { Navigate, useNavigate, useParams } from "react-router-dom";
 
@@ -7,32 +7,34 @@ import ProductForm from "@/components/farmer/products/ProductForm";
 
 import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 
-import { getProductById } from "@/services/productService";
-
-import { useProducts } from "@/context/ProductContext";
-
 export default function EditProduct() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const { updateProduct } = useProducts();
+  const { products, updateProduct } = useProducts();
 
   const { id } = useParams();
 
-  // Get Product
-  const product = getProductById(id);
+  // Get Product from context
+  const product = products.find((p) => String(p.id) === String(id));
 
   const isOwner = product?.sellerId === user?.id;
 
   // Update Product — preserve farmer identity fields
-  const handleUpdateProduct = (updatedProduct) => {
-    updateProduct(id, {
+  const handleUpdateProduct = async (updatedProduct) => {
+    await updateProduct(id, {
       ...updatedProduct,
       farmerId:   user?.id,
       sellerId:   user?.id,
       sellerName: user?.name,
-      farmer:     user?.farmName || user?.name,
-      location:   user?.farmLocation || updatedProduct.location || "",
+      farmer:
+  user?.farmerProfile?.farmName ||
+  user?.name,
+
+location:
+  user?.farmerProfile?.location ||
+  updatedProduct.location ||
+  "",
     });
     navigate("/farmer/products");
   };

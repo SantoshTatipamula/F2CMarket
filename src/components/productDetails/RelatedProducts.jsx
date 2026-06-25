@@ -1,27 +1,26 @@
 import { useNavigate } from "react-router-dom";
-
 import { ArrowRight, Sparkles } from "lucide-react";
+
 import ProductCard from "../product/ProductCard";
-import { productsData } from "@/data/productsData";
+
+import { useProducts } from "@/context/ProductContext";
 
 export default function RelatedProducts({ product }) {
-  const relatedProducts = productsData
+  const navigate = useNavigate();
+
+  const { products } = useProducts();
+
+  const relatedProducts = products
     .filter(
       (item) =>
-        item.id !== product?.id &&
+        String(item.id) !== String(product?.id) &&
         item.category === product?.category
     )
     .slice(0, 4);
 
-
-    const navigate = useNavigate();
-
-const goToProducts = () => {
-  navigate("/products");
-};
-
-
-
+  const goToProducts = () => {
+    navigate("/products");
+  };
 
   if (!relatedProducts.length) return null;
 

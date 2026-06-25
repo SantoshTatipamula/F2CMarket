@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 import { User, Store, MapPin, Phone, FileText } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
+import { useProducts } from "@/context/ProductContext";
 
-import { getProducts } from "@/services/productService";
 import { FaWhatsapp } from "react-icons/fa";
 import ProductCard from "@/components/product/ProductCard";
 
@@ -12,11 +12,13 @@ export default function FarmerProfile() {
   const { farmerId } = useParams();
 
   const { users } = useAuth();
+  const { products } = useProducts();
 
   const farmer = users.find((user) => user.id === farmerId);
-  const farmerProducts = getProducts().filter(
-    (product) => product.farmerId === farmer.id,
-  );
+  const farmerProducts = products.filter(
+  (product) =>
+    String(product.farmerId || product.sellerId) === String(farmer?.id)
+);
 
   if (!farmer) {
     return (
