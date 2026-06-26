@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Search, CheckCircle2, XCircle, ChevronDown, ChevronUp, Sprout } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { updateUserInFirestore } from "@/services/userService";
 import { sendGenericEmail } from "@/services/emailService";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
@@ -106,8 +107,16 @@ export default function AdminFarmers() {
     [users, search, activeTab]
   );
 
-  const approveFarmer = (farmer) => {
-    updateUserInList({ ...farmer, verificationStatus: "approved", verified: true });
+  const approveFarmer = async (farmer) => {
+    const updatedFarmer = { ...farmer, verificationStatus: "approved", verified: true };
+    updateUserInList(updatedFarmer);
+
+    try {
+      await updateUserInFirestore(updatedFarmer.id, updatedFarmer);
+    } catch (error) {
+      console.error("Failed to persist approved farmer status:", error);
+    }
+
     sendGenericEmail({
       name:    farmer.name,
       email:   farmer.email,

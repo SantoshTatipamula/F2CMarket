@@ -12,7 +12,18 @@ export default function LocationBar() {
   const displayLocation =
     selectedLocation?.city?.length > 15
       ? `${selectedLocation.city.slice(0, 15)}...`
-      : selectedLocation?.city || "Unknown Location";
+      : selectedLocation?.city ||
+        selectedLocation?.district ||
+        selectedLocation?.state ||
+        selectedLocation?.fullAddress ||
+        "Unknown Location";
+
+  const locationTitle =
+    selectedLocation?.city ||
+    selectedLocation?.district ||
+    selectedLocation?.state ||
+    selectedLocation?.fullAddress ||
+    "Unknown Location";
 
   return (
     <>
@@ -41,7 +52,7 @@ export default function LocationBar() {
               ) : (
                 <p
                   className="truncate text-sm font-semibold"
-                  title={selectedLocation?.city}
+                  title={locationTitle}
                 >
                   {displayLocation}
                 </p>

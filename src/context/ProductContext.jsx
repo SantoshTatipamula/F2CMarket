@@ -21,39 +21,35 @@ export function ProductProvider({ children }) {
 
   // Initialize
   useEffect(() => {
-  initializeProducts();
+    let mounted = true;
 
-  let mounted = true;
+    async function init() {
+      try {
+        await initializeProducts();
+        const data = await loadProducts();
 
-  async function init() {
-    try {
-      const data = await loadProducts();
+        if (mounted) {
+          setProducts(data || []);
+        }
+      } catch (error) {
+        console.error("Failed to load products from Firestore:", error);
 
-      if (mounted) {
-        setProducts(data || []);
-      }
-    } catch (error) {
-      console.error(
-        "Failed to load products from Firestore:",
-        error
-      );
-
-      if (mounted) {
-        setProducts(getProducts());
-      }
-    } finally {
-      if (mounted) {
-        setLoading(false);
+        if (mounted) {
+          setProducts(getProducts());
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
       }
     }
-  }
 
-  init();
+    init();
 
-  return () => {
-    mounted = false;
-  };
-}, []);
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   // Refresh Products
   const refreshProducts = async () => {

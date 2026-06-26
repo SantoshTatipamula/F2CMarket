@@ -2,12 +2,18 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
 import useGeolocation from "@/hooks/useGeolocation";
 import { reverseGeocode } from "@/services/locationService";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getLocationFromFirestore,
+  saveLocationToFirestore,
+} from "@/services/locationFirestoreService";
 
 const STORAGE_KEY = "f2c_selected_location";
 
 const LocationContext = createContext(null);
 
 export function LocationProvider({ children }) {
+  const { user } = useAuth();
   const { location, loading: geoLoading, error } = useGeolocation();
 
   const [selectedLocation, setSelectedLocation] = useState(() => {
@@ -22,6 +28,48 @@ export function LocationProvider({ children }) {
   });
 
   const [addressLoading, setAddressLoading] = useState(true);
+  const [remoteLocationLoaded, setRemoteLocationLoaded] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRemoteLocation() {
+      if (!user?.id) {
+        setRemoteLocationLoaded(false);
+        return;
+      }
+
+      try {
+        const remoteLocation = await getLocationFromFirestore(user.id);
+        if (!mounted) return;
+
+        if (remoteLocation) {
+          setSelectedLocation(remoteLocation);
+        }
+
+        setRemoteLocationLoaded(true);
+      } catch (error) {
+        console.error("Failed to load location from Firestore:", error);
+        if (mounted) {
+          setRemoteLocationLoaded(true);
+        }
+      }
+    }
+
+    loadRemoteLocation();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !remoteLocationLoaded || !selectedLocation) return;
+
+    saveLocationToFirestore(user.id, selectedLocation).catch((error) => {
+      console.error("Failed to sync location to Firestore:", error);
+    });
+  }, [selectedLocation, user?.id, remoteLocationLoaded]);
 
   useEffect(() => {
     async function initializeLocation() {

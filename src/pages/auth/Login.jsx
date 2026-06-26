@@ -23,7 +23,7 @@ export default function Login() {
   const [error,   setError]   = useState("");
   const [loading, setLoading] = useState(false);
 
-  const from    = location.state?.from?.pathname || null;
+  const from    = location.state?.from?.pathname;
   const isValid = form.email.trim() && form.password.trim();
 
   const handleChange = (e) => {

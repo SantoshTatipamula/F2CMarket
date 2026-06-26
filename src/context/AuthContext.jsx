@@ -1,6 +1,13 @@
-import { saveUser, updateStoredUser } from "@/services/profileService";
 import { useEffect, createContext, useContext, useState } from "react";
-import { saveUserToFirestore, getAllUsersFromFirestore, } from "@/services/userService";
+import {
+  saveUserToFirestore,
+  getAllUsersFromFirestore,
+  getUserFromFirestore,
+  updateUserInFirestore,
+} from "@/services/userService";
+import { syncFarmerProducts } from "@/services/productService";
+import { initializeNotifications } from "@/services/notificationService";
+import { initializeOrders } from "@/services/orderService";
 
 import {
   registerWithEmail,
@@ -26,51 +33,86 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const isAuthenticated = !!user;
 
-useEffect(() => {
-  const unsubscribe = onAuthStateChanged(
-    auth,
-    (firebaseUser) => {
-      if (firebaseUser) {
-        const storedUser = users.find(
-          (u) => u.id === firebaseUser.uid
-        );
+  useEffect(() => {
+    let mounted = true;
 
-        if (storedUser) {
-          setUser(storedUser);
+    const loadUsers = async () => {
+      try {
+        const firestoreUsers = await getAllUsersFromFirestore();
+        if (mounted) {
+          setUsers(firestoreUsers);
         }
-      } else {
-        setUser(null);
+      } catch (error) {
+        console.error("Failed to load users:", error);
       }
-    }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!mounted) return;
+      if (!firebaseUser) {
+        setUser(null);
+        setUsers([]);
+        setLoading(false);
+        return;
+      }
+
+      try {
+  const firestoreUser = await getUserFromFirestore(
+    firebaseUser.uid,
   );
 
-  
+  if (firestoreUser) {
+    setUser(firestoreUser);
 
-  return unsubscribe;
-}, [users]);
+    await loadUsers();
 
-useEffect(() => {
-  const loadUsers = async () => {
-    try {
-      const firestoreUsers = await getAllUsersFromFirestore();
-      setUsers(firestoreUsers);
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    }
-  };
+    initializeNotifications(
+      firestoreUser.id,
+    ).catch((error) => {
+      console.error(
+        "Failed to initialize notifications:",
+        error,
+      );
+    });
 
-  loadUsers();
-}, []);
+    initializeOrders(
+      firestoreUser.id,
+      firestoreUser.role,
+    ).catch((error) => {
+      console.error(
+        "Failed to initialize orders:",
+        error,
+      );
+    });
+  } else {
+    setUser(null);
+  }
+} catch (error) {
+  console.error(
+    "Failed to load Firebase user profile:",
+    error,
+  );
+
+  setUser(null);
+} finally {
+  setLoading(false);
+}
+    });
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
+  }, []);
 
   /* ── Login ── */
   const login = async (email, password) => {
-    // Admin Login
     if (email === ADMIN.email && password === ADMIN.password) {
       setUser(ADMIN);
-      saveUser(ADMIN);
 
       return {
         success: true,
@@ -80,9 +122,7 @@ useEffect(() => {
 
     try {
       const credentials = await loginWithEmail(email, password);
-
-      // Find complete profile from localStorage
-      const foundUser = users.find((u) => u.id === credentials.user.uid);
+      const foundUser = await getUserFromFirestore(credentials.user.uid);
 
       if (!foundUser) {
         return {
@@ -110,7 +150,10 @@ useEffect(() => {
       }
 
       setUser(foundUser);
-      saveUser(foundUser);
+      setUsers((prevUsers) => [
+        ...prevUsers.filter((u) => u.id !== foundUser.id),
+        foundUser,
+      ]);
 
       return {
         success: true,
@@ -125,99 +168,90 @@ useEffect(() => {
     }
   };
 
-/* ── Register ── */
-const register = async (newUser) => {
-  const credentials = await registerWithEmail(
-    newUser.email,
-    newUser.password
-  );
+  /* ── Register ── */
+  const register = async (newUser) => {
+    const credentials = await registerWithEmail(
+      newUser.email,
+      newUser.password,
+    );
 
-  const userToSave = {
-    ...newUser,
-    id: credentials.user.uid,
-    createdAt: new Date().toISOString(),
-    verificationStatus:
-      newUser.role === "farmer" ? "pending" : "approved",
-    verified: newUser.role !== "farmer",
-    banned: false,
+    const userToSave = {
+      ...newUser,
+      id: credentials.user.uid,
+      createdAt: new Date().toISOString(),
+      verificationStatus: newUser.role === "farmer" ? "pending" : "approved",
+      verified: newUser.role !== "farmer",
+      banned: false,
+    };
+
+    await saveUserToFirestore(userToSave);
+    setUsers((prev) => [...prev, userToSave]);
+
+    if (newUser.role === "consumer") {
+      setUser(userToSave);
+    }
+
+    return userToSave;
   };
 
-  await saveUserToFirestore(userToSave);
-  
-  setUsers((prev) => [...prev, userToSave]);
-
-
-  // Save profile data for all users
-  saveUser(userToSave);
-
-  // Consumers log in immediately
-  if (newUser.role === "consumer") {
-    setUser(userToSave);
-  }
-
-  return userToSave;
-};
-
   /* ── Update logged-in user ── */
-  const updateUser = (updatedData) => {
-    const updatedUser = updateStoredUser(updatedData);
+  const updateUser = async (updatedData) => {
+    if (!user) return null;
 
-    if (!updatedUser) return;
+    const updatedUser = {
+      ...user,
+      ...updatedData,
+      profile: {
+        ...(user.profile || {}),
+        ...(updatedData.profile || {}),
+      },
+      farmerProfile: {
+        ...(user.farmerProfile || {}),
+        ...(updatedData.farmerProfile || {}),
+      },
+    };
+
+    try {
+      await updateUserInFirestore(updatedUser.id, updatedUser);
+    } catch (error) {
+      console.error("Failed to update user in Firestore:", error);
+    }
 
     setUser(updatedUser);
+    setUsers((prevUsers) =>
+      prevUsers.map((existingUser) =>
+        existingUser.id === updatedUser.id ? updatedUser : existingUser,
+      ),
+    );
 
-    setUsers((prevUsers) => {
-      const updatedUsers = prevUsers.map((existingUser) =>
-        existingUser.id === updatedUser.id
-          ? {
-              ...existingUser,
-              ...updatedUser,
+    if (updatedUser.role === "farmer") {
+      const productUpdates = {
+        farmer: updatedUser.name,
+        farmerName: updatedUser.name,
+        farmerAvatar: updatedUser.avatar || "",
+        farmName: updatedUser.farmerProfile?.farmName || "",
+        farmLocation: updatedUser.farmerProfile?.location || null,
+        location:
+          updatedUser.farmerProfile?.location?.city ||
+          updatedUser.profile?.location ||
+          "",
+      };
 
-              profile: {
-                ...(existingUser.profile || {}),
-                ...(updatedUser.profile || {}),
-              },
+      try {
+        await syncFarmerProducts(updatedUser.id, productUpdates);
+      } catch (error) {
+        console.error("Failed to sync farmer product profile updates:", error);
+      }
+    }
 
-              farmerProfile: {
-                ...(existingUser.farmerProfile || {}),
-                ...(updatedUser.farmerProfile || {}),
-              },
-            }
-          : existingUser,
-      );
-
-      /* Sync farmer details to all products */
-      const products = JSON.parse(localStorage.getItem("f2c-products")) || [];
-
-      const updatedProducts = products.map((product) =>
-        product.farmerId === updatedUser.id
-          ? {
-              ...product,
-
-              farmerName: updatedUser.name,
-
-              farmerAvatar: updatedUser.avatar || "",
-
-              farmName: updatedUser.farmerProfile?.farmName || product.farmName,
-
-              farmLocation:
-                updatedUser.farmerProfile?.location || product.farmLocation,
-            }
-          : product,
-      );
-
-      localStorage.setItem("f2c-products", JSON.stringify(updatedProducts));
-
-      return updatedUsers;
-    });
+    return updatedUser;
   };
 
   /* ── Logout ── */
-const logout = async () => {
-  await logoutUser();
-  setUser(null);
-  localStorage.removeItem("f2c-user");
-};
+  const logout = async () => {
+    await logoutUser();
+    setUser(null);
+  };
 
   /* ── Admin helpers ── */
   const getAllUsers = () => users;
@@ -228,16 +262,6 @@ const logout = async () => {
           ? {
               ...existingUser,
               ...updated,
-
-              profile: {
-                ...(existingUser.profile || {}),
-                ...(updated.profile || {}),
-              },
-
-              farmerProfile: {
-                ...(existingUser.farmerProfile || {}),
-                ...(updated.farmerProfile || {}),
-              },
             }
           : existingUser,
       ),
@@ -248,6 +272,7 @@ const logout = async () => {
       value={{
         user,
         users,
+        loading,
         isAuthenticated,
         login,
         register,

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Search, Trash2, Package } from "lucide-react";
 import { useProducts } from "@/context/ProductContext";
 import { deleteProductAsAdmin } from "@/services/productService";
@@ -6,7 +6,6 @@ import { parsePrice } from "@/utils/parsePrice";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
 import EmptyState from "@/components/common/ui/EmptyState";
-import { useState, useMemo } from "react";
 
 export default function AdminProducts() {
   const { products, loading, refreshProducts } = useProducts();

@@ -1,7 +1,7 @@
 /**
  * orderService.js
  * Single source of truth for ALL order operations.
- * localStorage-backed — swap internals for Firestore later.
+ * Firestore-backed with local cache fallback.
  */
 
 import {
@@ -13,8 +13,75 @@ import {
   sendOrderConfirmationEmail,
   sendDeliveryStatusEmail,
 } from "@/services/emailService";
+import { getUserFromFirestore } from "@/services/userService";
+import {
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  setDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { db } from "@/config/firebase";
 
 const ORDERS_KEY = "f2c-orders";
+const ORDERS_COLLECTION = "orders";
+
+async function fetchOrdersForConsumerFromFirestore(consumerId) {
+  const q = query(
+    collection(db, ORDERS_COLLECTION),
+    where("consumerId", "==", consumerId),
+    orderBy("createdAt", "desc"),
+  );
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+}
+
+async function fetchOrdersForFarmerFromFirestore(farmerId) {
+  const q = query(
+    collection(db, ORDERS_COLLECTION),
+    where("farmerIds", "array-contains", farmerId),
+    orderBy("createdAt", "desc"),
+  );
+  const snapshot = await getDocs(q);
+
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+  }));
+}
+
+async function saveOrderToFirestore(order) {
+  const ref = doc(db, ORDERS_COLLECTION, String(order.id));
+  await setDoc(ref, JSON.parse(JSON.stringify(order)));
+}
+
+async function updateOrderInFirestore(orderId, data) {
+  const ref = doc(db, ORDERS_COLLECTION, String(orderId));
+  await updateDoc(ref, JSON.parse(JSON.stringify(data)));
+}
+
+export async function initializeOrders(userId, role) {
+  if (!userId || !role) return;
+
+  try {
+    const orders =
+      role === "farmer"
+        ? await fetchOrdersForFarmerFromFirestore(userId)
+        : await fetchOrdersForConsumerFromFirestore(userId);
+
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  } catch (error) {
+    console.error("Failed to initialize orders from Firestore:", error);
+  }
+}
 
 /* ── Helpers ──────────────────────────────────────────────── */
 
@@ -56,7 +123,7 @@ export function getFarmerOrders(farmerId) {
 }
 
 /** Save a new order + fire order_placed notification */
-export function saveOrder(orderData) {
+export async function saveOrder(orderData) {
   const orders = readAll();
   const order = {
     ...orderData,
@@ -72,28 +139,40 @@ export function saveOrder(orderData) {
         note: "Order placed successfully",
       },
     ],
+    farmerIds: Array.from(
+      new Set((orderData.items || []).map((item) => String(item.farmerId)))
+    ),
   };
   writeAll([order, ...orders]);
+
+  try {
+    await saveOrderToFirestore(order);
+  } catch (error) {
+    console.error("Failed to persist order to Firestore:", error);
+  }
 
   /* In-app notification */
   notifyOrderPlaced(order.consumerId, order.id, order.total);
 
   /* Email confirmation (non-blocking) */
-  const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
-  const consumer = users.find((u) => u.id === order.consumerId);
-  if (consumer?.email) {
-    sendOrderConfirmationEmail({
-      name: consumer.name,
-      email: consumer.email,
-      order,
-    });
+  try {
+    const consumer = await getUserFromFirestore(order.consumerId);
+    if (consumer?.email) {
+      sendOrderConfirmationEmail({
+        name: consumer.name,
+        email: consumer.email,
+        order,
+      });
+    }
+  } catch (error) {
+    console.error("Failed to load consumer profile for order confirmation email:", error);
   }
 
   return order;
 }
 
 /** Update order status — fires notification to consumer */
-export function updateOrderStatus(orderId, newStatus) {
+export async function updateOrderStatus(orderId, newStatus) {
   const orders = readAll();
   let updated = null;
 
@@ -122,6 +201,13 @@ export function updateOrderStatus(orderId, newStatus) {
 
   if (updated) {
     writeAll(next);
+
+    try {
+      await updateOrderInFirestore(orderId, updated);
+    } catch (error) {
+      console.error("Failed to update order status in Firestore:", error);
+    }
+
     /* Notify consumer on meaningful status changes */
     const notifyStatuses = [
       "Accepted",
@@ -136,16 +222,20 @@ export function updateOrderStatus(orderId, newStatus) {
       } else {
         notifyOrderStatusChanged(updated.consumerId, orderId, newStatus);
       }
+
       /* Email delivery status update (non-blocking) */
-      const users = JSON.parse(localStorage.getItem("f2c-users") || "[]");
-      const consumer = users.find((u) => u.id === updated.consumerId);
-      if (consumer?.email) {
-        sendDeliveryStatusEmail({
-          name: consumer.name,
-          email: consumer.email,
-          orderId,
-          status: newStatus,
-        });
+      try {
+        const consumer = await getUserFromFirestore(updated.consumerId);
+        if (consumer?.email) {
+          sendDeliveryStatusEmail({
+            name: consumer.name,
+            email: consumer.email,
+            orderId,
+            status: newStatus,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load consumer profile for delivery status email:", error);
       }
     }
   }
@@ -154,7 +244,7 @@ export function updateOrderStatus(orderId, newStatus) {
 }
 
 /** Consumer cancels their own order (only if Pending or Accepted) */
-export function cancelOrder(orderId) {
+export async function cancelOrder(orderId) {
   const orders = readAll();
   let updated = null;
 
@@ -168,6 +258,13 @@ export function cancelOrder(orderId) {
 
   if (updated) {
     writeAll(next);
+
+    try {
+      await updateOrderInFirestore(updated.id, updated);
+    } catch (error) {
+      console.error("Failed to persist cancelled order to Firestore:", error);
+    }
+
     notifyOrderCancelled(updated.consumerId, orderId);
   }
 

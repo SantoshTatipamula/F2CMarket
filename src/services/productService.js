@@ -8,9 +8,15 @@ import {
 
 const STORAGE_KEY = "f2c-products";
 
-/* Initialize local cache only */
-export function initializeProducts() {
-  if (!localStorage.getItem(STORAGE_KEY)) {
+/* Initialize product cache from Firestore if missing */
+export async function initializeProducts() {
+  if (localStorage.getItem(STORAGE_KEY)) return;
+
+  try {
+    const products = await fetchProducts();
+    saveProducts(products);
+  } catch (error) {
+    console.error("Failed to initialize products from Firestore:", error);
     localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
   }
 }
@@ -38,6 +44,36 @@ export function getProductById(productId) {
   return getProducts().find(
     (product) => String(product.id) === String(productId),
   );
+}
+
+/* Sync farmer profile fields across all local and Firestore products */
+export async function syncFarmerProducts(farmerId, updates) {
+  const products = getProducts();
+  const updatedProducts = products.map((product) => {
+    if (String(product.farmerId) !== String(farmerId)) {
+      return product;
+    }
+
+    return {
+      ...product,
+      ...updates,
+      id: product.id,
+    };
+  });
+
+  saveProducts(updatedProducts);
+
+  const toUpdate = updatedProducts.filter(
+    (product) => String(product.farmerId) === String(farmerId),
+  );
+
+  await Promise.all(
+    toUpdate.map((product) =>
+      updateProductInFirestore(product.id, product),
+    ),
+  );
+
+  return updatedProducts;
 }
 
 /* Get seller products from cache */

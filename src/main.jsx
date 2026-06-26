@@ -12,13 +12,8 @@ import { WishlistProvider} from "./context/WishlistContext";
 import { SearchProvider }  from "./context/SearchContext";
 import { LocationProvider } from "./context/LocationContext";
 
-import { initSeedData } from "@/data/initSeedData";
-
 import "./styles/globals.css";
 import "./styles/variables.css";
-
-/* Initialize temp seed data on first load */
-initSeedData();
 
 if ("scrollRestoration" in window.history) {
   window.history.scrollRestoration = "manual";

@@ -100,38 +100,6 @@ export default function ProfileForm() {
       message: `Hi ${user?.name}, your profile was updated.\n\nF2CMARKET Team`,
     });
 
-    // Sync all products with latest farmer details
-    // Sync all farmer products with updated profile information
-    if (isFarmer) {
-      const products = JSON.parse(localStorage.getItem("f2c-products")) || [];
-
-      const updatedProducts = products.map((product) => {
-        if (product.farmerId !== user?.id) {
-          return product;
-        }
-
-        return {
-          ...product,
-
-          // Farmer information
-          farmer: form.ownerName,
-          farmerName: form.ownerName,
-
-          // Farm information
-          farmName: form.farmName,
-          farmLocation: form.farmLocation,
-
-          // Marketplace location
-          location: form.farmLocation?.city || "",
-
-          // Keep avatar synchronized (for future profile image support)
-          farmerAvatar: user?.avatar || product.farmerAvatar,
-        };
-      });
-
-      localStorage.setItem("f2c-products", JSON.stringify(updatedProducts));
-    }
-
     updateUser({
       name: form.ownerName,
 

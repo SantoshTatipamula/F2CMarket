@@ -1,11 +1,77 @@
-import { createContext, useContext, useMemo } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { parsePrice } from "@/utils/parsePrice";
+import { useAuth } from "@/context/AuthContext";
+import {
+  getCartFromFirestore,
+  saveCartToFirestore,
+} from "@/services/cartFirestoreService";
 
 const CartContext = createContext();
 
+function mergeCartItems(localItems, remoteItems) {
+  const merged = [...remoteItems];
+  const remoteMap = new Map(remoteItems.map((item) => [String(item.id), item]));
+
+  for (const localItem of localItems) {
+    const key = String(localItem.id);
+    if (!remoteMap.has(key)) {
+      merged.push(localItem);
+      continue;
+    }
+
+    const remoteItem = remoteMap.get(key);
+    merged[merged.findIndex((item) => String(item.id) === key)] = {
+      ...remoteItem,
+      quantity: (remoteItem.quantity || 0) + (localItem.quantity || 0),
+    };
+  }
+
+  return merged;
+}
+
 export function CartProvider({ children }) {
+  const { user } = useAuth();
   const [cartItems, setCartItems] = useLocalStorage("f2c-cart", []);
+  const [remoteCartLoaded, setRemoteCartLoaded] = useState(false);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadRemoteCart() {
+      if (!user?.id) {
+        setRemoteCartLoaded(false);
+        return;
+      }
+
+      try {
+        const remoteItems = await getCartFromFirestore(user.id);
+        if (!mounted) return;
+
+        setCartItems((prevCartItems) => mergeCartItems(prevCartItems, remoteItems));
+        setRemoteCartLoaded(true);
+      } catch (error) {
+        console.error("Failed to load cart from Firestore:", error);
+        if (mounted) {
+          setRemoteCartLoaded(true);
+        }
+      }
+    }
+
+    loadRemoteCart();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (!user?.id || !remoteCartLoaded) return;
+
+    saveCartToFirestore(user.id, cartItems).catch((error) => {
+      console.error("Failed to sync cart to Firestore:", error);
+    });
+  }, [cartItems, user?.id, remoteCartLoaded]);
 
   const addToCart = (product, quantity = 1) => {
     setCartItems((prev) => {

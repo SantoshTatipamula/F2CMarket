@@ -21,27 +21,29 @@ export async function reverseGeocode(latitude, longitude) {
     const address = data.address || {};
 
     return {
-  latitude,
-  longitude,
+      latitude,
+      longitude,
 
-  city:
-    address.village ||
-    address.hamlet ||
-    address.suburb ||
-    address.neighbourhood ||
-    address.locality ||
-    address.town ||
-    address.city ||
-    "Unknown",
+      city:
+        address.village ||
+        address.hamlet ||
+        address.suburb ||
+        address.neighbourhood ||
+        address.locality ||
+        address.town ||
+        address.city ||
+        address.county ||
+        data.display_name ||
+        "Unknown",
 
-  mandal:
-    address.county ||
-    "",
+      mandal:
+        address.county ||
+        "",
 
-  district:
-    address.state_district ||
-    address.county ||
-    "",
+      district:
+        address.state_district ||
+        address.county ||
+        "",
 
   state: address.state || "",
 
