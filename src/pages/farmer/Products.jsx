@@ -33,10 +33,8 @@ export default function Products() {
   };
 
   const sellerProducts = useMemo(() => {
-  return products.filter(
-    (product) => product.sellerId === user?.id
-  );
-}, [products, user]);
+    return products.filter((product) => product.sellerId === user?.id);
+  }, [products, user]);
 
   // Search Filter
   const filteredProducts = useMemo(() => {
@@ -102,7 +100,10 @@ export default function Products() {
           <p className="text-sm text-[var(--text-secondary)]">Low Stock</p>
 
           <h3 className="mt-2 text-3xl font-bold text-orange-500">
-            {sellerProducts.filter((product) => Number(product.stock) <= 10).length}
+            {
+              sellerProducts.filter((product) => Number(product.stock) <= 10)
+                .length
+            }
           </h3>
         </div>
 
@@ -133,12 +134,12 @@ export default function Products() {
 
       {/* Products */}
       {!loading && (
-  <ProductList
-    products={filteredProducts}
-    onDelete={handleDelete}
-    onEdit={handleEdit}
-  />
-)}
+        <ProductList
+          products={filteredProducts}
+          onDelete={handleDelete}
+          onEdit={handleEdit}
+        />
+      )}
     </section>
   );
 }

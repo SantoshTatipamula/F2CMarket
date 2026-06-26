@@ -16,6 +16,13 @@ export default function ProductCard({
 
   const isWishlisted = isInWishlist(product.id);
 
+  const productLocation =
+  typeof product.location === "string"
+    ? product.location
+    : product.farmLocation?.city ||
+      product.location?.city ||
+      "Location not available";
+
   return (
     <Link to={`/products/${product.id}`} className="block h-full">
       <div className="group h-full bg-white border border-[var(--border)] rounded-3xl p-4 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300">
@@ -26,11 +33,7 @@ export default function ProductCard({
             <span className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-[var(--text-secondary)] shadow-sm">
               <MapPin size={12} className="text-[var(--primary)]" />
 
-              {product.location ||
-                (typeof product.farmLocation === "string"
-                  ? product.farmLocation
-                  : product.farmLocation?.city) ||
-                "Location not available"}
+              {productLocation}
             </span>
           ) : (
             <span className="absolute top-3 left-3 z-10 rounded-full bg-[var(--primary)] px-3 py-1 text-xs font-semibold text-white">

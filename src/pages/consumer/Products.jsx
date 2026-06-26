@@ -55,36 +55,52 @@ export default function Products() {
   } = useProductsFilter(products);
 
   /* Dynamic locations */
-  const availableLocations = useMemo(() => {
-    const locs = products.map((p) => {
-      const loc = p.location || "";
+const availableLocations = useMemo(() => {
+  const locs = products.map((p) => {
+    const loc =
+      typeof p.location === "string"
+        ? p.location
+        : p.farmLocation?.city ||
+          p.location?.city ||
+          "";
 
-      return loc.charAt(0).toUpperCase() + loc.slice(1).toLowerCase();
-    });
+    return loc
+      ? loc.charAt(0).toUpperCase() +
+          loc.slice(1).toLowerCase()
+      : "";
+  });
 
-    return ["All", ...new Set(locs.filter(Boolean))];
-  }, [products]);
+  return ["All", ...new Set(locs.filter(Boolean))];
+}, [products]);
 
   /* Final filtering */
-  const finalProducts = useMemo(() => {
-    const searchTerm = searchQuery?.toLowerCase().trim() || "";
+ const finalProducts = useMemo(() => {
+  const searchTerm = searchQuery?.toLowerCase().trim() || "";
 
-    return filteredProducts.filter((product) => {
-      const matchesLocation =
-        selectedLocation === "All"
-          ? true
-          : product.location?.toLowerCase() === selectedLocation.toLowerCase();
+  return filteredProducts.filter((product) => {
+    const productLocation =
+      typeof product.location === "string"
+        ? product.location
+        : product.farmLocation?.city ||
+          product.location?.city ||
+          "";
 
-      const matchesSearch =
-        product.name?.toLowerCase().includes(searchTerm) ||
-        product.category?.toLowerCase().includes(searchTerm) ||
-        product.farmerName?.toLowerCase().includes(searchTerm) ||
-        product.farmer?.toLowerCase().includes(searchTerm) ||
-        product.location?.toLowerCase().includes(searchTerm);
+    const matchesLocation =
+      selectedLocation === "All"
+        ? true
+        : productLocation.toLowerCase() ===
+          selectedLocation.toLowerCase();
 
-      return matchesLocation && matchesSearch;
-    });
-  }, [filteredProducts, selectedLocation, searchQuery]);
+    const matchesSearch =
+      product.name?.toLowerCase().includes(searchTerm) ||
+      product.category?.toLowerCase().includes(searchTerm) ||
+      product.farmerName?.toLowerCase().includes(searchTerm) ||
+      product.farmer?.toLowerCase().includes(searchTerm) ||
+      productLocation.toLowerCase().includes(searchTerm);
+
+    return matchesLocation && matchesSearch;
+  });
+}, [filteredProducts, selectedLocation, searchQuery]);
 
   const filterProps = {
     category,

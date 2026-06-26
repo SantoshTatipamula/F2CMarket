@@ -24,25 +24,26 @@ export function ProductProvider({ children }) {
     let mounted = true;
 
     async function init() {
-      try {
-        await initializeProducts();
-        const data = await loadProducts();
+  try {
+    await initializeProducts();
 
-        if (mounted) {
-          setProducts(data || []);
-        }
-      } catch (error) {
-        console.error("Failed to load products from Firestore:", error);
+    const data = await loadProducts();
 
-        if (mounted) {
-          setProducts(getProducts());
-        }
-      } finally {
-        if (mounted) {
-          setLoading(false);
-        }
-      }
+    if (mounted) {
+      setProducts(data || []);
     }
+  } catch (error) {
+    console.error("Failed to load products:", error);
+
+    if (mounted) {
+      setProducts(getProducts());
+    }
+  } finally {
+    if (mounted) {
+      setLoading(false);
+    }
+  }
+}
 
     init();
 

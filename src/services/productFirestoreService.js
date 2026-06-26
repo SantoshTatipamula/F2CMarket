@@ -16,17 +16,26 @@ const PRODUCTS_COLLECTION = "products";
 
 /* Get All Products */
 export async function fetchProducts() {
-  const q = query(
-    collection(db, PRODUCTS_COLLECTION),
-    orderBy("createdAt", "desc"),
-  );
+  try {
+    const q = query(
+      collection(db, PRODUCTS_COLLECTION),
+      orderBy("createdAt", "desc"),
+    );
 
-  const snapshot = await getDocs(q);
+    const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((d) => ({
-    id: d.id,
-    ...d.data(),
-  }));
+
+    const products = snapshot.docs.map((d) => ({
+      id: d.id,
+      ...d.data(),
+    }));
+
+
+    return products;
+  } catch (error) {
+    console.error("Firestore Fetch Error:", error);
+    return [];
+  }
 }
 
 /* Get Single Product */
