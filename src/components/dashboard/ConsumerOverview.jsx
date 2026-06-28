@@ -3,25 +3,26 @@ import { ShoppingBag, Heart, Package, ArrowUpRight } from "lucide-react";
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { getConsumerOrders } from "@/services/orderService";
+import { useWishlist } from "@/context/WishlistContext";
 import DashboardCard from "@/components/dashboard/shared/DashboardCard";
 import DashboardCardHeader from "@/components/dashboard/shared/DashboardCardHeader";
 
 export default function ConsumerOverview() {
   const { user } = useAuth();
+  const { wishlistItems } = useWishlist();
 
   const stats = useMemo(() => {
     const orders    = user?.id ? getConsumerOrders(user.id) : [];
     const pending   = orders.filter(o => o.orderStatus === "Pending").length;
     const delivered = orders.filter(o => o.orderStatus === "Delivered").length;
-    const wishlist  = JSON.parse(localStorage.getItem("f2c-wishlist") || "[]");
-    return { orders, pending, delivered, wishlist };
+    return { orders, pending, delivered };
   }, [user]);
 
   const overview = [
     { label: "Total Orders",     value: String(stats.orders.length),    icon: ShoppingBag, href: "/orders"   },
     { label: "Pending Orders",   value: String(stats.pending),          icon: Package,     href: "/orders"   },
     { label: "Delivered",        value: String(stats.delivered),        icon: Package,     href: "/orders"   },
-    { label: "Wishlist Items",   value: String(stats.wishlist.length),  icon: Heart,       href: "/wishlist" },
+    { label: "Wishlist Items",   value: String(wishlistItems.length),  icon: Heart,       href: "/wishlist" },
   ];
 
   return (
