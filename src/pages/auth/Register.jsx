@@ -73,7 +73,7 @@ function PendingScreen() {
 
 export default function Register() {
   const navigate = useNavigate();
-  const { register, users } = useAuth();
+  const { register, users, signInWithGoogle } = useAuth();
 
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
@@ -139,54 +139,76 @@ export default function Register() {
     submitRegistration();
   };
 
-const submitRegistration = async () => {
-  setLoading(true);
-  setError("");
+  const submitRegistration = async () => {
+    setLoading(true);
+    setError("");
 
-  const newUser = {
-    name: form.name.trim(),
-    email: form.email.trim(),
-    password: form.password,
-    role: form.role,
-    phone: form.phone,
-    specialty: form.specialty,
-    experience: form.experience,
-    govId: form.govId,
-    farmRegNo: form.farmRegNo,
+    const newUser = {
+      name: form.name.trim(),
+      email: form.email.trim(),
+      password: form.password,
+      role: form.role,
+      phone: form.phone,
+      specialty: form.specialty,
+      experience: form.experience,
+      govId: form.govId,
+      farmRegNo: form.farmRegNo,
 
-    profile: {
-      bio: "",
-      location: "",
-    },
+      profile: {
+        bio: "",
+        location: "",
+      },
 
-    farmerProfile: {
-      farmName: form.farmName,
-      location: form.farmLocation,
-      documents: [],
-    },
+      farmerProfile: {
+        farmName: form.farmName,
+        location: form.farmLocation,
+        documents: [],
+      },
+    };
+
+    try {
+      const saved = await register(newUser);
+
+      // Send welcome email (non-blocking)
+      sendWelcomeEmail({
+        name: saved.name,
+        email: saved.email,
+        role: saved.role,
+      });
+
+      if (saved.role === "consumer") {
+        navigate("/");
+      } else {
+        setStep(2);
+      }
+    } catch (error) {
+      setError(error.message || "Registration failed.");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  try {
-    const saved = await register(newUser);
+  const handleGoogleRegister = async () => {
+    if (loading) return;
 
-    // Send welcome email (non-blocking)
-    sendWelcomeEmail({
-      name: saved.name,
-      email: saved.email,
-      role: saved.role,
-    });
+    setLoading(true);
+    setError("");
 
-    if (saved.role === "consumer") {
+    try {
+      const result = await signInWithGoogle();
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
       navigate("/");
-    } else {
-      setStep(2);
+    } catch (error) {
+      setError(error.message || "Google sign in failed");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    setError(error.message || "Registration failed.");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const isFarmer = form.role === "farmer";
   const totalSteps = isFarmer ? 2 : 1;
@@ -294,7 +316,7 @@ const submitRegistration = async () => {
               </Button>
 
               <AuthDivider />
-              <GoogleButton />
+              <GoogleButton onClick={handleGoogleRegister} />
               <p className="text-center text-sm text-[var(--glass-text-muted)]">
                 Already have an account?{" "}
                 <Link
