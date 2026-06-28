@@ -1,8 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 
 import {
-  getProducts,
-  initializeProducts,
   loadProducts,
   createProduct as createProductService,
   updateProduct as updateProductService,
@@ -24,26 +22,26 @@ export function ProductProvider({ children }) {
     let mounted = true;
 
     async function init() {
-  try {
-    await initializeProducts();
+      try {
+        setLoading(true);
 
-    const data = await loadProducts();
+        const data = await loadProducts();
 
-    if (mounted) {
-      setProducts(data || []);
-    }
-  } catch (error) {
-    console.error("Failed to load products:", error);
+        if (mounted) {
+          setProducts(data || []);
+        }
+      } catch (error) {
+        console.error("Failed to load products:", error);
 
-    if (mounted) {
-      setProducts(getProducts());
+        if (mounted) {
+          setProducts([]);
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
     }
-  } finally {
-    if (mounted) {
-      setLoading(false);
-    }
-  }
-}
 
     init();
 
@@ -54,13 +52,15 @@ export function ProductProvider({ children }) {
 
   // Refresh Products
   const refreshProducts = async () => {
-    setLoading(true);
     try {
+      setLoading(true);
+
       const data = await loadProducts();
+
       setProducts(data || []);
     } catch (error) {
       console.error("Failed to refresh products:", error);
-      setProducts(getProducts());
+      setProducts([]);
     } finally {
       setLoading(false);
     }
