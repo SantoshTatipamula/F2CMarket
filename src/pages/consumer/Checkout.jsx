@@ -48,43 +48,39 @@ export default function Checkout() {
     if (cartItems.length === 0) navigate("/cart");
   }, [cartItems, navigate]);
 
- useEffect(() => {
-  if (!selectedLocation) return;
+  useEffect(() => {
+    if (!selectedLocation) return;
 
-  const matchedVillage = SERVICEABLE_LOCATIONS.find((location) =>
-    location.aliases.some(
-      (alias) =>
-        alias.toLowerCase() ===
-        (selectedLocation.city || "").toLowerCase()
-    )
-  );
+    const matchedVillage = SERVICEABLE_LOCATIONS.find((location) =>
+      location.aliases.some(
+        (alias) =>
+          alias.toLowerCase() === (selectedLocation.city || "").toLowerCase(),
+      ),
+    );
 
-  setFormData((prev) => ({
-    ...prev,
+    setFormData((prev) => ({
+      ...prev,
 
-    city: selectedLocation.city || "",
+      city: selectedLocation.city || "",
 
-    address: selectedLocation.fullAddress || "",
+      address: selectedLocation.fullAddress || "",
 
-    // Use API postcode first, otherwise use dataset postcode
-    pincode:
-      selectedLocation.postcode ||
-      matchedVillage?.postcode ||
-      "",
-  }));
-}, [selectedLocation]);
+      // Use API postcode first, otherwise use dataset postcode
+      pincode: selectedLocation.postcode || matchedVillage?.postcode || "",
+    }));
+  }, [selectedLocation]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!isFormFilled(formData) || loading) return;
+
     setLoading(true);
 
-    setTimeout(() => {
-      /* Build well-shaped order via service — single place to change structure */
+    try {
       const orderPayload = buildOrder({
         cartItems,
         formData,
@@ -94,11 +90,18 @@ export default function Checkout() {
         deliveryLocation: selectedLocation,
       });
 
-      const saved = saveOrder(orderPayload);
+      const saved = await saveOrder(orderPayload);
 
-      navigate("/order-success", { state: { orderId: saved.id } });
-      setTimeout(clearCart, 100);
-    }, 1200);
+      navigate("/order-success", {
+        state: { orderId: saved.id },
+      });
+
+      clearCart();
+    } catch (error) {
+      console.error("Failed to place order:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
