@@ -9,38 +9,52 @@ import EmptyState from "@/components/common/ui/EmptyState";
 import WorkspaceHeader from "@/components/farmer/workspace/WorkspaceHeader";
 import OrdersSummary from "@/components/order/OrdersSummary";
 
-const STATUS_FILTERS = ["All", "Pending", "Accepted", "Packed", "Shipped", "Delivered", "Cancelled"];
+const STATUS_FILTERS = [
+  "All",
+  "Pending",
+  "Accepted",
+  "Packed",
+  "Shipped",
+  "Delivered",
+  "Cancelled",
+];
 
 export default function FarmerOrders() {
   const { user } = useAuth();
-  const [orders, setOrders]         = useState([]);
-  const [activeFilter, setFilter]   = useState("All");
+  const [orders, setOrders] = useState([]);
+  const [activeFilter, setFilter] = useState("All");
 
-  const loadOrders = () => {
-    if (!user?.id) return;
-    setOrders(getFarmerOrders(user.id));
-  };
+ const loadOrders = () => {
+  if (!user?.id) return;
+  setOrders(getFarmerOrders(user.id));
+};
 
-  useEffect(() => { loadOrders(); }, [user]);
+useEffect(() => {
+  loadOrders();
+}, [user]);
 
-  const handleStatusUpdate = (orderId, newStatus) => {
-    updateOrderStatus(orderId, newStatus);
-    loadOrders();
-  };
+const handleStatusUpdate = async (orderId, newStatus) => {
+  await updateOrderStatus(orderId, newStatus);
+  loadOrders();
+};
 
-  const filtered = useMemo(() =>
-    activeFilter === "All"
-      ? orders
-      : orders.filter((o) => o.orderStatus === activeFilter),
-    [orders, activeFilter]
+  const filtered = useMemo(
+    () =>
+      activeFilter === "All"
+        ? orders
+        : orders.filter((o) => o.orderStatus === activeFilter),
+    [orders, activeFilter],
   );
 
-  const stats = useMemo(() => ({
-    total:     orders.length,
-    pending:   orders.filter((o) => o.orderStatus === "Pending").length,
-    delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
-    cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
-  }), [orders]);
+  const stats = useMemo(
+    () => ({
+      total: orders.length,
+      pending: orders.filter((o) => o.orderStatus === "Pending").length,
+      delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
+      cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
+    }),
+    [orders],
+  );
 
   return (
     <section className="mx-auto w-full max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
