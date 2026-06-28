@@ -6,27 +6,17 @@ import {
   updateUserInFirestore,
 } from "@/services/userService";
 import { syncFarmerProducts } from "@/services/productService";
-import { initializeNotifications } from "@/services/notificationService";
 import { initializeOrders } from "@/services/orderService";
 
 import {
   registerWithEmail,
   loginWithEmail,
+  loginWithGoogle as firebaseGoogleLogin,
   logoutUser,
   onAuthStateChanged,
 } from "@/services/firebaseAuth";
 
 import { auth } from "@/config/firebase";
-
-const ADMIN = {
-  id: "admin-001",
-  name: "Admin",
-  email: "admin@f2cmarket.com",
-  password: "admin123",
-  role: "admin",
-  verified: true,
-  verificationStatus: "approved",
-};
 
 const AuthContext = createContext();
 
@@ -61,46 +51,28 @@ export function AuthProvider({ children }) {
       }
 
       try {
-  const firestoreUser = await getUserFromFirestore(
-    firebaseUser.uid,
-  );
+        const firestoreUser = await getUserFromFirestore(firebaseUser.uid);
 
-  if (firestoreUser) {
-    setUser(firestoreUser);
+        if (firestoreUser) {
+          setUser(firestoreUser);
 
-    await loadUsers();
+          await loadUsers();
 
-    initializeNotifications(
-      firestoreUser.id,
-    ).catch((error) => {
-      console.error(
-        "Failed to initialize notifications:",
-        error,
-      );
-    });
+          initializeOrders(firestoreUser.id, firestoreUser.role).catch(
+            (error) => {
+              console.error("Failed to initialize orders:", error);
+            },
+          );
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.error("Failed to load Firebase user profile:", error);
 
-    initializeOrders(
-      firestoreUser.id,
-      firestoreUser.role,
-    ).catch((error) => {
-      console.error(
-        "Failed to initialize orders:",
-        error,
-      );
-    });
-  } else {
-    setUser(null);
-  }
-} catch (error) {
-  console.error(
-    "Failed to load Firebase user profile:",
-    error,
-  );
-
-  setUser(null);
-} finally {
-  setLoading(false);
-}
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     });
 
     return () => {
@@ -111,15 +83,6 @@ export function AuthProvider({ children }) {
 
   /* ── Login ── */
   const login = async (email, password) => {
-    if (email === ADMIN.email && password === ADMIN.password) {
-      setUser(ADMIN);
-
-      return {
-        success: true,
-        role: "admin",
-      };
-    }
-
     try {
       const credentials = await loginWithEmail(email, password);
       const foundUser = await getUserFromFirestore(credentials.user.uid);
@@ -159,6 +122,49 @@ export function AuthProvider({ children }) {
         success: true,
         role: foundUser.role,
         verificationStatus: foundUser.verificationStatus || "pending",
+      };
+    } catch (error) {
+      console.log("Firebase Login Error:", error);
+      console.log("Error Code:", error.code);
+      console.log("Error Message:", error.message);
+
+      return {
+        success: false,
+        error: error.message,
+      };
+    }
+  };
+
+  const signInWithGoogle = async () => {
+    try {
+      const result = await firebaseGoogleLogin();
+
+      const firebaseUser = result.user;
+
+      let existingUser = await getUserFromFirestore(firebaseUser.uid);
+
+      // New user
+      if (!existingUser) {
+        existingUser = {
+          id: firebaseUser.uid,
+          name: firebaseUser.displayName || "",
+          email: firebaseUser.email,
+          avatar: firebaseUser.photoURL || "",
+          role: "consumer",
+          createdAt: new Date().toISOString(),
+          verificationStatus: "approved",
+          verified: true,
+          banned: false,
+        };
+
+        await saveUserToFirestore(existingUser);
+      }
+
+      setUser(existingUser);
+
+      return {
+        success: true,
+        role: existingUser.role,
       };
     } catch (error) {
       return {
@@ -276,6 +282,7 @@ export function AuthProvider({ children }) {
         isAuthenticated,
         login,
         register,
+        signInWithGoogle,
         updateUser,
         logout,
         getAllUsers,
