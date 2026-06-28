@@ -8,9 +8,14 @@ import { useAuth } from "@/context/AuthContext";
 export default function FarmerCard({ product }) {
   const { users } = useAuth();
 
-  const farmer = users.find((user) => user.id === product?.farmerId);
+  if (!product) return null;
+
+  const farmer = users.find(
+    (user) => String(user.id) === String(product.farmerId)
+  );
 
   const navigate = useNavigate();
+
   return (
     <div className="rounded-2xl border border-[var(--border)] bg-gradient-to-br from-green-50 to-white p-5 shadow-sm">
       <div className="flex items-center gap-4">
@@ -51,9 +56,18 @@ export default function FarmerCard({ product }) {
             View Profile
           </button>
           <a
-            href={`https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
-              `Hi! I'm interested in your product "${product.name}" on F2CMARKET.`,
-            )}`}
+            href={
+              farmer?.phone
+                ? `https://wa.me/91${farmer.phone}?text=${encodeURIComponent(
+                    `Hi! I'm interested in your product "${product.name}" on F2CMARKET.`,
+                  )}`
+                : "#"
+            }
+            onClick={(e) => {
+              if (!farmer?.phone) {
+                e.preventDefault();
+              }
+            }}
             target="_blank"
             rel="noopener noreferrer"
             className="
@@ -70,7 +84,7 @@ export default function FarmerCard({ product }) {
                     "
           >
             <FaWhatsapp size={16} className="text-[#25D366]" />
-            <span>Contact</span>
+            <span>{farmer?.phone ? "Contact" : "Unavailable"}</span>
           </a>
         </div>
       </div>
