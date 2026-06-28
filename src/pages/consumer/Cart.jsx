@@ -26,6 +26,9 @@ export default function Cart() {
 
   const [locationDialogOpen, setLocationDialogOpen] = useState(false);
 
+  const deliveryFee = cartTotal > 499 ? 0 : 40;
+  const finalTotal = cartTotal + deliveryFee;
+
   return (
     <section className="min-h-screen bg-[var(--surface)] py-6 sm:py-10">
       <div className="mx-auto max-w-7xl px-4 lg:px-8">
@@ -43,7 +46,14 @@ export default function Cart() {
           <>
             <PageHeader
               title="Shopping Cart"
-              subtitle={`${cartItems.length} item${cartItems.length !== 1 ? "s" : ""} in your cart`}
+              subtitle={`${cartItems.reduce(
+                (sum, item) => sum + item.quantity,
+                0,
+              )} item${
+                cartItems.reduce((sum, item) => sum + item.quantity, 0) !== 1
+                  ? "s"
+                  : ""
+              } in your cart`}
               action={
                 <button
                   onClick={clearCart}
@@ -53,8 +63,6 @@ export default function Cart() {
                 </button>
               }
             />
-
-            
 
             <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
               {/* Cart Items */}
@@ -147,17 +155,29 @@ export default function Cart() {
                     <span className="text-[var(--text-secondary)]">
                       Delivery
                     </span>
-                    <span className="font-semibold text-green-600">Free</span>
+
+                    {deliveryFee === 0 ? (
+                      <span className="font-semibold text-green-600">Free</span>
+                    ) : (
+                      <span className="font-semibold">₹{deliveryFee}</span>
+                    )}
                   </div>
                   <div className="border-t border-[var(--border)] pt-3 flex justify-between">
                     <span className="font-bold text-base text-[var(--text-primary)]">
                       Total
                     </span>
                     <span className="text-xl font-bold text-[var(--primary)]">
-                      ₹{cartTotal.toFixed(0)}
+                      ₹{finalTotal.toFixed(0)}
                     </span>
                   </div>
                 </div>
+
+                {deliveryFee > 0 && (
+                  <p className="text-xs text-[var(--text-secondary)]">
+                    Add products worth ₹{(500 - cartTotal).toFixed(0)} more to
+                    get free delivery.
+                  </p>
+                )}
 
                 <Link to="/checkout" className="block mt-5">
                   <button className="w-full h-12 rounded-2xl bg-[var(--primary)] font-bold text-white text-sm transition hover:bg-[var(--primary-hover)] active:scale-95">
