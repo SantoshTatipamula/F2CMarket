@@ -8,6 +8,7 @@ import {
   notifyOrderPlaced,
   notifyOrderCancelled,
   notifyOrderStatusChanged,
+  notifyNewOrderForFarmer,
 } from "@/services/notificationService";
 import {
   sendOrderConfirmationEmail,
@@ -33,29 +34,37 @@ const ORDERS_COLLECTION = "orders";
 async function fetchOrdersForConsumerFromFirestore(consumerId) {
   const q = query(
     collection(db, ORDERS_COLLECTION),
-    where("consumerId", "==", consumerId),
-    orderBy("createdAt", "desc"),
+    where("consumerId", "==", consumerId)
   );
+
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  return snapshot.docs
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    .sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
 }
 
 async function fetchOrdersForFarmerFromFirestore(farmerId) {
   const q = query(
     collection(db, ORDERS_COLLECTION),
-    where("farmerIds", "array-contains", farmerId),
-    orderBy("createdAt", "desc"),
+    where("farmerIds", "array-contains", farmerId)
   );
+
   const snapshot = await getDocs(q);
 
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-  }));
+  return snapshot.docs
+    .map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
+    .sort(
+      (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    );
 }
 
 async function saveOrderToFirestore(order) {
@@ -153,6 +162,22 @@ export async function saveOrder(orderData) {
 
   /* In-app notification */
   notifyOrderPlaced(order.consumerId, order.id, order.total);
+
+  const farmerIds = Array.from(
+  new Set(
+    (order.items || []).map((item) =>
+      String(item.farmerId)
+    )
+  )
+);
+
+for (const farmerId of farmerIds) {
+  notifyNewOrderForFarmer(
+    farmerId,
+    order.id,
+    order.total
+  );
+}
 
   /* Email confirmation (non-blocking) */
   try {
