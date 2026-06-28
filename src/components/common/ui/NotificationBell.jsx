@@ -26,18 +26,35 @@ export default function NotificationBell() {
   const [unread, setUnread] = useState(0);
   const ref                 = useRef(null);
 
-  const load = () => {
-    if (!user?.id) return;
-    setNotifications(getNotifications(user.id));
-    setUnread(getUnreadCount(user.id));
-  };
+  const load = async () => {
+  if (!user?.id) return;
+
+  try {
+    const notificationsData =
+      await getNotifications(user.id);
+
+    const unreadCount =
+      await getUnreadCount(user.id);
+
+    setNotifications(notificationsData);
+    setUnread(unreadCount);
+  } catch (error) {
+    console.error(
+      "Failed to load notifications:",
+      error
+    );
+  }
+};
 
   useEffect(() => {
-    load();
-    /* Poll every 5s so status changes from farmer reflect here */
-    const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
-  }, [user]);
+  if (!user?.id) return;
+
+  load();
+
+  const interval = setInterval(load, 5000);
+
+  return () => clearInterval(interval);
+}, [user?.id]);
 
   /* Close on outside click */
   useEffect(() => {
@@ -52,27 +69,29 @@ export default function NotificationBell() {
     setOpen((prev) => !prev);
   };
 
-  const handleRead = (n) => {
-    if (!n.read) {
-      markAsRead(n.id);
-      load();
-    }
-    if (n.orderId) {
-      navigate("/orders");
-      setOpen(false);
-    }
-  };
+  const handleRead = async (n) => {
+  if (!n.read) {
+    await markAsRead(n.id);
+    await load();
+  }
 
-  const handleMarkAll = () => {
-    markAllAsRead(user.id);
-    load();
-  };
+  if (n.orderId) {
+    navigate("/orders");
+    setOpen(false);
+  }
+};
 
-  const handleDelete = (e, id) => {
-    e.stopPropagation();
-    deleteNotification(id);
-    load();
-  };
+  const handleMarkAll = async () => {
+  await markAllAsRead(user.id);
+  await load();
+};
+
+  const handleDelete = async (e, id) => {
+  e.stopPropagation();
+
+  await deleteNotification(id);
+  await load();
+};
 
   if (!user) return null;
 
