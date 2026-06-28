@@ -1,4 +1,3 @@
-// import { productsData } from "@/data/productsData";
 import {
   fetchProducts,
   addProductToFirestore,
@@ -6,105 +5,69 @@ import {
   deleteProductFromFirestore,
 } from "@/services/productFirestoreService";
 
-const STORAGE_KEY = "f2c-products";
-
-/* Initialize product cache from Firestore if missing */
-export async function initializeProducts() {
-  if (localStorage.getItem(STORAGE_KEY)) return;
-
-  try {
-    const products = await fetchProducts();
-    saveProducts(products);
-  } catch (error) {
-    console.error("Failed to initialize products from Firestore:", error);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
-  }
+/* Load all products from Firestore */
+export async function loadProducts() {
+  return await fetchProducts();
 }
 
-/* Get all products from localStorage cache */
-export function getProducts() {
-  return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-}
+/* Get single product */
+export async function getProductById(productId) {
+  const products = await fetchProducts();
 
-/* Save all products to localStorage cache */
-export function saveProducts(products) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-}
-
-/* Add product (legacy localStorage only) */
-export function addProduct(newProduct) {
-  const products = getProducts();
-  const updatedProducts = [newProduct, ...products];
-  saveProducts(updatedProducts);
-  return updatedProducts;
-}
-
-/* Get single product from cache */
-export function getProductById(productId) {
-  return getProducts().find(
-    (product) => String(product.id) === String(productId),
+  return products.find(
+    (product) => String(product.id) === String(productId)
   );
 }
 
-/* Sync farmer profile fields across all local and Firestore products */
+/* Sync farmer profile changes across products */
 export async function syncFarmerProducts(farmerId, updates) {
-  const products = getProducts();
-  const updatedProducts = products.map((product) => {
-    if (String(product.farmerId) !== String(farmerId)) {
-      return product;
-    }
+  const products = await fetchProducts();
 
-    return {
-      ...product,
-      ...updates,
-      id: product.id,
-    };
-  });
-
-  saveProducts(updatedProducts);
-
-  const toUpdate = updatedProducts.filter(
-    (product) => String(product.farmerId) === String(farmerId),
+  const farmerProducts = products.filter(
+    (product) => String(product.farmerId) === String(farmerId)
   );
 
   await Promise.all(
-    toUpdate.map((product) =>
-      updateProductInFirestore(product.id, product),
-    ),
+    farmerProducts.map((product) =>
+      updateProductInFirestore(product.id, {
+        ...product,
+        ...updates,
+      })
+    )
   );
-
-  return updatedProducts;
 }
 
-/* Get seller products from cache */
-export function getSellerProducts(sellerId) {
-  return getProducts().filter((product) => product.sellerId === sellerId);
-}
-
-/* Load products from Firestore and cache to localStorage */
-export async function loadProducts() {
+/* Get farmer products */
+export async function getSellerProducts(farmerId) {
   const products = await fetchProducts();
-  saveProducts(products);
-  return products;
+
+  return products.filter(
+    (product) =>
+      String(product.farmerId) === String(farmerId)
+  );
 }
 
-/* Create product in Firestore + cache */
+/* Create product */
 export async function createProduct(productData) {
-  const products = getProducts();
-
   const newProduct = {
     ...productData,
 
-    // Backward compatibility
     location:
-      productData.location || productData.farmLocation?.city || "Karimnagar",
+      productData.location ||
+      productData.farmLocation?.city ||
+      "Karimnagar",
 
-    farmer: productData.farmer || productData.farmerName || "Local Farmer",
+    farmer:
+      productData.farmer ||
+      productData.farmerName ||
+      "Local Farmer",
 
-    // New standardized fields
     farmerId: productData.farmerId || "",
 
-    farmerName: productData.farmerName || productData.farmer || "",
+    farmerName:
+      productData.farmerName ||
+      productData.farmer ||
+      "",
 
     farmName: productData.farmName || "",
 
@@ -112,7 +75,6 @@ export async function createProduct(productData) {
 
     farmerAvatar: productData.farmerAvatar || "",
 
-    // Product stock
     stock: productData.stock || 0,
 
     stockUnit: productData.stockUnit || "kg",
@@ -121,7 +83,9 @@ export async function createProduct(productData) {
 
     id: productData.id || crypto.randomUUID(),
 
-    createdAt: productData.createdAt || new Date().toISOString(),
+    createdAt:
+      productData.createdAt ||
+      new Date().toISOString(),
 
     status: "active",
 
@@ -130,84 +94,77 @@ export async function createProduct(productData) {
 
   await addProductToFirestore(newProduct);
 
-  const updatedProducts = [newProduct, ...products];
-  saveProducts(updatedProducts);
-
   return newProduct;
 }
 
-/* Update product in Firestore + cache */
-export async function updateProduct(productId, updatedData, currentUserId) {
-  const products = getProducts();
+/* Update product */
+export async function updateProduct(
+  productId,
+  updatedData,
+  currentUserId
+) {
+  const products = await fetchProducts();
 
   const existingProduct = products.find(
-    (product) => String(product.id) === String(productId),
+    (product) =>
+      String(product.id) === String(productId)
   );
 
-  // Authorization check
-  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
+  if (
+    !existingProduct ||
+    String(existingProduct.farmerId) !==
+      String(currentUserId)
+  ) {
     return null;
   }
 
   const merged = {
     ...existingProduct,
     ...updatedData,
-
     id: existingProduct.id,
-
-    sellerId: existingProduct.sellerId,
-
-    sellerName: existingProduct.sellerName,
-
-    sellerRole: existingProduct.sellerRole,
+    farmerId: existingProduct.farmerId,
+    farmerName: existingProduct.farmerName,
   };
 
-  await updateProductInFirestore(productId, merged);
-
-  const updatedProducts = products.map((product) =>
-    String(product.id) === String(productId) ? merged : product,
+  await updateProductInFirestore(
+    productId,
+    merged
   );
-
-  saveProducts(updatedProducts);
 
   return merged;
 }
 
-/* Delete product in Firestore + cache */
-export async function deleteProduct(productId, currentUserId) {
-  const products = getProducts();
+/* Delete product */
+export async function deleteProduct(
+  productId,
+  currentUserId
+) {
+  const products = await fetchProducts();
 
   const existingProduct = products.find(
-    (product) => String(product.id) === String(productId),
+    (product) =>
+      String(product.id) === String(productId)
   );
 
-  // Authorization check
-  if (!existingProduct || existingProduct.sellerId !== currentUserId) {
-    return products;
+  if (
+    !existingProduct ||
+    String(existingProduct.farmerId) !==
+      String(currentUserId)
+  ) {
+    return null;
   }
 
   await deleteProductFromFirestore(productId);
 
-  const updatedProducts = products.filter(
-    (product) => String(product.id) !== String(productId),
+  return products.filter(
+    (product) =>
+      String(product.id) !== String(productId)
   );
-
-  saveProducts(updatedProducts);
-
-  return updatedProducts;
 }
 
-/* Admin delete without ownership check */
-export async function deleteProductAsAdmin(productId) {
-  const products = getProducts();
-
+/* Admin delete */
+export async function deleteProductAsAdmin(
+  productId
+) {
   await deleteProductFromFirestore(productId);
-
-  const updatedProducts = products.filter(
-    (product) => String(product.id) !== String(productId),
-  );
-
-  saveProducts(updatedProducts);
-
-  return updatedProducts;
 }
