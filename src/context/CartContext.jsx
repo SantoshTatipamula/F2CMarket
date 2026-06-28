@@ -10,24 +10,29 @@ import {
 const CartContext = createContext();
 
 function mergeCartItems(localItems, remoteItems) {
-  const merged = [...remoteItems];
-  const remoteMap = new Map(remoteItems.map((item) => [String(item.id), item]));
+  const mergedMap = new Map();
 
-  for (const localItem of localItems) {
-    const key = String(localItem.id);
-    if (!remoteMap.has(key)) {
-      merged.push(localItem);
-      continue;
+  // Prefer remote cart as source of truth
+  remoteItems.forEach((item) => {
+    mergedMap.set(String(item.id), {
+      ...item,
+      quantity: Number(item.quantity || 1),
+    });
+  });
+
+  // Add local items only if missing remotely
+  localItems.forEach((item) => {
+    const key = String(item.id);
+
+    if (!mergedMap.has(key)) {
+      mergedMap.set(key, {
+        ...item,
+        quantity: Number(item.quantity || 1),
+      });
     }
+  });
 
-    const remoteItem = remoteMap.get(key);
-    merged[merged.findIndex((item) => String(item.id) === key)] = {
-      ...remoteItem,
-      quantity: (remoteItem.quantity || 0) + (localItem.quantity || 0),
-    };
-  }
-
-  return merged;
+  return Array.from(mergedMap.values());
 }
 
 export function CartProvider({ children }) {
@@ -48,7 +53,7 @@ export function CartProvider({ children }) {
         const remoteItems = await getCartFromFirestore(user.id);
         if (!mounted) return;
 
-        setCartItems((prevCartItems) => mergeCartItems(prevCartItems, remoteItems));
+        setCartItems(remoteItems || []);
         setRemoteCartLoaded(true);
       } catch (error) {
         console.error("Failed to load cart from Firestore:", error);
@@ -79,12 +84,18 @@ export function CartProvider({ children }) {
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
+            ? {
+                ...item,
+                quantity: Number(item.quantity || 0) + Number(quantity || 1),
+              }
+            : item,
         );
       }
       /* Store numericPrice once so downstream (orderService) never re-parses */
-      return [...prev, { ...product, quantity, numericPrice: parsePrice(product.price) }];
+      return [
+        ...prev,
+        { ...product, quantity, numericPrice: parsePrice(product.price) },
+      ];
     });
   };
 
@@ -94,38 +105,54 @@ export function CartProvider({ children }) {
   const increaseQty = (id) =>
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
+        item.id === id ? { ...item, quantity: Number(item.quantity || 0) + 1 } : item,
+      ),
     );
 
   const decreaseQty = (id) =>
     setCartItems((prev) =>
       prev
         .map((item) =>
-          item.id === id ? { ...item, quantity: item.quantity - 1 } : item
+          item.id === id ? { ...item, quantity: Number(item.quantity || 0) - 1 } : item,
         )
-        .filter((item) => item.quantity > 0)
+        .filter((item) => item.quantity > 0),
     );
 
   const clearCart = () => setCartItems([]);
 
   const cartCount = useMemo(
-    () => cartItems.reduce((total, item) => total + item.quantity, 0),
-    [cartItems]
-  );
+  () =>
+    cartItems.reduce(
+      (total, item) => total + Number(item.quantity || 0),
+      0
+    ),
+  [cartItems]
+);
 
   const cartTotal = useMemo(
-    () =>
-      cartItems.reduce(
-        (total, item) => total + (item.numericPrice ?? parsePrice(item.price)) * item.quantity,
-        0
-      ),
-    [cartItems]
-  );
+  () =>
+    cartItems.reduce(
+      (total, item) =>
+        total +
+        Number(item.numericPrice ?? parsePrice(item.price)) *
+          Number(item.quantity || 0),
+      0
+    ),
+  [cartItems]
+);
 
   return (
     <CartContext.Provider
-      value={{ cartItems, addToCart, removeFromCart, increaseQty, decreaseQty, clearCart, cartCount, cartTotal }}
+      value={{
+        cartItems,
+        addToCart,
+        removeFromCart,
+        increaseQty,
+        decreaseQty,
+        clearCart,
+        cartCount,
+        cartTotal,
+      }}
     >
       {children}
     </CartContext.Provider>
