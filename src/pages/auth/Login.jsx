@@ -10,20 +10,24 @@ import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
 function getRoleRedirect(result) {
   if (result.role === "farmer" && result.verificationStatus === "pending")
     return "/farmer/pending";
-  const map = { consumer: "/", farmer: "/farmer/dashboard", admin: "/admin/dashboard" };
+  const map = {
+    consumer: "/",
+    farmer: "/farmer/dashboard",
+    admin: "/admin/dashboard",
+  };
   return map[result.role] || "/";
 }
 
 export default function Login() {
-  const navigate  = useNavigate();
-  const location  = useLocation();
-  const { login } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login, signInWithGoogle } = useAuth();
 
-  const [form,    setForm]    = useState({ email: "", password: "" });
-  const [error,   setError]   = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const from    = location.state?.from?.pathname;
+  const from = location.state?.from?.pathname;
   const isValid = form.email.trim() && form.password.trim();
 
   const handleChange = (e) => {
@@ -33,16 +37,35 @@ export default function Login() {
   };
 
   const handleLogin = async () => {
-  if (!isValid || loading) return;
+    if (!isValid || loading) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const result = await login(form.email.trim(), form.password);
+
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
+      navigate(from || getRoleRedirect(result), { replace: true });
+    } catch (error) {
+      setError(error.message || "Login failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+  if (loading) return;
 
   setLoading(true);
   setError("");
 
   try {
-    const result = await login(
-      form.email.trim(),
-      form.password
-    );
+    const result = await signInWithGoogle();
 
     if (!result.success) {
       setError(result.error);
@@ -54,20 +77,36 @@ export default function Login() {
       { replace: true }
     );
   } catch (error) {
-    setError(error.message || "Login failed");
+    setError(error.message || "Google login failed");
   } finally {
     setLoading(false);
   }
 };
 
-  const handleKeyDown = (e) => { if (e.key === "Enter") handleLogin(); };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleLogin();
+  };
 
   return (
     <AuthLayout title="Welcome Back" subtitle="Login to your F2CMARKET account">
-      <AuthInputField icon={Mail} name="email" type="email" placeholder="Email Address"
-        value={form.email} onChange={handleChange} onKeyDown={handleKeyDown} />
-      <AuthInputField icon={Lock} name="password" type="password" placeholder="Password"
-        value={form.password} onChange={handleChange} onKeyDown={handleKeyDown} />
+      <AuthInputField
+        icon={Mail}
+        name="email"
+        type="email"
+        placeholder="Email Address"
+        value={form.email}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+      />
+      <AuthInputField
+        icon={Lock}
+        name="password"
+        type="password"
+        placeholder="Password"
+        value={form.password}
+        onChange={handleChange}
+        onKeyDown={handleKeyDown}
+      />
 
       {error && (
         <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-3">
@@ -84,26 +123,34 @@ export default function Login() {
         </Link>
       </div>
 
-      <Button onClick={handleLogin} disabled={!isValid || loading}
+      <Button
+        onClick={handleLogin}
+        disabled={!isValid || loading}
         className={`w-full h-11 rounded-xl font-semibold transition-all ${
           isValid && !loading
             ? "bg-[var(--primary)] hover:bg-[var(--primary-hover)] text-white shadow-lg shadow-green-900/30"
             : "bg-white/10 text-white/40 cursor-not-allowed"
-        }`}>
-        {loading
-          ? <span className="flex items-center justify-center gap-2">
-              <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-              Logging in…
-            </span>
-          : "Login"}
+        }`}
+      >
+        {loading ? (
+          <span className="flex items-center justify-center gap-2">
+            <span className="h-4 w-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+            Logging in…
+          </span>
+        ) : (
+          "Login"
+        )}
       </Button>
 
       <AuthDivider />
-      <GoogleButton />
+      <GoogleButton onClick={handleGoogleLogin} />
 
       <p className="text-center text-sm text-[var(--glass-text-muted)]">
         Don't have an account?{" "}
-        <Link to="/register" className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold">
+        <Link
+          to="/register"
+          className="text-[var(--primary)] hover:text-[var(--primary-hover)] font-semibold"
+        >
           Create an account
         </Link>
       </p>
