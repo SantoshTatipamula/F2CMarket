@@ -11,35 +11,44 @@ import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 
 export default function Orders() {
-  const { user }            = useAuth();
+  const { user } = useAuth();
   const [orders, setOrders] = useState([]);
 
   const loadOrders = useCallback(() => {
-    const id = user?.id || "guest";
-    setOrders(getConsumerOrders(id));
+    if (!user?.id) return;
+    
+    setOrders(getConsumerOrders(user.id));
   }, [user]);
 
-  useEffect(() => { loadOrders(); }, [loadOrders]);
+  useEffect(() => {
+    loadOrders();
+  }, [loadOrders]);
 
   /* Called by OrderCard after cancel so list updates instantly */
   const handleOrderUpdate = (updatedOrder) => {
     setOrders((prev) =>
-      prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o))
+      prev.map((o) => (o.id === updatedOrder.id ? updatedOrder : o)),
     );
   };
 
-  const stats = useMemo(() => ({
-    total:     orders.length,
-    pending:   orders.filter((o) => o.orderStatus === "Pending").length,
-    delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
-    cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
-  }), [orders]);
+  const stats = useMemo(
+    () => ({
+      total: orders.length,
+      pending: orders.filter((o) => o.orderStatus === "Pending").length,
+      delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
+      cancelled: orders.filter((o) => o.orderStatus === "Cancelled").length,
+    }),
+    [orders],
+  );
 
   return (
     <section className="min-h-screen bg-[var(--surface)] py-10">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         <Breadcrumb items={[{ label: "My Orders" }]} />
-        <PageHeader title="My Orders" subtitle="Track and review your purchases." />
+        <PageHeader
+          title="My Orders"
+          subtitle="Track and review your purchases."
+        />
 
         {orders.length > 0 && <OrdersSummary stats={stats} />}
 
