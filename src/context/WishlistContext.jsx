@@ -37,11 +37,12 @@ export function WishlistProvider({ children }) {
 
       try {
         const remoteItems = await getWishlistFromFirestore(user.id);
+
         if (!mounted) return;
 
-        setWishlistItems((prevWishlistItems) =>
-          mergeWishlistItems(prevWishlistItems, remoteItems),
-        );
+        // Firebase is the source of truth
+        setWishlistItems(remoteItems || []);
+
         setRemoteWishlistLoaded(true);
       } catch (error) {
         console.error("Failed to load wishlist from Firestore:", error);
@@ -67,15 +68,23 @@ export function WishlistProvider({ children }) {
   }, [user?.id, wishlistItems, remoteWishlistLoaded]);
 
   const toggleWishlist = (product) => {
-    setWishlistItems((prev) => {
-      const exists = prev.find((item) => item.id === product.id);
-      return exists
-        ? prev.filter((item) => item.id !== product.id)
-        : [...prev, product];
-    });
-  };
+  setWishlistItems((prev) => {
+    const exists = prev.find(
+      (item) => String(item.id) === String(product.id)
+    );
 
-  const isInWishlist = (id) => wishlistItems.some((item) => item.id === id);
+    return exists
+      ? prev.filter(
+          (item) => String(item.id) !== String(product.id)
+        )
+      : [...prev, product];
+  });
+};
+
+  const isInWishlist = (id) =>
+  wishlistItems.some(
+    (item) => String(item.id) === String(id)
+  );
 
   const wishlistCount = useMemo(() => wishlistItems.length, [wishlistItems]);
 
