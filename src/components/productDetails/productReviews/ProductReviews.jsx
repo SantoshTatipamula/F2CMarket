@@ -1,15 +1,35 @@
-// src/components/productDetails/productReviews/ProductReviews.jsx
-
-import { useState } from "react";
-import { reviewsData } from "@/data/reviewsData";
+import { useState, useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import ReviewsSummary from "./ReviewsSummary";
+import AddReviewForm from "./AddReviewForm";
+import { getProductReviews } from "@/services/reviewService";
 
 export default function ProductReviews({ product }) {
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [visibleCount, setVisibleCount] = useState(3);
 
-  const visibleReviews = reviewsData.slice(0, visibleCount);
-  const hasMore = visibleCount < reviewsData.length;
+  useEffect(() => {
+    loadReviews();
+  }, [product.id]);
+
+  const loadReviews = async () => {
+    try {
+      setLoading(true);
+
+      const fetchedReviews = await getProductReviews(product.id);
+
+      setReviews(fetchedReviews);
+    } catch (error) {
+      console.error("Failed to load reviews:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const visibleReviews = reviews.slice(0, visibleCount);
+
+  const hasMore = visibleCount < reviews.length;
 
   const handleLoadMore = () => {
     setVisibleCount((prev) => prev + 3);
@@ -28,15 +48,27 @@ export default function ProductReviews({ product }) {
         </p>
       </div>
 
+      {/* Add Review Form */}
+      <AddReviewForm product={product} onReviewAdded={loadReviews} />
       {/* Summary */}
-      <ReviewsSummary product={product} />
+      <ReviewsSummary product={product} reviews={reviews} />
 
       {/* Reviews Grid */}
-      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {visibleReviews.map((review) => (
-          <ReviewCard key={review.id} review={review} />
-        ))}
-      </div>
+      {loading ? (
+        <div className="py-10 text-center">
+          <p className="text-[var(--text-secondary)]">Loading reviews...</p>
+        </div>
+      ) : reviews.length === 0 ? (
+        <div className="py-10 text-center">
+          <p className="text-[var(--text-secondary)]">No reviews yet.</p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          {visibleReviews.map((review) => (
+            <ReviewCard key={review.id} review={review} />
+          ))}
+        </div>
+      )}
 
       {/* Load More */}
       {hasMore && (

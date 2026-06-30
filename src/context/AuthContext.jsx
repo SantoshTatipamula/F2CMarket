@@ -182,13 +182,22 @@ export function AuthProvider({ children }) {
     );
 
     const userToSave = {
-      ...newUser,
-      id: credentials.user.uid,
-      createdAt: new Date().toISOString(),
-      verificationStatus: newUser.role === "farmer" ? "pending" : "approved",
-      verified: newUser.role !== "farmer",
-      banned: false,
-    };
+  ...newUser,
+  id: credentials.user.uid,
+  createdAt: new Date().toISOString(),
+
+  verificationStatus:
+    newUser.role === "farmer"
+      ? "pending"
+      : "approved",
+
+  verified: newUser.role !== "farmer",
+
+  verificationDocuments:
+    newUser.verificationDocuments || {},
+
+  banned: false,
+};
 
     await saveUserToFirestore(userToSave);
     setUsers((prev) => [...prev, userToSave]);

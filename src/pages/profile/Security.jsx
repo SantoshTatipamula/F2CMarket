@@ -1,14 +1,10 @@
-import {
-  Shield,
-  LockKeyhole,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react";
+import { Shield, LockKeyhole, CheckCircle2, AlertTriangle } from "lucide-react";
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { sendGenericEmail } from "@/services/emailService";
 import { toast } from "sonner";
+import { changeUserPassword } from "@/services/firebaseAuth";
 
 import ProfileCard from "@/components/profile/shared/ProfileCard";
 
@@ -17,18 +13,16 @@ import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
 import { Button } from "@/components/ui/button";
 
 export default function Security() {
-  const { user, updateUserInList } = useAuth();
-  const [form, setForm] =
-    useState({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    });
+  const { user } = useAuth();
+  const [form, setForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: "",
+  });
 
   // Handle Change
   const handleChange = (e) => {
-    const { name, value } =
-      e.target;
+    const { name, value } = e.target;
 
     setForm((prev) => ({
       ...prev,
@@ -37,17 +31,14 @@ export default function Security() {
   };
 
   // Submit
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.currentPassword || !form.newPassword || !form.confirmPassword) {
       toast.error("Please fill all fields.");
       return;
     }
-    if (user?.password !== form.currentPassword) {
-      toast.error("Current password is incorrect.");
-      return;
-    }
+
     if (form.newPassword.length < 6) {
       toast.error("New password must be at least 6 characters.");
       return;
@@ -57,23 +48,56 @@ export default function Security() {
       return;
     }
 
-    updateUserInList({ ...user, password: form.newPassword });
+    try {
+      await changeUserPassword(form.currentPassword, form.newPassword);
 
-    /* Send security alert email */
-    sendGenericEmail({
-      name:    user?.name || "User",
-      email:   user?.email || "",
-      subject: "Password Changed — F2CMARKET",
-      message: `Hi ${user?.name},\n\nYour F2CMARKET account password was changed successfully.\n\nIf you did not make this change, contact support immediately at support@f2cmarket.com.\n\nF2CMARKET Team`,
-    });
+      // Send security alert email
+      sendGenericEmail({
+        name: user?.name || "User",
+        email: user?.email || "",
+        subject: "Password Changed — F2CMARKET",
+        message: `Hi ${user?.name},
 
-    toast.success("Password updated successfully!");
-    setForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+Your F2CMARKET account password was changed successfully.
+
+If you did not make this change, contact support immediately at support@f2cmarket.com.
+
+F2CMARKET Team`,
+      });
+
+      toast.success("Password updated successfully!");
+
+      setForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error) {
+      console.error(error);
+
+      switch (error.code) {
+        case "auth/wrong-password":
+          toast.error("Current password is incorrect.");
+          break;
+
+        case "auth/weak-password":
+          toast.error("New password is too weak.");
+          break;
+
+        case "auth/requires-recent-login":
+          toast.error(
+            "Please logout and login again before changing password.",
+          );
+          break;
+
+        default:
+          toast.error(error.message || "Failed to update password.");
+      }
+    }
   };
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
-      
       <section
         className="
           mx-auto
@@ -82,7 +106,6 @@ export default function Security() {
           lg:px-8
         "
       >
-        
         {/* Hero */}
         <div
           className="
@@ -93,7 +116,6 @@ export default function Security() {
             shadow-sm
           "
         >
-          
           {/* Banner */}
           <div
             className="
@@ -105,7 +127,6 @@ export default function Security() {
               text-white
             "
           >
-            
             <div
               className="
                 inline-flex items-center
@@ -120,7 +141,6 @@ export default function Security() {
             </div>
 
             <div className="mt-6 flex items-start gap-4">
-              
               <div
                 className="
                   flex h-14 w-14
@@ -134,7 +154,6 @@ export default function Security() {
               </div>
 
               <div>
-                
                 <h1
                   className="
                     text-3xl font-bold
@@ -152,10 +171,8 @@ export default function Security() {
                     text-white/80
                   "
                 >
-                  Manage your password,
-                  account security, and
-                  protection preferences
-                  across F2CMARKET.
+                  Manage your password, account security, and protection
+                  preferences across F2CMARKET.
                 </p>
               </div>
             </div>
@@ -163,55 +180,36 @@ export default function Security() {
 
           {/* Content */}
           <div className="p-6 md:p-8 space-y-8">
-            
             {/* Password */}
             <ProfileCard>
-              
               <ProfileCardHeader
                 title="Change Password"
                 description="Update your account password regularly to keep your marketplace account secure."
               />
 
-              <form
-                onSubmit={handleSubmit}
-                className="mt-8 space-y-6"
-              >
-                
+              <form onSubmit={handleSubmit} className="mt-8 space-y-6">
                 <PasswordField
                   label="Current Password"
                   name="currentPassword"
-                  value={
-                    form.currentPassword
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={form.currentPassword}
+                  onChange={handleChange}
                 />
 
                 <PasswordField
                   label="New Password"
                   name="newPassword"
-                  value={
-                    form.newPassword
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={form.newPassword}
+                  onChange={handleChange}
                 />
 
                 <PasswordField
                   label="Confirm Password"
                   name="confirmPassword"
-                  value={
-                    form.confirmPassword
-                  }
-                  onChange={
-                    handleChange
-                  }
+                  value={form.confirmPassword}
+                  onChange={handleChange}
                 />
 
                 <div className="flex justify-end">
-                  
                   <Button
                     type="submit"
                     className="
@@ -227,27 +225,21 @@ export default function Security() {
 
             {/* Security Status */}
             <ProfileCard>
-              
               <ProfileCardHeader
                 title="Security Status"
                 description="Monitor your account protection and security recommendations."
               />
 
               <div className="mt-8 space-y-4">
-                
                 <SecurityStatus
-                  icon={
-                    CheckCircle2
-                  }
+                  icon={CheckCircle2}
                   title="Strong Account Protection"
                   description="Your account currently has a secure password configuration."
                   success
                 />
 
                 <SecurityStatus
-                  icon={
-                    AlertTriangle
-                  }
+                  icon={AlertTriangle}
                   title="Enable Two-Factor Authentication"
                   description="Additional account protection features can improve account security."
                 />
@@ -261,15 +253,9 @@ export default function Security() {
 }
 
 /* Password Field */
-function PasswordField({
-  label,
-  name,
-  value,
-  onChange,
-}) {
+function PasswordField({ label, name, value, onChange }) {
   return (
     <label className="block">
-      
       <span
         className="
           mb-3 flex items-center gap-2
@@ -306,12 +292,7 @@ function PasswordField({
 }
 
 /* Security Status */
-function SecurityStatus({
-  icon: Icon,
-  title,
-  description,
-  success = false,
-}) {
+function SecurityStatus({ icon: Icon, title, description, success = false }) {
   return (
     <div
       className="
@@ -322,7 +303,6 @@ function SecurityStatus({
         p-5
       "
     >
-      
       <div
         className={`
           flex h-12 w-12
@@ -339,7 +319,6 @@ function SecurityStatus({
       </div>
 
       <div>
-        
         <h3
           className="
             text-base font-semibold

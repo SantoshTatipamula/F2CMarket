@@ -85,7 +85,7 @@ export default function ProductFilters({
             type="range"
             min={min}
             max={max}
-            step="10"
+            step="1"
             value={maxPrice}
             onChange={(e) =>
               setMaxPrice(Number(e.target.value))

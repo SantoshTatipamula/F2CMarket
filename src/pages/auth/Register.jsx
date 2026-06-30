@@ -11,6 +11,12 @@ import {
   Sprout,
   CheckCircle2,
 } from "lucide-react";
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  validatePhone,
+} from "@/pages/auth/authValidation";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/auth/AuthLayout";
@@ -18,6 +24,7 @@ import AuthInputField from "@/components/auth/AuthInputField";
 import AuthSelectField from "@/components/auth/AuthSelectField";
 import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
 import { sendWelcomeEmail } from "@/services/emailService";
+import { uploadImage } from "@/services/cloudinaryService";
 import LocationDialog from "@/components/home/hero/LocationDialog";
 
 function StepDots({ step, total }) {
@@ -71,15 +78,19 @@ function PendingScreen() {
   );
 }
 
+// ── helper: convert a File to a base64 data-URL ──────────────────────────────
+
 export default function Register() {
   const navigate = useNavigate();
   const { register, users, signInWithGoogle } = useAuth();
 
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [showLocationDialog, setShowLocationDialog] = useState(false);
 
+  // FIX 1: idType and idDocumentFile were missing from initial state
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -91,28 +102,95 @@ export default function Register() {
     phone: "",
     specialty: "",
     experience: "",
-    govId: "",
     farmRegNo: "",
+    idType: "",
+    idDocumentFile: null, // stores the raw File object
   });
 
-  const passwordsMatch =
-    form.confirmPassword === "" || form.password === form.confirmPassword;
   const step0Valid =
     form.name.trim() &&
     form.email.trim() &&
     form.password.trim() &&
     form.confirmPassword.trim() &&
-    form.password === form.confirmPassword;
+    form.password === form.confirmPassword &&
+    !validateName(form.name) &&
+    !validateEmail(form.email) &&
+    !validatePassword(form.password);
+
+  // FIX 2: use idDocumentFile (the stored File) instead of form.idDocument
   const step1Valid =
     form.farmName.trim() &&
     form.farmLocation &&
     form.phone.trim() &&
-    form.govId.trim();
+    form.idType &&
+    form.idDocumentFile &&
+    !validatePhone(form.phone);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setForm((prev) => ({ ...prev, [name]: value }));
+
+    let validationError = "";
+
+    switch (name) {
+      case "name":
+        validationError = validateName(value);
+        break;
+      case "email":
+        validationError = validateEmail(value);
+        break;
+      case "password":
+        validationError = validatePassword(value);
+        break;
+      case "confirmPassword":
+        validationError =
+          value !== form.password ? "Passwords do not match" : "";
+        break;
+      case "phone":
+        validationError = validatePhone(value);
+        break;
+      // FIX 3: idType is now handled so its error state is cleared
+      case "idType":
+        validationError = value ? "" : "Please select an ID type";
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({ ...prev, [name]: validationError }));
     if (error) setError("");
+  };
+
+  // FIX 4: dedicated handler for the file input
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+
+    if (!file) return;
+
+    const allowedTypes = [
+      "image/jpeg",
+      "image/jpg",
+      "image/png",
+      "application/pdf",
+    ];
+
+    if (!allowedTypes.includes(file.type)) {
+      setError("Only JPG, PNG and PDF files are allowed.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("File size should be less than 5MB.");
+      return;
+    }
+
+    setForm((prev) => ({
+      ...prev,
+      idDocumentFile: file,
+    }));
+
+    setError("");
   };
 
   const handleStep0 = () => {
@@ -143,33 +221,60 @@ export default function Register() {
     setLoading(true);
     setError("");
 
-    const newUser = {
-      name: form.name.trim(),
-      email: form.email.trim(),
-      password: form.password,
-      role: form.role,
-      phone: form.phone,
-      specialty: form.specialty,
-      experience: form.experience,
-      govId: form.govId,
-      farmRegNo: form.farmRegNo,
-
-      profile: {
-        bio: "",
-        location: "",
-      },
-
-      farmerProfile: {
-        farmName: form.farmName,
-        location: form.farmLocation,
-        documents: [],
-      },
-    };
-
     try {
+      let documentUrl = "";
+
+      // Upload farmer document to Cloudinary
+      if (form.role === "farmer" && form.idDocumentFile) {
+        setError("Uploading verification document...");
+
+        documentUrl = await uploadImage(
+          form.idDocumentFile,
+          "f2cmarket/verification-documents",
+        );
+
+        setError("");
+      }
+
+      const newUser = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        role: form.role,
+
+        phone: form.phone,
+        specialty: form.specialty,
+        experience: form.experience,
+        farmRegNo: form.farmRegNo,
+
+        verificationStatus: form.role === "farmer" ? "pending" : "approved",
+
+        verified: form.role !== "farmer",
+
+        verificationDocuments: {
+          idType: form.idType,
+          idDocumentUrl: documentUrl,
+        },
+
+        profile: {
+          bio: "",
+          location:
+            form.role === "farmer"
+              ? form.farmLocation?.city || form.farmLocation || ""
+              : "",
+        },
+
+        farmerProfile: {
+          farmName: form.farmName,
+          location: form.farmLocation,
+          documents: documentUrl ? [documentUrl] : [],
+        },
+
+        banned: false,
+      };
+
       const saved = await register(newUser);
 
-      // Send welcome email (non-blocking)
       sendWelcomeEmail({
         name: saved.name,
         email: saved.email,
@@ -181,8 +286,27 @@ export default function Register() {
       } else {
         setStep(2);
       }
-    } catch (error) {
-      setError(error.message || "Registration failed.");
+    } catch (err) {
+      switch (err.code) {
+        case "auth/email-already-in-use":
+          setError("This email is already registered.");
+          break;
+
+        case "auth/invalid-email":
+          setError("Please enter a valid email address.");
+          break;
+
+        case "auth/weak-password":
+          setError("Password is too weak. Please choose a stronger password.");
+          break;
+
+        case "auth/network-request-failed":
+          setError("Network error. Please check your internet connection.");
+          break;
+
+        default:
+          setError(err.message || "Registration failed.");
+      }
     } finally {
       setLoading(false);
     }
@@ -190,21 +314,17 @@ export default function Register() {
 
   const handleGoogleRegister = async () => {
     if (loading) return;
-
     setLoading(true);
     setError("");
-
     try {
       const result = await signInWithGoogle();
-
       if (!result.success) {
         setError(result.error);
         return;
       }
-
       navigate("/");
-    } catch (error) {
-      setError(error.message || "Google sign in failed");
+    } catch (err) {
+      setError(err.message || "Google sign in failed");
     } finally {
       setLoading(false);
     }
@@ -245,6 +365,12 @@ export default function Register() {
                 value={form.name}
                 onChange={handleChange}
               />
+              {errors.name && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.name}
+                </p>
+              )}
+
               <AuthInputField
                 icon={Mail}
                 name="email"
@@ -253,6 +379,12 @@ export default function Register() {
                 value={form.email}
                 onChange={handleChange}
               />
+              {errors.email && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.email}
+                </p>
+              )}
+
               <AuthSelectField
                 icon={Users}
                 name="role"
@@ -263,6 +395,7 @@ export default function Register() {
                   { label: "Farmer — Sell your produce", value: "farmer" },
                 ]}
               />
+
               <AuthInputField
                 icon={Lock}
                 name="password"
@@ -271,6 +404,12 @@ export default function Register() {
                 value={form.password}
                 onChange={handleChange}
               />
+              {errors.password && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.password}
+                </p>
+              )}
+
               <AuthInputField
                 icon={Lock}
                 name="confirmPassword"
@@ -279,19 +418,49 @@ export default function Register() {
                 value={form.confirmPassword}
                 onChange={handleChange}
               />
-
-              {!passwordsMatch && (
-                <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-2.5">
-                  <p className="text-xs font-medium text-red-300">
-                    Passwords do not match
-                  </p>
-                </div>
+              {errors.confirmPassword && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.confirmPassword}
+                </p>
               )}
+
+              {/* <div className="rounded-xl bg-white/10 border border-white/20 p-3 space-y-1">
+                <p className="text-xs text-[var(--glass-text-muted)] mb-2">
+                  Password requirements:
+                </p>
+                <p
+                  className={`text-xs ${form.password.length >= 8 ? "text-green-400" : "text-white/50"}`}
+                >
+                  ✓ Minimum 8 characters
+                </p>
+                <p
+                  className={`text-xs ${/[A-Z]/.test(form.password) ? "text-green-400" : "text-white/50"}`}
+                >
+                  ✓ One uppercase letter
+                </p>
+                <p
+                  className={`text-xs ${/[a-z]/.test(form.password) ? "text-green-400" : "text-white/50"}`}
+                >
+                  ✓ One lowercase letter
+                </p>
+                <p
+                  className={`text-xs ${/[0-9]/.test(form.password) ? "text-green-400" : "text-white/50"}`}
+                >
+                  ✓ One number
+                </p>
+                <p
+                  className={`text-xs ${/[!@#$%^&*(),.?":{}|<>]/.test(form.password) ? "text-green-400" : "text-white/50"}`}
+                >
+                  ✓ One special character
+                </p>
+              </div> */}
+
               {error && (
                 <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-2.5">
                   <p className="text-xs font-medium text-red-300">{error}</p>
                 </div>
               )}
+
               {isFarmer && (
                 <div className="rounded-xl bg-amber-500/15 border border-amber-400/25 px-4 py-3">
                   <p className="text-xs text-amber-300 leading-5">
@@ -315,8 +484,13 @@ export default function Register() {
                 {isFarmer ? "Continue →" : "Create Account"}
               </Button>
 
-              <AuthDivider />
-              <GoogleButton onClick={handleGoogleRegister} />
+              {!isFarmer && (
+                <>
+                  <AuthDivider />
+                  <GoogleButton onClick={handleGoogleRegister} />
+                </>
+              )}
+
               <p className="text-center text-sm text-[var(--glass-text-muted)]">
                 Already have an account?{" "}
                 <Link
@@ -338,26 +512,18 @@ export default function Register() {
                 value={form.farmName}
                 onChange={handleChange}
               />
+
               <div className="space-y-2">
                 <label className="text-sm font-medium text-[var(--glass-text)]">
                   Farm Location *
                 </label>
-
                 <button
                   type="button"
                   onClick={() => setShowLocationDialog(true)}
-                  className="
-      flex h-12 w-full items-center justify-between
-      rounded-xl border border-white/20
-      bg-white/10 px-4
-      text-left text-sm
-      text-[var(--glass-text)]
-      transition hover:bg-white/15
-    "
+                  className="flex h-12 w-full items-center justify-between rounded-xl border border-white/20 bg-white/10 px-4 text-left text-sm text-[var(--glass-text)] transition hover:bg-white/15"
                 >
                   <div className="flex items-center gap-2">
                     <MapPin size={16} />
-
                     <span>
                       {form.farmLocation?.city || "Select Farm Location"}
                     </span>
@@ -370,12 +536,10 @@ export default function Register() {
                 onOpenChange={setShowLocationDialog}
                 value={form.farmLocation}
                 onConfirm={(location) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    farmLocation: location,
-                  }))
+                  setForm((prev) => ({ ...prev, farmLocation: location }))
                 }
               />
+
               <AuthInputField
                 icon={Phone}
                 name="phone"
@@ -383,6 +547,12 @@ export default function Register() {
                 value={form.phone}
                 onChange={handleChange}
               />
+              {errors.phone && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.phone}
+                </p>
+              )}
+
               <AuthInputField
                 icon={Sprout}
                 name="specialty"
@@ -390,6 +560,7 @@ export default function Register() {
                 value={form.specialty}
                 onChange={handleChange}
               />
+
               <AuthSelectField
                 icon={FileText}
                 name="experience"
@@ -404,30 +575,47 @@ export default function Register() {
                   { label: "More than 10 years", value: "10+" },
                 ]}
               />
-              <AuthInputField
-                icon={FileText}
-                name="govId"
-                placeholder="Government ID (Aadhaar/PAN) *"
-                value={form.govId}
-                onChange={handleChange}
-              />
-              <AuthInputField
-                icon={FileText}
-                name="farmRegNo"
-                placeholder="Farm Registration No. (optional)"
-                value={form.farmRegNo}
-                onChange={handleChange}
-              />
 
-              <div className="rounded-xl bg-white/10 border border-white/20 px-4 py-3">
-                <p className="text-xs text-[var(--glass-text-muted)] leading-5">
-                  <span className="font-semibold text-[var(--glass-text)]">
-                    Note:
-                  </span>{" "}
-                  Physical documents can be uploaded via your profile after
-                  approval.
+              {/* FIX 8: removed orphaned govId error — no govId input exists in Step 1 */}
+              <AuthSelectField
+                icon={FileText}
+                name="idType"
+                value={form.idType}
+                onChange={handleChange}
+                options={[
+                  { label: "Select Government ID *", value: "" },
+                  { label: "Aadhaar Card", value: "aadhaar" },
+                  { label: "PAN Card", value: "pan" },
+                  { label: "Driving Licence", value: "driving_license" },
+                  { label: "Voter ID", value: "voter_id" },
+                ]}
+              />
+              {errors.idType && (
+                <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+                  {errors.idType}
                 </p>
+              )}
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--glass-text)]">
+                  Upload Document *
+                </label>
+                {/* FIX 9: use handleFileChange, not handleChange */}
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.pdf"
+                  onChange={handleFileChange}
+                  className="w-full rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-sm text-[var(--glass-text)] file:mr-4 file:rounded-lg file:border-0 file:bg-[var(--primary)] file:px-4 file:py-2 file:text-white file:cursor-pointer"
+                />
+                {/* FIX 10: show file name confirmation once selected */}
+                {form.idDocumentFile && (
+                  <p className="text-xs text-green-400 px-1">
+                    ✓ {form.idDocumentFile.name}
+                  </p>
+                )}
               </div>
+
+              
 
               {error && (
                 <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-2.5">
@@ -460,7 +648,7 @@ export default function Register() {
                       Submitting…
                     </span>
                   ) : (
-                    "Submit Application"
+                    "Submit "
                   )}
                 </Button>
               </div>

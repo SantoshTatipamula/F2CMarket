@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import AuthLayout from "@/components/auth/AuthLayout";
 import AuthInputField from "@/components/auth/AuthInputField";
 import { AuthDivider, GoogleButton } from "@/components/auth/AuthExtras";
+import { validateEmail, validatePassword } from "@/pages/auth/authValidation";
 
 function getRoleRedirect(result) {
   if (result.role === "farmer" && result.verificationStatus === "pending")
@@ -25,14 +26,44 @@ export default function Login() {
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
+  const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
 
   const from = location.state?.from?.pathname;
-  const isValid = form.email.trim() && form.password.trim();
+  const isValid =
+    form.email.trim() &&
+    form.password.trim() &&
+    !validateEmail(form.email) &&
+    !validatePassword(form.password);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    let validationError = "";
+
+    switch (name) {
+      case "email":
+        validationError = validateEmail(value);
+        break;
+
+      case "password":
+        validationError = validatePassword(value);
+        break;
+
+      default:
+        break;
+    }
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: validationError,
+    }));
+
     if (error) setError("");
   };
 
@@ -52,36 +83,60 @@ export default function Login() {
 
       navigate(from || getRoleRedirect(result), { replace: true });
     } catch (error) {
+  switch (error.code) {
+    case "auth/user-not-found":
+      setError("No account found with this email.");
+      break;
+
+    case "auth/wrong-password":
+      setError("Incorrect password.");
+      break;
+
+    case "auth/invalid-email":
+      setError("Please enter a valid email address.");
+      break;
+
+    case "auth/too-many-requests":
+      setError(
+        "Too many failed attempts. Please try again later."
+      );
+      break;
+
+    case "auth/network-request-failed":
+      setError(
+        "Network error. Please check your internet connection."
+      );
+      break;
+
+    default:
       setError(error.message || "Login failed");
-    } finally {
+  }
+} finally {
       setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
-  if (loading) return;
+    if (loading) return;
 
-  setLoading(true);
-  setError("");
+    setLoading(true);
+    setError("");
 
-  try {
-    const result = await signInWithGoogle();
+    try {
+      const result = await signInWithGoogle();
 
-    if (!result.success) {
-      setError(result.error);
-      return;
+      if (!result.success) {
+        setError(result.error);
+        return;
+      }
+
+      navigate(from || getRoleRedirect(result), { replace: true });
+    } catch (error) {
+      setError(error.message || "Google login failed");
+    } finally {
+      setLoading(false);
     }
-
-    navigate(
-      from || getRoleRedirect(result),
-      { replace: true }
-    );
-  } catch (error) {
-    setError(error.message || "Google login failed");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") handleLogin();
@@ -98,6 +153,11 @@ export default function Login() {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
+
+      {errors.email && (
+        <p className="text-xs text-red-300 -mt-2 mb-2 px-1">{errors.email}</p>
+      )}
+
       <AuthInputField
         icon={Lock}
         name="password"
@@ -107,6 +167,12 @@ export default function Login() {
         onChange={handleChange}
         onKeyDown={handleKeyDown}
       />
+
+      {errors.password && (
+        <p className="text-xs text-red-300 -mt-2 mb-2 px-1">
+          {errors.password}
+        </p>
+      )}
 
       {error && (
         <div className="rounded-xl bg-red-500/20 border border-red-400/30 px-4 py-3">

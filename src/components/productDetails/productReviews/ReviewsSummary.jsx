@@ -2,17 +2,38 @@
 
 import { Star, BadgeCheck } from "lucide-react";
 
-export default function ReviewsSummary({ product }) {
-  const rating = product?.rating || 4.8;
-  const totalReviews = 125;
+export default function ReviewsSummary({
+  product,
+  reviews = [],
+}) {
+  const totalReviews = reviews.length;
 
-  const ratingDistribution = [
-    { stars: 5, count: 95, percentage: 76 },
-    { stars: 4, count: 22, percentage: 18 },
-    { stars: 3, count: 5, percentage: 4 },
-    { stars: 2, count: 2, percentage: 1 },
-    { stars: 1, count: 1, percentage: 1 },
-  ];
+  const rating =
+    totalReviews > 0
+      ? (
+          reviews.reduce(
+            (sum, review) => sum + review.rating,
+            0,
+          ) / totalReviews
+        ).toFixed(1)
+      : "0.0";
+
+  const ratingDistribution = [5, 4, 3, 2, 1].map(
+    (stars) => {
+      const count = reviews.filter(
+        (review) => review.rating === stars,
+      ).length;
+
+      return {
+        stars,
+        count,
+        percentage:
+          totalReviews > 0
+            ? (count / totalReviews) * 100
+            : 0,
+      };
+    },
+  );
 
   return (
     <div className="mb-10 grid gap-6 lg:grid-cols-3">
@@ -28,8 +49,16 @@ export default function ReviewsSummary({ product }) {
               <Star
                 key={index}
                 size={20}
-                fill="#F59E0B"
-                className="text-amber-500"
+                fill={
+                  index < Math.round(rating)
+                    ? "#F59E0B"
+                    : "none"
+                }
+                className={
+                  index < Math.round(rating)
+                    ? "text-amber-500"
+                    : "text-gray-300"
+                }
               />
             ))}
           </div>

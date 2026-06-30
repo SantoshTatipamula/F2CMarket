@@ -1,8 +1,8 @@
-import {
-  Star,
-  MessageCircle,
-  BadgeCheck,
-} from "lucide-react";
+import { useEffect, useState } from "react";
+
+import { getSellerReviews } from "@/services/reviewService";
+
+import { Star, MessageCircle, BadgeCheck } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
 
@@ -13,59 +13,35 @@ import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
 export default function SellerReviews() {
   const { user } = useAuth();
 
-  const reviews = [
-    {
-      id: 1,
+  const [reviews, setReviews] = useState([]);
 
-      customer: "Ramesh",
+  useEffect(() => {
+    const loadReviews = async () => {
+      if (!user?.id) return;
 
-      rating: 5,
+      try {
+        const data = await getSellerReviews(user.id);
 
-      comment:
-        "Excellent product quality and very fast delivery.",
+        setReviews(Array.isArray(data) ? data : []);
+      } catch (error) {
+        console.error("Failed to load seller reviews:", error);
 
-      date: "2 days ago",
-    },
+        setReviews([]);
+      }
+    };
 
-    {
-      id: 2,
-
-      customer: "Priya",
-
-      rating: 4,
-
-      comment:
-        "Fresh vegetables and good packaging experience.",
-
-      date: "5 days ago",
-    },
-
-    {
-      id: 3,
-
-      customer: "Kiran",
-
-      rating: 5,
-
-      comment:
-        "Highly trusted seller with premium farm products.",
-
-      date: "1 week ago",
-    },
-  ];
+    loadReviews();
+  }, [user]);
 
   const averageRating =
-    (
-      reviews.reduce(
-        (acc, item) =>
-          acc + item.rating,
-        0
-      ) / reviews.length
-    ).toFixed(1);
+    reviews.length > 0
+      ? (
+          reviews.reduce((acc, item) => acc + item.rating, 0) / reviews.length
+        ).toFixed(1)
+      : "0.0";
 
   return (
     <main className="min-h-screen bg-[var(--bg)]">
-      
       <section
         className="
           mx-auto
@@ -74,7 +50,6 @@ export default function SellerReviews() {
           lg:px-8
         "
       >
-        
         {/* Hero */}
         <div
           className="
@@ -85,7 +60,6 @@ export default function SellerReviews() {
             shadow-sm
           "
         >
-          
           {/* Banner */}
           <div
             className="
@@ -97,7 +71,6 @@ export default function SellerReviews() {
               text-white
             "
           >
-            
             <div
               className="
                 inline-flex items-center
@@ -112,7 +85,6 @@ export default function SellerReviews() {
             </div>
 
             <div className="mt-6 flex items-start gap-4">
-              
               <div
                 className="
                   flex h-14 w-14
@@ -126,7 +98,6 @@ export default function SellerReviews() {
               </div>
 
               <div>
-                
                 <h1
                   className="
                     text-3xl font-bold
@@ -144,9 +115,7 @@ export default function SellerReviews() {
                     text-white/80
                   "
                 >
-                  Customer feedback,
-                  marketplace trust,
-                  and seller reputation
+                  Customer feedback, marketplace trust, and seller reputation
                   across F2CMARKET.
                 </p>
               </div>
@@ -155,10 +124,8 @@ export default function SellerReviews() {
 
           {/* Content */}
           <div className="p-6 md:p-8 space-y-8">
-            
             {/* Summary */}
             <ProfileCard>
-              
               <ProfileCardHeader
                 title="Seller Rating Summary"
                 description="Overall marketplace trust and customer satisfaction."
@@ -172,7 +139,6 @@ export default function SellerReviews() {
                   md:grid-cols-3
                 "
               >
-                
                 <SummaryCard
                   label="Average Rating"
                   value={`${averageRating}/5`}
@@ -195,21 +161,30 @@ export default function SellerReviews() {
 
             {/* Reviews */}
             <ProfileCard>
-              
               <ProfileCardHeader
                 title="Customer Reviews"
                 description="Recent marketplace feedback from buyers."
               />
 
               <div className="mt-8 space-y-5">
-                
-                {reviews.map(
-                  (review) => (
-                    <ReviewCard
-                      key={review.id}
-                      review={review}
-                    />
-                  )
+                {reviews.length === 0 ? (
+                  <div
+                    className="
+        rounded-2xl
+        border border-dashed
+        border-black/10
+        p-10
+        text-center
+      "
+                  >
+                    <p className="text-[var(--text-secondary)]">
+                      No customer reviews yet.
+                    </p>
+                  </div>
+                ) : (
+                  reviews.map((review) => (
+                    <ReviewCard key={review.id} review={review} />
+                  ))
                 )}
               </div>
             </ProfileCard>
@@ -221,11 +196,7 @@ export default function SellerReviews() {
 }
 
 /* Summary Card */
-function SummaryCard({
-  label,
-  value,
-  icon: Icon,
-}) {
+function SummaryCard({ label, value, icon: Icon }) {
   return (
     <div
       className="
@@ -235,7 +206,6 @@ function SummaryCard({
         p-6
       "
     >
-      
       <div
         className="
           flex h-12 w-12
@@ -282,23 +252,20 @@ function ReviewCard({ review }) {
         p-6
       "
     >
-      
       <div
         className="
           flex flex-wrap items-center
           justify-between gap-4
         "
       >
-        
         <div>
-          
           <h3
             className="
               text-base font-semibold
               text-[var(--text-primary)]
             "
           >
-            {review.customer}
+            {review.customerName}
           </h3>
 
           <p
@@ -308,12 +275,11 @@ function ReviewCard({ review }) {
               text-[var(--text-secondary)]
             "
           >
-            {review.date}
+            {review.date || "recently"}
           </p>
         </div>
 
         <div className="flex items-center gap-1">
-          
           {Array.from({
             length: review.rating,
           }).map((_, index) => (
@@ -336,7 +302,7 @@ function ReviewCard({ review }) {
           text-[var(--text-secondary)]
         "
       >
-        {review.comment}
+        {review.review}
       </p>
     </div>
   );
