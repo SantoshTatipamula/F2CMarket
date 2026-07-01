@@ -22,7 +22,7 @@ const AboutHero = () => (
         </motion.div>
         <motion.div initial="hidden" whileInView="visible" viewport={viewport} variants={revealRight}>
           <div className="overflow-hidden rounded-[var(--radius-lg)] border border-[var(--border)] bg-white shadow-[var(--shadow-sm)]">
-            <img src={farmerImage} alt="Farmer" className="h-[420px] w-full object-cover" />
+            <img loading="lazy" src={farmerImage} alt="Farmer" className="h-[420px] w-full object-cover" />
           </div>
         </motion.div>
       </div>

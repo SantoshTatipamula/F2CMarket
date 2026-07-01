@@ -55,7 +55,7 @@ export default function OrderCard({ order, onOrderUpdate }) {
             {visibleItems.map((item, i) => (
               <div key={i} className="flex items-center gap-3">
                 {item.image && (
-                  <img src={item.image} alt={item.name} className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl object-cover shrink-0 border border-[var(--border)]" />
+                  <img loading="lazy" src={item.image} alt={item.name} className="h-11 w-11 sm:h-12 sm:w-12 rounded-xl object-cover shrink-0 border border-[var(--border)]" />
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-[var(--text-primary)] truncate">{item.name}</p>

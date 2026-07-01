@@ -39,7 +39,7 @@ export default function FarmerOrderCard({ order, onStatusUpdate }) {
           {order.items.map((item, i) => (
             <div key={i} className="flex items-center gap-3">
               {item.image && (
-                <img
+                <img loading="lazy"
                   src={item.image}
                   alt={item.name}
                   className="h-10 w-10 rounded-lg object-cover border border-[var(--border)] shrink-0"

@@ -12,13 +12,15 @@ import ProductsPageHeader from "@/components/product/ProductPageHeader";
 
 import ProductGrid from "@/components/product/ProductGrid";
 
+import SkeletonCard from "@/components/common/loaders/SkeletonCard";
+
 import { useSearch } from "@/context/SearchContext";
 
 export default function Products() {
   // Global Search
   const { searchQuery } = useSearch();
 
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
 
   /* Dynamic categories */
 
@@ -55,52 +57,46 @@ export default function Products() {
   } = useProductsFilter(products);
 
   /* Dynamic locations */
-const availableLocations = useMemo(() => {
-  const locs = products.map((p) => {
-    const loc =
-      typeof p.location === "string"
-        ? p.location
-        : p.farmLocation?.city ||
-          p.location?.city ||
-          "";
+  const availableLocations = useMemo(() => {
+    const locs = products.map((p) => {
+      const loc =
+        typeof p.location === "string"
+          ? p.location
+          : p.farmLocation?.city || p.location?.city || "";
 
-    return loc
-      ? loc.charAt(0).toUpperCase() +
-          loc.slice(1).toLowerCase()
-      : "";
-  });
+      return loc
+        ? loc.charAt(0).toUpperCase() + loc.slice(1).toLowerCase()
+        : "";
+    });
 
-  return ["All", ...new Set(locs.filter(Boolean))];
-}, [products]);
+    return ["All", ...new Set(locs.filter(Boolean))];
+  }, [products]);
 
   /* Final filtering */
- const finalProducts = useMemo(() => {
-  const searchTerm = searchQuery?.toLowerCase().trim() || "";
+  const finalProducts = useMemo(() => {
+    const searchTerm = searchQuery?.toLowerCase().trim() || "";
 
-  return filteredProducts.filter((product) => {
-    const productLocation =
-      typeof product.location === "string"
-        ? product.location
-        : product.farmLocation?.city ||
-          product.location?.city ||
-          "";
+    return filteredProducts.filter((product) => {
+      const productLocation =
+        typeof product.location === "string"
+          ? product.location
+          : product.farmLocation?.city || product.location?.city || "";
 
-    const matchesLocation =
-      selectedLocation === "All"
-        ? true
-        : productLocation.toLowerCase() ===
-          selectedLocation.toLowerCase();
+      const matchesLocation =
+        selectedLocation === "All"
+          ? true
+          : productLocation.toLowerCase() === selectedLocation.toLowerCase();
 
-    const matchesSearch =
-      product.name?.toLowerCase().includes(searchTerm) ||
-      product.category?.toLowerCase().includes(searchTerm) ||
-      product.farmerName?.toLowerCase().includes(searchTerm) ||
-      product.farmer?.toLowerCase().includes(searchTerm) ||
-      productLocation.toLowerCase().includes(searchTerm);
+      const matchesSearch =
+        product.name?.toLowerCase().includes(searchTerm) ||
+        product.category?.toLowerCase().includes(searchTerm) ||
+        product.farmerName?.toLowerCase().includes(searchTerm) ||
+        product.farmer?.toLowerCase().includes(searchTerm) ||
+        productLocation.toLowerCase().includes(searchTerm);
 
-    return matchesLocation && matchesSearch;
-  });
-}, [filteredProducts, selectedLocation, searchQuery]);
+      return matchesLocation && matchesSearch;
+    });
+  }, [filteredProducts, selectedLocation, searchQuery]);
 
   const filterProps = {
     category,
@@ -147,8 +143,17 @@ const availableLocations = useMemo(() => {
           </aside>
 
           {/* Product Grid */}
+          {/* Product Grid */}
           <div className="flex-1 w-full min-w-0">
-            <ProductGrid products={finalProducts} />
+            {loading ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {Array.from({ length: 9 }).map((_, index) => (
+                  <SkeletonCard key={index} />
+                ))}
+              </div>
+            ) : (
+              <ProductGrid products={finalProducts} />
+            )}
           </div>
         </div>
       </section>

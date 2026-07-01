@@ -22,7 +22,7 @@ export default function ProfileHeader() {
       {/* Cover */}
       <div className="relative h-56 overflow-hidden">
   {user?.coverImage ? (
-    <img
+    <img loading="lazy"
       src={user.coverImage}
       alt="Cover"
       className="h-full w-full object-cover"
@@ -55,7 +55,7 @@ export default function ProfileHeader() {
             shadow-xl
           "
         >
-          <img
+          <img loading="lazy"
             src={user?.avatar || "https://ui-avatars.com/api/?name=User"}
             alt={user?.name}
             className="

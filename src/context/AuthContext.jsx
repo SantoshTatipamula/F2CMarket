@@ -1,4 +1,11 @@
-import { useEffect, createContext, useContext, useState } from "react";
+import {
+  useEffect,
+  createContext,
+  useContext,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   saveUserToFirestore,
   getAllUsersFromFirestore,
@@ -182,22 +189,18 @@ export function AuthProvider({ children }) {
     );
 
     const userToSave = {
-  ...newUser,
-  id: credentials.user.uid,
-  createdAt: new Date().toISOString(),
+      ...newUser,
+      id: credentials.user.uid,
+      createdAt: new Date().toISOString(),
 
-  verificationStatus:
-    newUser.role === "farmer"
-      ? "pending"
-      : "approved",
+      verificationStatus: newUser.role === "farmer" ? "pending" : "approved",
 
-  verified: newUser.role !== "farmer",
+      verified: newUser.role !== "farmer",
 
-  verificationDocuments:
-    newUser.verificationDocuments || {},
+      verificationDocuments: newUser.verificationDocuments || {},
 
-  banned: false,
-};
+      banned: false,
+    };
 
     await saveUserToFirestore(userToSave);
     setUsers((prev) => [...prev, userToSave]);
@@ -263,44 +266,53 @@ export function AuthProvider({ children }) {
   };
 
   /* ── Logout ── */
-  const logout = async () => {
+  const logout = useCallback(async () => {
     await logoutUser();
     setUser(null);
-  };
+  }, []);
 
   /* ── Admin helpers ── */
-  const getAllUsers = () => users;
-  const updateUserInList = (updated) =>
-    setUsers((prev) =>
-      prev.map((existingUser) =>
-        existingUser.id === updated.id
-          ? {
-              ...existingUser,
-              ...updated,
-            }
-          : existingUser,
-      ),
-    );
+  const getAllUsers = useCallback(() => users, [users]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        users,
-        loading,
-        isAuthenticated,
-        login,
-        register,
-        signInWithGoogle,
-        updateUser,
-        logout,
-        getAllUsers,
-        updateUserInList,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const updateUserInList = useCallback(
+    (updated) =>
+      setUsers((prev) =>
+        prev.map((existingUser) =>
+          existingUser.id === updated.id
+            ? { ...existingUser, ...updated }
+            : existingUser,
+        ),
+      ),
+    [],
   );
+
+  const value = useMemo(
+    () => ({
+      user,
+      users,
+      loading,
+      isAuthenticated,
+      login,
+      register,
+      signInWithGoogle,
+      updateUser,
+      logout,
+      getAllUsers,
+      updateUserInList,
+    }),
+    [
+      user,
+      users,
+      loading,
+      isAuthenticated,
+      updateUser,
+      logout,
+      getAllUsers,
+      updateUserInList,
+    ],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export const useAuth = () => useContext(AuthContext);

@@ -20,7 +20,7 @@ export function GoogleButton({ onClick }) {
       className="w-full h-11 rounded-xl flex items-center justify-center gap-2 border-[var(--glass-border)] bg-[var(--glass-input)] hover:bg-[var(--glass-bg)] text-[var(--glass-text)]"
       onClick={onClick}
     >
-      <img src={google} alt="google" className="h-5 w-5" />
+      <img loading="lazy" src={google} alt="google" className="h-5 w-5" />
       Continue with Google
     </Button>
   );

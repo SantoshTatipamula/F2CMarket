@@ -11,7 +11,7 @@ export default function SectionHeader({
       {badge && (
         <span className="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full text-sm font-semibold my-3">
           <span>
-            <img src={icon} alt="Herbal Leaves" className="w-5" />
+            <img loading="lazy" src={icon} alt="Herbal Leaves" className="w-5" />
           </span>{" "}
           {badge}
         </span>

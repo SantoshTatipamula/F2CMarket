@@ -1,18 +1,33 @@
+import { memo, useMemo } from "react";
 import { Star, BadgeCheck, ThumbsUp, MessageCircle } from "lucide-react";
 
-export default function TestimonialCard({ item }) {
-  const name = item.consumerName || item.name || "Anonymous User";
+function TestimonialCard({ item }) {
+  const name = useMemo(
+    () => item.consumerName || item.name || "Anonymous User",
+    [item],
+  );
 
-  const avatar =
-    item.consumerAvatar ||
-    item.avatar ||
-    "https://ui-avatars.com/api/?name=User";
+  const avatar = useMemo(
+    () =>
+      item.consumerAvatar ||
+      item.avatar ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}`,
+    [item, name],
+  );
 
-  const location = item.location || item.role || "F2CMARKET Customer";
+  const location = useMemo(
+    () => item.location || item.role || "F2CMARKET Customer",
+    [item],
+  );
 
-  const review = item.review || item.quote || "";
+  const review = useMemo(() => item.review || item.quote || "", [item]);
 
-  const verified = item.verified !== undefined ? item.verified : true;
+  const verified = useMemo(
+    () => (item.verified !== undefined ? item.verified : true),
+    [item],
+  );
+
+  const stars = useMemo(() => [...Array(5)], []);
 
   return (
     <div className="group h-full rounded-3xl border border-[var(--border)] bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
@@ -20,6 +35,7 @@ export default function TestimonialCard({ item }) {
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-start gap-3">
           <img
+            loading="lazy"
             src={avatar}
             alt={name}
             className="h-12 w-12 rounded-full border-2 border-[var(--border)] object-cover"
@@ -39,7 +55,7 @@ export default function TestimonialCard({ item }) {
 
       {/* Rating */}
       <div className="mb-3 flex gap-1">
-        {[...Array(5)].map((_, index) => (
+        {stars.map((_, index) => (
           <Star
             key={index}
             size={16}
@@ -69,3 +85,6 @@ export default function TestimonialCard({ item }) {
     </div>
   );
 }
+
+
+export default memo(TestimonialCard);

@@ -11,7 +11,7 @@ export default function HeroVisual() {
 
       {/* Hero Image */}
       <div className="relative z-10">
-        <img
+        <img loading="lazy"
           src={heroImg}
           alt="Fresh Products"
           className="w-full h-full object-contain drop-shadow-2xl"

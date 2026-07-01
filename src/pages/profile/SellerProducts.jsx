@@ -205,7 +205,7 @@ function ProductCard({
       {/* Image */}
       <div className="h-52 overflow-hidden">
         
-        <img
+        <img loading="lazy"
           src={product.image}
           alt={product.name}
           className="

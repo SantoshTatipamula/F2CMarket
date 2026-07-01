@@ -98,7 +98,7 @@ const filtered = useMemo(() => {
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           {product.image && (
-                            <img
+                            <img loading="lazy"
                               src={product.image}
                               alt={product.name}
                               className="h-10 w-10 rounded-lg object-cover border border-[var(--border)] shrink-0"

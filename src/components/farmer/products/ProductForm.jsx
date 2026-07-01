@@ -483,7 +483,7 @@ export default function ProductForm({
             </label>
           ) : (
             <div className="relative overflow-hidden rounded-2xl">
-              <img
+              <img loading="lazy"
                 src={preview}
                 alt="Preview"
                 className="

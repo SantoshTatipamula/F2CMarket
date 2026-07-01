@@ -246,7 +246,7 @@ export default function Navbar() {
         <nav className="max-w-7xl mx-auto px-4 lg:px-8 h-[60px] flex items-center justify-between gap-2">
           {/* Logo */}
           <Link to="/" className="shrink-0">
-            <img
+            <img loading="lazy"
               src={logo}
               alt="F2CMARKET"
               className="h-10 w-auto object-contain"
@@ -323,7 +323,7 @@ export default function Navbar() {
     focus:outline-none
   "
                   >
-                    <img
+                    <img loading="lazy"
                       src={
                         user?.avatar ||
                         `https://ui-avatars.com/api/?name=${encodeURIComponent(
@@ -420,7 +420,7 @@ export default function Navbar() {
       >
         {/* Drawer Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)]">
-          <img src={logo} alt="F2CMARKET" className="h-9 w-auto" />
+          <img loading="lazy" src={logo} alt="F2CMARKET" className="h-9 w-auto" />
           <button
             onClick={() => setMenuOpen(false)}
             className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl hover:bg-[var(--surface-2)] transition"
@@ -513,7 +513,7 @@ export default function Navbar() {
             {/* Avatar + name + role */}
             <div className="flex items-center gap-3 px-3 py-2 mb-1">
               <div className="h-10 w-10 overflow-hidden rounded-full border border-[var(--border)] bg-[var(--surface-2)]">
-                <img
+                <img loading="lazy"
                   src={
                     user?.avatar ||
                     `https://ui-avatars.com/api/?name=${encodeURIComponent(

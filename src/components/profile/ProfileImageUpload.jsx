@@ -88,7 +88,7 @@ export default function ProfileImageUpload() {
     <section className="relative">
       {/* Banner */}
       <div className="relative h-52 overflow-hidden rounded-3xl bg-[var(--surface-2)] md:h-64">
-        <img
+        <img loading="lazy"
           src={bannerImage}
           alt="Profile Banner"
           className="h-full w-full object-cover"
@@ -123,7 +123,7 @@ export default function ProfileImageUpload() {
       {/* Avatar */}
       <div className="relative -mt-16 flex justify-center">
         <div className="relative">
-          <img
+          <img loading="lazy"
             src={avatarImage}
             alt="Profile"
             className="

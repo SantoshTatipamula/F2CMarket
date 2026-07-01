@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  useMemo,
+  useCallback,
+} from "react";
 
 import {
   loadProducts,
@@ -51,7 +58,7 @@ export function ProductProvider({ children }) {
   }, [user]);
 
   // Refresh Products
-  const refreshProducts = async () => {
+  const refreshProducts = useCallback(async () => {
     try {
       setLoading(true);
 
@@ -60,43 +67,63 @@ export function ProductProvider({ children }) {
       setProducts(data || []);
     } catch (error) {
       console.error("Failed to refresh products:", error);
+
       setProducts([]);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Create Product
-  const createProduct = async (productData) => {
-    await createProductService(productData);
-    await refreshProducts();
-  };
+  const createProduct = useCallback(
+    async (productData) => {
+      await createProductService(productData);
+      await refreshProducts();
+    },
+    [refreshProducts],
+  );
 
   // Update Product
-  const updateProduct = async (productId, updatedData) => {
-    await updateProductService(productId, updatedData, user?.id);
-    await refreshProducts();
-  };
+  const updateProduct = useCallback(
+    async (productId, updatedData) => {
+      await updateProductService(productId, updatedData, user?.id);
+
+      await refreshProducts();
+    },
+    [user, refreshProducts],
+  );
 
   // Delete Product
-  const deleteProduct = async (productId) => {
-    await deleteProductService(productId, user?.id);
-    await refreshProducts();
-  };
+  const deleteProduct = useCallback(
+    async (productId) => {
+      await deleteProductService(productId, user?.id);
+
+      await refreshProducts();
+    },
+    [user, refreshProducts],
+  );
+
+  const value = useMemo(
+    () => ({
+      products,
+      loading,
+      refreshProducts,
+      createProduct,
+      updateProduct,
+      deleteProduct,
+    }),
+    [
+      products,
+      loading,
+      refreshProducts,
+      createProduct,
+      updateProduct,
+      deleteProduct,
+    ],
+  );
 
   return (
-    <ProductContext.Provider
-      value={{
-        products,
-        loading,
-        refreshProducts,
-        createProduct,
-        updateProduct,
-        deleteProduct,
-      }}
-    >
-      {children}
-    </ProductContext.Provider>
+    <ProductContext.Provider value={value}>{children}</ProductContext.Provider>
   );
 }
 

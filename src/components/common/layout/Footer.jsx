@@ -33,7 +33,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-10 pb-10 border-b border-slate-800">
           {/* Brand */}
           <div>
-            <img src={logo} alt="F2CMARKET" className="h-14 w-auto mb-5" />
+            <img loading="lazy" src={logo} alt="F2CMARKET" className="h-14 w-auto mb-5" />
 
             <p className="text-slate-300 leading-relaxed">
               Fresh farm products delivered directly from trusted local farmers

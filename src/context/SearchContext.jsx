@@ -2,10 +2,10 @@ import {
   createContext,
   useContext,
   useState,
+  useMemo,
 } from "react";
 
-const SearchContext =
-  createContext();
+const SearchContext = createContext();
 
 export function SearchProvider({
   children,
@@ -13,12 +13,17 @@ export function SearchProvider({
   const [searchQuery, setSearchQuery] =
     useState("");
 
+  const value = useMemo(
+    () => ({
+      searchQuery,
+      setSearchQuery,
+    }),
+    [searchQuery],
+  );
+
   return (
     <SearchContext.Provider
-      value={{
-        searchQuery,
-        setSearchQuery,
-      }}
+      value={value}
     >
       {children}
     </SearchContext.Provider>
@@ -27,4 +32,4 @@ export function SearchProvider({
 
 export function useSearch() {
   return useContext(SearchContext);
-}
+}f

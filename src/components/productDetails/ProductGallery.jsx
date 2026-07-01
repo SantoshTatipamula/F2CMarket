@@ -59,7 +59,7 @@ export default function ProductGallery({ product }) {
 
           {/* Main Image */}
           <div className="aspect-[4/3] w-full max-h-[500px] overflow-hidden bg-gradient-to-br from-[var(--surface)] to-white">
-            <img
+            <img loading="lazy"
               src={currentImage}
               alt={product?.name}
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
@@ -85,7 +85,7 @@ export default function ProductGallery({ product }) {
                 }`}
               >
                 <div className="aspect-square overflow-hidden bg-gradient-to-br from-[var(--surface)] to-white">
-                  <img
+                  <img loading="lazy"
                     src={img}
                     alt={`Thumbnail ${index + 1}`}
                     className={`h-full w-full object-cover transition-all ${

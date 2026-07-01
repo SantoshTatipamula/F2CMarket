@@ -163,7 +163,7 @@ function FarmerRow({ farmer, onApprove, onReject }) {
                     </a>
                   ) : (
                     <div className="space-y-3">
-                      <img
+                      <img loading="lazy"
                         src={farmer.verificationDocuments.idDocumentUrl}
                         alt="Verification Document"
                         className="w-full max-w-md rounded-xl border border-[var(--border)] object-cover"

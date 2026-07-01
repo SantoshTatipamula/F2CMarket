@@ -1,33 +1,48 @@
+import { memo, useMemo, useCallback } from "react";
 import { MapPin, Star } from "lucide-react";
 import farmerImage from "@/assets/images/farmer.webp";
 import { useNavigate } from "react-router-dom";
 
-export default function FarmerCard({ farmer }) {
+function FarmerCard({ farmer }) {
   const navigate = useNavigate();
-  console.log("Farmer Avatar:", farmer.avatar);
-  const image =
-    farmer.avatar || farmer.profileImage || farmer.image || farmerImage;
+  const image = useMemo(
+    () => farmer.avatar || farmer.profileImage || farmer.image || farmerImage,
+    [farmer],
+  );
 
-  const location =
-    farmer.farmerProfile?.location?.city ||
-    (typeof farmer.farmerProfile?.location === "string"
-      ? farmer.farmerProfile.location
-      : null) ||
-    farmer.farmLocation?.city ||
-    farmer.farmLocation ||
-    farmer.location?.city ||
-    farmer.location ||
-    "Location ";
+  const location = useMemo(
+    () =>
+      farmer.farmerProfile?.location?.city ||
+      (typeof farmer.farmerProfile?.location === "string"
+        ? farmer.farmerProfile.location
+        : null) ||
+      farmer.farmLocation?.city ||
+      farmer.farmLocation ||
+      farmer.location?.city ||
+      farmer.location ||
+      "Location",
+    [farmer],
+  );
 
-  const description =
-    farmer.profile?.bio ||
-    farmer.description ||
-    farmer.specialty ||
-    "Verified farmer on F2CMARKET.";
+  const description = useMemo(
+    () =>
+      farmer.profile?.bio ||
+      farmer.description ||
+      farmer.specialty ||
+      "Verified farmer on F2CMARKET.",
+    [farmer],
+  );
 
-  const rating = farmer.rating ?? 4.5;
+  const rating = useMemo(() => farmer.rating ?? 4.5, [farmer]);
 
-  const productsCount = farmer.productsCount ?? farmer.products ?? 0;
+  const productsCount = useMemo(
+    () => farmer.productsCount ?? farmer.products ?? 0,
+    [farmer],
+  );
+
+  const handleViewProfile = useCallback(() => {
+    navigate(`/farmers/${farmer.id}`);
+  }, [navigate, farmer.id]);
 
   return (
     <article
@@ -44,6 +59,7 @@ export default function FarmerCard({ farmer }) {
       {/* Cover Image */}
       <div className="relative h-56 overflow-hidden">
         <img
+          loading="lazy"
           src={image}
           alt={farmer.name}
           className="
@@ -128,9 +144,7 @@ export default function FarmerCard({ farmer }) {
           </div>
 
           <button
-            onClick={() => {
-              navigate(`/farmers/${farmer.id}`);
-            }}
+            onClick={handleViewProfile}
             className="
     h-11 px-5 rounded-xl
     bg-[var(--primary)]
@@ -145,3 +159,5 @@ export default function FarmerCard({ farmer }) {
     </article>
   );
 }
+
+export default memo(FarmerCard);

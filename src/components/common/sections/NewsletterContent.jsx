@@ -18,17 +18,17 @@ export default function NewsletterContent() {
       <div className="mt-6 flex flex-wrap gap-4 text-sm text-white/90 font-medium">
         <span className="flex items-center justify-center gap-2">
           {" "}
-          <img src={herbal} alt="Fast Delivery" className="w-6" />
+          <img loading="lazy" src={herbal} alt="Fast Delivery" className="w-6" />
           <p>Fresh Updates</p>
         </span>
         <span className="flex items-center justify-center gap-2">
           {" "}
-          <img src={money} alt="Fast Delivery" className="w-6" />
+          <img loading="lazy" src={money} alt="Fast Delivery" className="w-6" />
           <p>Special Discounts</p>
         </span>
         <span className="flex items-center justify-center gap-2">
           {" "}
-          <img src={delevery} alt="Fast Delivery" className="w-6" />
+          <img loading="lazy" src={delevery} alt="Fast Delivery" className="w-6" />
           <p>Early Access</p>
         </span>
       </div>

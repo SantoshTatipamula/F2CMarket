@@ -59,7 +59,7 @@ const AboutFarmers = () => {
 
               {/* Image */}
               <div className="aspect-[4/3] overflow-hidden">
-                <img
+                <img loading="lazy"
                   src={farmer.image}
                   alt={farmer.name}
                   className="

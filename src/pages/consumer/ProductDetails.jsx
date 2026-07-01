@@ -10,6 +10,7 @@ import ProductInfo from "@/components/productDetails/ProductInfo";
 import FarmerCard from "@/components/productDetails/FarmerCard";
 import ProductReviews from "@/components/productDetails/productReviews/ProductReviews";
 import RelatedProducts from "@/components/productDetails/RelatedProducts";
+import ProductDetailsSkeleton from "@/components/common/loaders/ProductDetailsSkeleton";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -19,14 +20,8 @@ export default function ProductDetails() {
   const product = products.find((p) => String(p.id) === String(id));
 
   if (loading) {
-    return (
-      <section className="min-h-screen bg-gradient-to-b from-[var(--bg)] to-white px-4 py-20">
-        <div className="mx-auto max-w-lg text-center">
-          <p className="text-[var(--text-secondary)]">Loading product…</p>
-        </div>
-      </section>
-    );
-  }
+  return <ProductDetailsSkeleton />;
+}
 
   if (!product) {
     return (

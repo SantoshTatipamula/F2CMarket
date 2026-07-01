@@ -43,7 +43,7 @@ export default function FarmerProfile() {
           {/* Hero */}
           <div className="relative overflow-hidden">
             {farmer.coverImage ? (
-              <img
+              <img loading="lazy"
                 src={farmer.coverImage}
                 alt="Farm Banner"
                 className="absolute inset-0 h-full w-full object-cover"
@@ -64,7 +64,7 @@ export default function FarmerProfile() {
               <div className="flex flex-col gap-8 lg:flex-row lg:items-center">
                 {/* Avatar */}
                 <div className="h-28 w-28 overflow-hidden rounded-full border-4 border-white bg-white shadow-lg">
-                  <img
+                  <img loading="lazy"
                     src={
                       farmer.avatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(

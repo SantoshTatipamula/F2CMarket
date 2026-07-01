@@ -76,7 +76,7 @@ export default function Cart() {
                     >
                       <div className="flex items-start gap-3 sm:gap-4">
                         {/* Image */}
-                        <img
+                        <img loading="lazy"
                           src={item.image}
                           alt={item.name}
                           className="h-20 w-20 sm:h-24 sm:w-24 rounded-xl object-cover shrink-0 border border-[var(--border)]"

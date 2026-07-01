@@ -1,10 +1,12 @@
 import { Suspense, lazy } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 
 import AppLayout from "@/components/common/layout/AppLayout";
 import ScrollToTop from "@/components/common/layout/ScrollToTop";
 import ProtectedRoute from "./ProtectedRoute";
 import PageLoader from "@/components/common/ui/PageLoader";
+import FullPageLoader from "@/components/common/loaders/FullPageLoader";
 
 /* ── Public ──────────────────────────────────────────────── */
 const Home = lazy(() => import("@/pages/consumer/Home"));
@@ -22,7 +24,7 @@ const Feedback = lazy(() => import("@/pages/common/Feedback"));
 
 /* ── Auth ────────────────────────────────────────────────── */
 const Login = lazy(() => import("@/pages/auth/Login"));
-const Register = lazy(() => import("@/pages/auth/Register"));
+const Register = lazy(() => import("@/pages/auth/Register")); 
 const PendingVerification = lazy(
   () => import("@/pages/auth/PendingVerification"),
 );
@@ -64,6 +66,11 @@ const SellerProducts = lazy(() => import("@/pages/profile/SellerProducts"));
 const SellerReviews = lazy(() => import("@/pages/profile/SellerReviews"));
 
 export default function AppRoutes() {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <FullPageLoader />;
+  }
   return (
     <>
       <ScrollToTop />

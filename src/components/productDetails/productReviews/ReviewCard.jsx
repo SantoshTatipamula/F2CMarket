@@ -13,7 +13,7 @@ export default function ReviewCard({ review }) {
       {/* Header */}
       <div className="mb-4 flex items-start justify-between">
         <div className="flex items-start gap-3">
-          <img
+          <img loading="lazy"
             src={review.avatar}
             alt={review.name}
             className="h-12 w-12 rounded-full border-2 border-[var(--border)] object-cover"

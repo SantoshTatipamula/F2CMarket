@@ -1,4 +1,11 @@
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  useCallback,
+} from "react";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -8,18 +15,18 @@ import {
 
 const WishlistContext = createContext();
 
-function mergeWishlistItems(localItems, remoteItems) {
-  const remoteIds = new Set(remoteItems.map((item) => String(item.id)));
-  const merged = [...remoteItems];
+// function mergeWishlistItems(localItems, remoteItems) {
+//   const remoteIds = new Set(remoteItems.map((item) => String(item.id)));
+//   const merged = [...remoteItems];
 
-  for (const localItem of localItems) {
-    if (!remoteIds.has(String(localItem.id))) {
-      merged.push(localItem);
-    }
-  }
+//   for (const localItem of localItems) {
+//     if (!remoteIds.has(String(localItem.id))) {
+//       merged.push(localItem);
+//     }
+//   }
 
-  return merged;
-}
+//   return merged;
+// }
 
 export function WishlistProvider({ children }) {
   const { user } = useAuth();
@@ -67,7 +74,7 @@ export function WishlistProvider({ children }) {
     });
   }, [user?.id, wishlistItems, remoteWishlistLoaded]);
 
-  const toggleWishlist = (product) => {
+ const toggleWishlist = useCallback((product) => {
   setWishlistItems((prev) => {
     const exists = prev.find(
       (item) => String(item.id) === String(product.id)
@@ -79,19 +86,35 @@ export function WishlistProvider({ children }) {
         )
       : [...prev, product];
   });
-};
+}, [setWishlistItems]);
 
-  const isInWishlist = (id) =>
-  wishlistItems.some(
-    (item) => String(item.id) === String(id)
-  );
+  const isInWishlist = useCallback(
+  (id) =>
+    wishlistItems.some(
+      (item) => String(item.id) === String(id)
+    ),
+  [wishlistItems]
+);
 
   const wishlistCount = useMemo(() => wishlistItems.length, [wishlistItems]);
 
+
+  const value = useMemo(
+  () => ({
+    wishlistItems,
+    toggleWishlist,
+    isInWishlist,
+    wishlistCount,
+  }),
+  [
+    wishlistItems,
+    toggleWishlist,
+    isInWishlist,
+    wishlistCount,
+  ]
+);
   return (
-    <WishlistContext.Provider
-      value={{ wishlistItems, toggleWishlist, isInWishlist, wishlistCount }}
-    >
+    <WishlistContext.Provider value={value}>
       {children}
     </WishlistContext.Provider>
   );

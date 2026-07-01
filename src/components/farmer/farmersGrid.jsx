@@ -1,6 +1,7 @@
+import { memo } from "react";
 import FarmerCard from "./farmerCard";
 
-export default function FarmersGrid({
+function FarmersGrid({
   farmers = [],
 }) {
   return (
@@ -21,3 +22,5 @@ export default function FarmersGrid({
     </section>
   );
 }
+
+export default memo(FarmersGrid);

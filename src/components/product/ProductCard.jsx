@@ -1,10 +1,11 @@
+import { memo, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { Heart, ShoppingCart, Star, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
-export default function ProductCard({
+function ProductCard({
   product,
   variant = "featured", // featured | catalog
 }) {
@@ -16,12 +17,15 @@ export default function ProductCard({
 
   const isWishlisted = isInWishlist(product.id);
 
-  const productLocation =
-  typeof product.location === "string"
-    ? product.location
-    : product.farmLocation?.city ||
-      product.location?.city ||
-      "Location not available";
+  const productLocation = useMemo(
+    () =>
+      typeof product.location === "string"
+        ? product.location
+        : product.farmLocation?.city ||
+          product.location?.city ||
+          "Location not available",
+    [product],
+  );
 
   return (
     <Link to={`/products/${product.id}`} className="block h-full">
@@ -71,9 +75,9 @@ export default function ProductCard({
           {/* Image */}
           {product.image ? (
             <img
+              loading="lazy"
               src={product.image}
               alt={product.name}
-              loading="lazy"
               className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
             />
           ) : (
@@ -149,3 +153,5 @@ export default function ProductCard({
     </Link>
   );
 }
+
+export default memo(ProductCard);
