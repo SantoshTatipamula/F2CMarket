@@ -64,14 +64,10 @@ export function AuthProvider({ children }) {
       if (!mounted) return;
       if (!firebaseUser) {
         setUser(null);
+        setUsers([]);
         setLoading(false);
+        setUsersLoading(false);
 
-        // The public Farmers directory (and admin farmer/user tooling) reads
-        // from this same list, so we still need it even when nobody is
-        // logged in. If your Firestore rules require auth to read /users,
-        // this will fail for signed-out visitors — see the note in
-        // firestore.rules about enabling Anonymous Authentication.
-        loadUsers();
         return;
       }
 
@@ -231,57 +227,66 @@ export function AuthProvider({ children }) {
   };
 
   /* ── Update logged-in user ── */
-  const updateUser = async (updatedData) => {
-    if (!user) return null;
+  const updateUser = useCallback(async (updatedData) => {
+  if (!user) return null;
 
-    const updatedUser = {
-      ...user,
-      ...updatedData,
-      profile: {
-        ...(user.profile || {}),
-        ...(updatedData.profile || {}),
-      },
-      farmerProfile: {
-        ...(user.farmerProfile || {}),
-        ...(updatedData.farmerProfile || {}),
-      },
+  const updatedUser = {
+    ...user,
+    ...updatedData,
+    profile: {
+      ...(user.profile || {}),
+      ...(updatedData.profile || {}),
+    },
+    farmerProfile: {
+      ...(user.farmerProfile || {}),
+      ...(updatedData.farmerProfile || {}),
+    },
+  };
+
+  try {
+    await updateUserInFirestore(updatedUser.id, updatedUser);
+  } catch (error) {
+    console.error("Failed to update user in Firestore:", error);
+  }
+
+  setUser(updatedUser);
+
+  setUsers((prevUsers) =>
+    prevUsers.map((existingUser) =>
+      existingUser.id === updatedUser.id
+        ? updatedUser
+        : existingUser
+    )
+  );
+
+  if (updatedUser.role === "farmer") {
+    const productUpdates = {
+      farmer: updatedUser.name,
+      farmerName: updatedUser.name,
+      farmerAvatar: updatedUser.avatar || "",
+      farmName: updatedUser.farmerProfile?.farmName || "",
+      farmLocation: updatedUser.farmerProfile?.location || null,
+      location:
+        updatedUser.farmerProfile?.location?.city ||
+        updatedUser.profile?.location ||
+        "",
     };
 
     try {
-      await updateUserInFirestore(updatedUser.id, updatedUser);
+      await syncFarmerProducts(
+        updatedUser.id,
+        productUpdates
+      );
     } catch (error) {
-      console.error("Failed to update user in Firestore:", error);
+      console.error(
+        "Failed to sync farmer product profile updates:",
+        error
+      );
     }
+  }
 
-    setUser(updatedUser);
-    setUsers((prevUsers) =>
-      prevUsers.map((existingUser) =>
-        existingUser.id === updatedUser.id ? updatedUser : existingUser,
-      ),
-    );
-
-    if (updatedUser.role === "farmer") {
-      const productUpdates = {
-        farmer: updatedUser.name,
-        farmerName: updatedUser.name,
-        farmerAvatar: updatedUser.avatar || "",
-        farmName: updatedUser.farmerProfile?.farmName || "",
-        farmLocation: updatedUser.farmerProfile?.location || null,
-        location:
-          updatedUser.farmerProfile?.location?.city ||
-          updatedUser.profile?.location ||
-          "",
-      };
-
-      try {
-        await syncFarmerProducts(updatedUser.id, productUpdates);
-      } catch (error) {
-        console.error("Failed to sync farmer product profile updates:", error);
-      }
-    }
-
-    return updatedUser;
-  };
+  return updatedUser;
+}, [user]);
 
   /* ── Logout ── */
   const logout = useCallback(async () => {
