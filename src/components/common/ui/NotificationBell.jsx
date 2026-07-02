@@ -51,7 +51,14 @@ export default function NotificationBell() {
 
   load();
 
-  const interval = setInterval(load, 5000);
+  // NOTE: this project is on the Firebase Spark (free) plan, which has a
+  // hard daily read quota. Polling every few seconds here means every
+  // logged-in tab burns 2 reads per cycle for as long as it's open — that
+  // adds up fast across even a handful of users. 45s keeps the badge
+  // reasonably fresh without meaningfully risking the quota. If you need
+  // true real-time updates, switch this to an onSnapshot listener instead
+  // of polling (one live connection instead of repeated reads).
+  const interval = setInterval(load, 45000);
 
   return () => clearInterval(interval);
 }, [user?.id]);
