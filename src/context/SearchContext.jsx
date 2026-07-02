@@ -32,4 +32,4 @@ export function SearchProvider({
 
 export function useSearch() {
   return useContext(SearchContext);
-}f
+}
