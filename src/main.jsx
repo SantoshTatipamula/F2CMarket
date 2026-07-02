@@ -4,6 +4,7 @@ import "leaflet/dist/leaflet.css";
 import "./utils/leafletConfig";
 
 import App from "./App";
+import ErrorBoundary from "./components/common/ui/ErrorBoundary";
 
 import { AuthProvider }    from "./context/AuthContext";
 import { ProductProvider } from "./context/ProductContext";
@@ -21,18 +22,23 @@ if ("scrollRestoration" in window.history) {
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <AuthProvider>
-      <ProductProvider>
-        <CartProvider>
-          <WishlistProvider>
-            <SearchProvider>
-              <LocationProvider>
-                <App />
-              </LocationProvider>
-            </SearchProvider>
-          </WishlistProvider>
-        </CartProvider>
-      </ProductProvider>
-    </AuthProvider>
+    <ErrorBoundary
+      fallbackTitle="F2CMARKET hit a snag"
+      fallbackMessage="The app ran into an unexpected error while starting up. Reloading usually fixes this."
+    >
+      <AuthProvider>
+        <ProductProvider>
+          <CartProvider>
+            <WishlistProvider>
+              <SearchProvider>
+                <LocationProvider>
+                  <App />
+                </LocationProvider>
+              </SearchProvider>
+            </WishlistProvider>
+          </CartProvider>
+        </ProductProvider>
+      </AuthProvider>
+    </ErrorBoundary>
   </React.StrictMode>
 );
