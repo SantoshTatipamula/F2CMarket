@@ -23,6 +23,7 @@ export function ProductProvider({ children }) {
 
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Initialize
   useEffect(() => {
@@ -36,12 +37,13 @@ export function ProductProvider({ children }) {
 
         if (mounted) {
           setProducts(data || []);
+          setError(null);
         }
       } catch (error) {
         console.error("Failed to load products:", error);
 
         if (mounted) {
-          setProducts([]);
+          setError(error);
         }
       } finally {
         if (mounted) {
@@ -65,10 +67,11 @@ export function ProductProvider({ children }) {
       const data = await loadProducts();
 
       setProducts(data || []);
+      setError(null);
     } catch (error) {
       console.error("Failed to refresh products:", error);
 
-      setProducts([]);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -107,6 +110,7 @@ export function ProductProvider({ children }) {
     () => ({
       products,
       loading,
+      error,
       refreshProducts,
       createProduct,
       updateProduct,
@@ -115,6 +119,7 @@ export function ProductProvider({ children }) {
     [
       products,
       loading,
+      error,
       refreshProducts,
       createProduct,
       updateProduct,

@@ -31,6 +31,8 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersError, setUsersError] = useState(null);
 
   const isAuthenticated = !!user;
 
@@ -39,12 +41,22 @@ export function AuthProvider({ children }) {
 
     const loadUsers = async () => {
       try {
+        setUsersLoading(true);
         const firestoreUsers = await getAllUsersFromFirestore();
         if (mounted) {
           setUsers(firestoreUsers);
+          setUsersError(null);
         }
       } catch (error) {
         console.error("Failed to load users:", error);
+        // Keep whatever users we already have (don't wipe a good cache on a
+        // transient failure) and surface the error so pages like Farmers can
+        // tell "no data" apart from "the fetch failed".
+        if (mounted) {
+          setUsersError(error);
+        }
+      } finally {
+        if (mounted) setUsersLoading(false);
       }
     };
 
@@ -52,8 +64,14 @@ export function AuthProvider({ children }) {
       if (!mounted) return;
       if (!firebaseUser) {
         setUser(null);
-        setUsers([]);
         setLoading(false);
+
+        // The public Farmers directory (and admin farmer/user tooling) reads
+        // from this same list, so we still need it even when nobody is
+        // logged in. If your Firestore rules require auth to read /users,
+        // this will fail for signed-out visitors — see the note in
+        // firestore.rules about enabling Anonymous Authentication.
+        loadUsers();
         return;
       }
 
@@ -274,6 +292,20 @@ export function AuthProvider({ children }) {
   /* ── Admin helpers ── */
   const getAllUsers = useCallback(() => users, [users]);
 
+  const refreshUsers = useCallback(async () => {
+    try {
+      setUsersLoading(true);
+      const firestoreUsers = await getAllUsersFromFirestore();
+      setUsers(firestoreUsers);
+      setUsersError(null);
+    } catch (error) {
+      console.error("Failed to refresh users:", error);
+      setUsersError(error);
+    } finally {
+      setUsersLoading(false);
+    }
+  }, []);
+
   const updateUserInList = useCallback(
     (updated) =>
       setUsers((prev) =>
@@ -291,6 +323,8 @@ export function AuthProvider({ children }) {
       user,
       users,
       loading,
+      usersLoading,
+      usersError,
       isAuthenticated,
       login,
       register,
@@ -299,16 +333,20 @@ export function AuthProvider({ children }) {
       logout,
       getAllUsers,
       updateUserInList,
+      refreshUsers,
     }),
     [
       user,
       users,
       loading,
+      usersLoading,
+      usersError,
       isAuthenticated,
       updateUser,
       logout,
       getAllUsers,
       updateUserInList,
+      refreshUsers,
     ],
   );
 
