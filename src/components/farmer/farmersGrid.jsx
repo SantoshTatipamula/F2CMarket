@@ -1,9 +1,21 @@
 import { memo } from "react";
+import { Sprout } from "lucide-react";
 import FarmerCard from "./farmerCard";
+import EmptyState from "@/components/common/ui/EmptyState";
 
 function FarmersGrid({
   farmers = [],
 }) {
+  if (farmers.length === 0) {
+    return (
+      <EmptyState
+        icon={Sprout}
+        title="No Farmers Found"
+        description="Try a different search, or check back soon as more farmers join."
+      />
+    );
+  }
+
   return (
     <section
       className="

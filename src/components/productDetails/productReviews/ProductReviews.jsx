@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import ReviewCard from "./ReviewCard";
 import ReviewsSummary from "./ReviewsSummary";
 import AddReviewForm from "./AddReviewForm";
+import ErrorState from "@/components/common/ui/ErrorState";
 import { getProductReviews } from "@/services/reviewService";
 
 export default function ProductReviews({ product }) {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [visibleCount, setVisibleCount] = useState(3);
 
   useEffect(() => {
@@ -20,8 +22,10 @@ export default function ProductReviews({ product }) {
       const fetchedReviews = await getProductReviews(product.id);
 
       setReviews(fetchedReviews);
+      setError(null);
     } catch (error) {
       console.error("Failed to load reviews:", error);
+      setError(error);
     } finally {
       setLoading(false);
     }
@@ -58,6 +62,12 @@ export default function ProductReviews({ product }) {
         <div className="py-10 text-center">
           <p className="text-[var(--text-secondary)]">Loading reviews...</p>
         </div>
+      ) : error ? (
+        <ErrorState
+          title="Couldn't load reviews"
+          description="We ran into a problem loading reviews for this product."
+          onRetry={loadReviews}
+        />
       ) : reviews.length === 0 ? (
         <div className="py-10 text-center">
           <p className="text-[var(--text-secondary)]">No reviews yet.</p>

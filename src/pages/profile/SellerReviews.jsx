@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 import { getSellerReviews } from "@/services/reviewService";
 
@@ -9,29 +9,37 @@ import { useAuth } from "@/context/AuthContext";
 import ProfileCard from "@/components/profile/shared/ProfileCard";
 
 import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
+import ErrorState from "@/components/common/ui/ErrorState";
+import ListItemSkeleton from "@/components/common/loaders/ListItemSkeleton";
 
 export default function SellerReviews() {
   const { user } = useAuth();
 
   const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const loadReviews = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      setLoading(true);
+      const data = await getSellerReviews(user.id);
+
+      setReviews(Array.isArray(data) ? data : []);
+      setError(null);
+    } catch (error) {
+      console.error("Failed to load seller reviews:", error);
+
+      setError(error);
+    } finally {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
-    const loadReviews = async () => {
-      if (!user?.id) return;
-
-      try {
-        const data = await getSellerReviews(user.id);
-
-        setReviews(Array.isArray(data) ? data : []);
-      } catch (error) {
-        console.error("Failed to load seller reviews:", error);
-
-        setReviews([]);
-      }
-    };
-
     loadReviews();
-  }, [user]);
+  }, [loadReviews]);
 
   const averageRating =
     reviews.length > 0
@@ -167,7 +175,18 @@ export default function SellerReviews() {
               />
 
               <div className="mt-8 space-y-5">
-                {reviews.length === 0 ? (
+                {loading ? (
+                  <>
+                    <ListItemSkeleton />
+                    <ListItemSkeleton />
+                  </>
+                ) : error ? (
+                  <ErrorState
+                    title="Couldn't load reviews"
+                    description="We ran into a problem loading your reviews. Please try again."
+                    onRetry={loadReviews}
+                  />
+                ) : reviews.length === 0 ? (
                   <div
                     className="
         rounded-2xl

@@ -14,13 +14,15 @@ import ProductGrid from "@/components/product/ProductGrid";
 
 import SkeletonCard from "@/components/common/loaders/SkeletonCard";
 
+import ErrorState from "@/components/common/ui/ErrorState";
+
 import { useSearch } from "@/context/SearchContext";
 
 export default function Products() {
   // Global Search
   const { searchQuery } = useSearch();
 
-  const { products, loading } = useProducts();
+  const { products, loading, error, refreshProducts } = useProducts();
 
   /* Dynamic categories */
 
@@ -127,6 +129,13 @@ export default function Products() {
       />
 
       <section className="max-w-7xl mx-auto px-4 md:px-6 py-10">
+        {error ? (
+          <ErrorState
+            title="Couldn't load products"
+            description="We ran into a problem loading the product catalog. Please try again."
+            onRetry={refreshProducts}
+          />
+        ) : (
         <div className="flex flex-col lg:flex-row items-start gap-8">
           {/* Sidebar */}
           <aside
@@ -156,6 +165,7 @@ export default function Products() {
             )}
           </div>
         </div>
+        )}
       </section>
     </div>
   );

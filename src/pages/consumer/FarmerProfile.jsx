@@ -7,18 +7,31 @@ import { useProducts } from "@/context/ProductContext";
 
 import { FaWhatsapp } from "react-icons/fa";
 import ProductCard from "@/components/product/ProductCard";
+import FarmerSkeleton from "@/components/common/loaders/FarmerSkeleton";
 
 export default function FarmerProfile() {
   const { farmerId } = useParams();
 
-  const { users } = useAuth();
-  const { products } = useProducts();
+  const { users, usersLoading } = useAuth();
+  const { products, loading: productsLoading } = useProducts();
 
   const farmer = users.find((user) => user.id === farmerId);
   const farmerProducts = products.filter(
   (product) =>
     String(product.farmerId || product.sellerId) === String(farmer?.id)
 );
+
+  if (usersLoading || productsLoading) {
+    return (
+      <main className="min-h-screen bg-[var(--bg)] px-4 py-8 lg:px-8">
+        <div className="mx-auto max-w-7xl grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <FarmerSkeleton />
+          <FarmerSkeleton />
+          <FarmerSkeleton />
+        </div>
+      </main>
+    );
+  }
 
   if (!farmer) {
     return (

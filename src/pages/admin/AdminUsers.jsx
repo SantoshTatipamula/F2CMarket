@@ -4,9 +4,10 @@ import { useAuth } from "@/context/AuthContext";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
 import EmptyState from "@/components/common/ui/EmptyState";
+import ErrorState from "@/components/common/ui/ErrorState";
 
 export default function AdminUsers() {
-  const { users, updateUserInList } = useAuth();
+  const { users, updateUserInList, usersLoading, usersError, refreshUsers } = useAuth();
   const [search, setSearch] = useState("");
 
   const consumers = useMemo(() =>
@@ -32,7 +33,19 @@ export default function AdminUsers() {
             className="flex-1 bg-transparent outline-none text-sm placeholder:text-[var(--text-muted)]" />
         </div>
 
-        {consumers.length === 0 ? (
+        {usersError ? (
+          <ErrorState
+            title="Couldn't load users"
+            description="We ran into a problem loading the users list. Please try again."
+            onRetry={refreshUsers}
+          />
+        ) : usersLoading ? (
+          <div className="bg-white border border-[var(--border)] rounded-2xl p-8 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-10 rounded-lg bg-[var(--surface-2)] animate-pulse" />
+            ))}
+          </div>
+        ) : consumers.length === 0 ? (
           <EmptyState icon={Users} title="No Consumers Found" description="No consumers have registered yet." />
         ) : (
           <div className="bg-white border border-[var(--border)] rounded-2xl overflow-hidden">

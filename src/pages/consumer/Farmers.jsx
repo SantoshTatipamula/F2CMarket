@@ -5,6 +5,7 @@ import FarmersPageHeader from "@/components/farmer/farmersPageHeader";
 import FarmersGrid from "@/components/farmer/farmersGrid";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import FarmerSkeleton from "@/components/common/loaders/FarmerSkeleton";
+import ErrorState from "@/components/common/ui/ErrorState";
 import { revealUp, viewport } from "@/utils/scrollReveal";
 
 const STATS = [
@@ -15,7 +16,7 @@ const STATS = [
 ];
 
 export default function Farmers() {
-  const { users, loading } = useAuth();
+  const { users, usersLoading, usersError, refreshUsers } = useAuth();
 
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -90,7 +91,13 @@ export default function Farmers() {
           </div>
         </motion.div>
 
-        {loading ? (
+        {usersError ? (
+          <ErrorState
+            title="Couldn't load farmers"
+            description="We ran into a problem loading the farmer directory. Please try again."
+            onRetry={refreshUsers}
+          />
+        ) : usersLoading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {Array.from({ length: 6 }).map((_, index) => (
               <FarmerSkeleton key={index} />

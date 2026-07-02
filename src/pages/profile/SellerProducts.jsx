@@ -17,7 +17,7 @@ import ProfileCardHeader from "@/components/profile/shared/ProfileCardHeader";
 export default function SellerProducts() {
   const { user } = useAuth();
 
-  const { products } =
+  const { products, loading } =
     useProducts();
 
   const sellerProducts =
@@ -128,7 +128,21 @@ export default function SellerProducts() {
                 description="Products currently visible in the marketplace."
               />
 
-              {sellerProducts.length ===
+              {loading ? (
+                <div
+                  className="
+                    mt-8
+                    grid grid-cols-1
+                    gap-6
+                    md:grid-cols-2
+                    xl:grid-cols-3
+                  "
+                >
+                  <div className="h-40 rounded-2xl bg-[var(--surface-2)] animate-pulse" />
+                  <div className="h-40 rounded-2xl bg-[var(--surface-2)] animate-pulse" />
+                  <div className="h-40 rounded-2xl bg-[var(--surface-2)] animate-pulse" />
+                </div>
+              ) : sellerProducts.length ===
               0 ? (
                 <div
                   className="

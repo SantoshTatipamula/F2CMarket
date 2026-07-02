@@ -11,17 +11,32 @@ import FarmerCard from "@/components/productDetails/FarmerCard";
 import ProductReviews from "@/components/productDetails/productReviews/ProductReviews";
 import RelatedProducts from "@/components/productDetails/RelatedProducts";
 import ProductDetailsSkeleton from "@/components/common/loaders/ProductDetailsSkeleton";
+import ErrorState from "@/components/common/ui/ErrorState";
 
 export default function ProductDetails() {
   const { id } = useParams();
 
-  const { products, loading } = useProducts();
+  const { products, loading, error, refreshProducts } = useProducts();
 
   const product = products.find((p) => String(p.id) === String(id));
 
   if (loading) {
   return <ProductDetailsSkeleton />;
 }
+
+  if (error && !product) {
+    return (
+      <section className="min-h-screen bg-gradient-to-b from-[var(--bg)] to-white px-4 py-20">
+        <div className="mx-auto max-w-lg">
+          <ErrorState
+            title="Couldn't load this product"
+            description="We ran into a problem loading product details. Please try again."
+            onRetry={refreshProducts}
+          />
+        </div>
+      </section>
+    );
+  }
 
   if (!product) {
     return (

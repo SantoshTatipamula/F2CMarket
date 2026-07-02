@@ -13,6 +13,7 @@ import { sendGenericEmail } from "@/services/emailService";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
 import PageHeader from "@/components/common/ui/PageHeader";
 import EmptyState from "@/components/common/ui/EmptyState";
+import ErrorState from "@/components/common/ui/ErrorState";
 
 const STATUS_TABS = ["All", "pending", "approved", "rejected"];
 
@@ -194,7 +195,7 @@ function FarmerRow({ farmer, onApprove, onReject }) {
 }
 
 export default function AdminFarmers() {
-  const { users, updateUserInList } = useAuth();
+  const { users, updateUserInList, usersLoading, usersError, refreshUsers } = useAuth();
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState("All");
 
@@ -326,7 +327,19 @@ F2CMARKET Team`,
           </div>
         </div>
 
-        {farmers.length === 0 ? (
+        {usersError ? (
+          <ErrorState
+            title="Couldn't load farmers"
+            description="We ran into a problem loading the farmers list. Please try again."
+            onRetry={refreshUsers}
+          />
+        ) : usersLoading ? (
+          <div className="bg-white border border-[var(--border)] rounded-2xl p-8 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="h-10 rounded-lg bg-[var(--surface-2)] animate-pulse" />
+            ))}
+          </div>
+        ) : farmers.length === 0 ? (
           <EmptyState
             icon={Sprout}
             title="No Farmers Found"
