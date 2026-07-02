@@ -8,16 +8,17 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Dependencies
-node_modules
+node_modules/
 
 # Build files
-dist
-dist-ssr
+dist/
+dist-ssr/
 
 # Firebase
 .firebase/
-
-*.local
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
 
 # Environment Variables
 .env
@@ -25,13 +26,30 @@ dist-ssr
 .env.production
 .env.development
 
+# Local configuration files
+*.local
+
+# Cache files
+.cache/
+.eslintcache
+
+# Test coverage reports
+coverage/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
+
+# Operating System files
 .DS_Store
+Thumbs.db
+
+# Visual Studio files
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
+
+# Swap files
 *.sw?
