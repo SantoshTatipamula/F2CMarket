@@ -31,7 +31,7 @@ import { db } from "@/config/firebase";
 const ORDERS_KEY = "f2c-orders";
 const ORDERS_COLLECTION = "orders";
 
-async function fetchOrdersForConsumerFromFirestore(consumerId) {
+export async function fetchOrdersForConsumerFromFirestore(consumerId) {
   const q = query(
     collection(db, ORDERS_COLLECTION),
     where("consumerId", "==", consumerId)
@@ -49,7 +49,7 @@ async function fetchOrdersForConsumerFromFirestore(consumerId) {
     );
 }
 
-async function fetchOrdersForFarmerFromFirestore(farmerId) {
+export async function fetchOrdersForFarmerFromFirestore(farmerId) {
   const q = query(
     collection(db, ORDERS_COLLECTION),
     where("farmerIds", "array-contains", farmerId)
@@ -90,6 +90,26 @@ export async function initializeOrders(userId, role) {
   } catch (error) {
     console.error("Failed to initialize orders from Firestore:", error);
   }
+}
+
+/**
+ * Fetch this user's orders straight from Firestore, refresh the local
+ * cache, and return them — used by pages that need a real loading/error
+ * state instead of just reading whatever's already cached locally.
+ * Throws on failure so callers can show an error UI; the local cache is
+ * left untouched on failure so a transient error doesn't wipe good data.
+ */
+export async function refreshOrdersFromFirestore(userId, role) {
+  if (!userId || !role) return [];
+
+  const orders =
+    role === "farmer"
+      ? await fetchOrdersForFarmerFromFirestore(userId)
+      : await fetchOrdersForConsumerFromFirestore(userId);
+
+  localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+
+  return orders;
 }
 
 /* ── Helpers ──────────────────────────────────────────────── */

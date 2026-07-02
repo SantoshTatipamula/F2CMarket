@@ -2,22 +2,43 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { Package } from "lucide-react";
 
 import { useAuth } from "@/context/AuthContext";
-import { getConsumerOrders } from "@/services/orderService";
+import {
+  getConsumerOrders,
+  refreshOrdersFromFirestore,
+} from "@/services/orderService";
 
 import OrderCard from "@/components/order/OrderCard";
 import OrdersSummary from "@/components/order/OrdersSummary";
 import EmptyState from "@/components/common/ui/EmptyState";
+import ErrorState from "@/components/common/ui/ErrorState";
 import PageHeader from "@/components/common/ui/PageHeader";
 import Breadcrumb from "@/components/common/ui/Breadcrumb";
+import ListItemSkeleton from "@/components/common/loaders/ListItemSkeleton";
 
 export default function Orders() {
   const { user } = useAuth();
-  const [orders, setOrders] = useState([]);
+  // Show cached orders instantly (if any) while the fresh fetch runs.
+  const [orders, setOrders] = useState(() =>
+    user?.id ? getConsumerOrders(user.id) : [],
+  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const loadOrders = useCallback(() => {
+  const loadOrders = useCallback(async () => {
     if (!user?.id) return;
-    
-    setOrders(getConsumerOrders(user.id));
+
+    try {
+      setLoading(true);
+      const fresh = await refreshOrdersFromFirestore(user.id, "consumer");
+      setOrders(fresh);
+      setError(null);
+    } catch (err) {
+      console.error("Failed to load orders:", err);
+      // Keep showing the cached orders on failure — just surface the error too.
+      setError(err);
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -52,7 +73,27 @@ export default function Orders() {
 
         {orders.length > 0 && <OrdersSummary stats={stats} />}
 
-        {orders.length === 0 ? (
+        {error && (
+          <div className="mt-6">
+            <ErrorState
+              title="Couldn't refresh your orders"
+              description={
+                orders.length > 0
+                  ? "Showing your most recently loaded orders. Some information may be out of date."
+                  : "We ran into a problem loading your orders. Please try again."
+              }
+              onRetry={loadOrders}
+            />
+          </div>
+        )}
+
+        {loading && orders.length === 0 && !error ? (
+          <div className="mt-6 grid gap-5">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <ListItemSkeleton key={i} />
+            ))}
+          </div>
+        ) : orders.length === 0 && !error ? (
           <EmptyState
             icon={Package}
             title="No Orders Yet"
@@ -60,7 +101,7 @@ export default function Orders() {
             ctaLabel="Browse Products"
             ctaHref="/products"
           />
-        ) : (
+        ) : orders.length > 0 ? (
           <div className="mt-6 grid gap-5">
             {orders.map((order) => (
               <OrderCard
@@ -70,7 +111,7 @@ export default function Orders() {
               />
             ))}
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );
