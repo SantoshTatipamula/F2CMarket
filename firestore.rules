@@ -1,77 +1,87 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Public product catalog - reads are public, writes only by the owning farmer.
+
+    // Public product catalog
     match /products/{productId} {
       allow read: if true;
 
       allow create: if request.auth != null &&
-                      request.auth.uid == request.resource.data.farmerId;
+                    request.auth.uid == request.resource.data.farmerId;
 
       allow update, delete: if request.auth != null &&
-                              request.auth.uid == resource.data.farmerId;
+                            request.auth.uid == resource.data.farmerId;
     }
 
-    // Any authenticated user can read the directory (needed for the public
-    // Farmers page / admin tooling) but can only write their own document.
+    // Any authenticated user (including anonymous users) can read users.
+    // Users can only modify their own profile.
     match /users/{userId} {
       allow read: if request.auth != null;
-      allow write: if request.auth != null && request.auth.uid == userId;
+      allow create: if request.auth != null &&
+                    request.auth.uid == userId;
+      allow update, delete: if request.auth != null &&
+                            request.auth.uid == userId;
     }
 
-    // Orders: readable/writable only by the consumer who placed them or a
-    // farmer whose products are in the order. orderService.js already
-    // populates farmerIds on every order (used elsewhere for the
-    // array-contains query in fetchOrdersForFarmerFromFirestore), so we
-    // rely on that instead of iterating items — Firestore Rules has no
-    // .map()/lambda support, only hasAll/hasAny/hasOnly/in on lists.
+    // Orders
     match /orders/{orderId} {
       allow create: if request.auth != null;
 
       allow read, update: if request.auth != null && (
         request.auth.uid == resource.data.consumerId ||
         (resource.data.farmerIds is list &&
-          request.auth.uid in resource.data.farmerIds)
+         request.auth.uid in resource.data.farmerIds)
       );
 
       allow delete: if request.auth != null &&
-                      request.auth.uid == resource.data.consumerId;
+                    request.auth.uid == resource.data.consumerId;
     }
 
-    // Notifications are created cross-user by design (a consumer's order
-    // creates a notification for the farmer, and vice versa for status
-    // updates) so create can't be owner-restricted the way read/update/
-    // delete can.
+    // Notifications
     match /notifications/{notificationId} {
       allow create: if request.auth != null;
-      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+
+      allow read, update, delete: if request.auth != null &&
+                                  request.auth.uid == resource.data.userId;
     }
 
-    match /feedbacks/{feedbackId} {
-      allow read: if true;
-      allow write: if request.auth != null;
-    }
-
-    // Cart/wishlist/location docs are keyed by the owner's uid.
-    match /carts/{cartId} {
-      allow read, write: if request.auth != null && request.auth.uid == cartId;
-    }
-
-    match /wishlists/{wishlistId} {
-      allow read, write: if request.auth != null && request.auth.uid == wishlistId;
-    }
-
-    match /locations/{locationId} {
-      allow read, write: if request.auth != null && request.auth.uid == locationId;
-    }
-
-    // Reviews are public to read, but only the author can create/edit/delete their own.
+    // Product Reviews
     match /productReviews/{reviewId} {
       allow read: if true;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.consumerId;
-      allow update, delete: if request.auth != null && request.auth.uid == resource.data.consumerId;
+
+      allow create: if request.auth != null &&
+                    request.auth.uid == request.resource.data.consumerId;
+
+      allow update, delete: if request.auth != null &&
+                            request.auth.uid == resource.data.consumerId;
     }
 
+    // Feedback
+    match /feedbacks/{feedbackId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if false;
+    }
+
+    // Cart
+    match /carts/{cartId} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid == cartId;
+    }
+
+    // Wishlist
+    match /wishlists/{wishlistId} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid == wishlistId;
+    }
+
+    // Saved Locations
+    match /locations/{locationId} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid == locationId;
+    }
+
+    // Default deny
     match /{document=**} {
       allow read, write: if false;
     }
