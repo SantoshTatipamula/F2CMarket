@@ -1,7 +1,5 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import "leaflet/dist/leaflet.css";
-import "./utils/leafletConfig";
 
 import App from "./App";
 import ErrorBoundary from "./components/common/ui/ErrorBoundary";

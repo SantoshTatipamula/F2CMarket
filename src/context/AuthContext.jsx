@@ -20,12 +20,44 @@ import {
   loginWithEmail,
   loginWithGoogle as firebaseGoogleLogin,
   logoutUser,
+  signInAsGuest,
   onAuthStateChanged,
 } from "@/services/firebaseAuth";
 
 import { auth } from "@/config/firebase";
 
 const AuthContext = createContext();
+
+/**
+ * Shared banned/rejected checks. Used by every path that can establish a
+ * session (email login, Google login, and session-restore on page load) so
+ * a banned/rejected account can't slip through one path just because it
+ * wasn't re-checked there.
+ */
+function checkAccountStatus(firestoreUser) {
+  if (!firestoreUser) {
+    return { ok: false, error: "User profile not found." };
+  }
+
+  if (firestoreUser.banned) {
+    return {
+      ok: false,
+      error: "Your account has been suspended. Contact support.",
+    };
+  }
+
+  if (
+    firestoreUser.role === "farmer" &&
+    firestoreUser.verificationStatus === "rejected"
+  ) {
+    return {
+      ok: false,
+      error: "Your farmer application was rejected. Please contact support.",
+    };
+  }
+
+  return { ok: true };
+}
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
@@ -64,10 +96,30 @@ export function AuthProvider({ children }) {
       if (!mounted) return;
       if (!firebaseUser) {
         setUser(null);
-        setUsers([]);
         setLoading(false);
-        setUsersLoading(false);
 
+        // The public Farmers/Products/Reviews pages read collections whose
+        // Firestore rules require `request.auth != null` (see
+        // firestore.rules). Signing in anonymously satisfies that without
+        // creating an app-level "logged in" user — it just gives visitors
+        // a UID so public reads succeed. Requires Anonymous Authentication
+        // to be enabled in the Firebase console; if it isn't, this fails
+        // and we fall back to attempting the read anyway (it'll surface as
+        // usersError, same degraded behavior as before).
+        signInAsGuest().catch((error) => {
+          console.error("Anonymous sign-in failed:", error);
+          loadUsers();
+        });
+
+        return;
+      }
+
+      if (firebaseUser.isAnonymous) {
+        // Authenticated enough for public-read rules, but not a real
+        // app user — don't treat this as "logged in".
+        setUser(null);
+        setLoading(false);
+        await loadUsers();
         return;
       }
 
@@ -75,6 +127,19 @@ export function AuthProvider({ children }) {
         const firestoreUser = await getUserFromFirestore(firebaseUser.uid);
 
         if (firestoreUser) {
+          const status = checkAccountStatus(firestoreUser);
+
+          if (!status.ok) {
+            // A previously-fine session can end up here if the account was
+            // banned/rejected after they last signed in — e.g. an admin
+            // action while this tab was still open. Terminate it rather
+            // than silently letting them stay logged in.
+            console.warn("Blocking restored session:", status.error);
+            await logoutUser();
+            setUser(null);
+            return;
+          }
+
           setUser(firestoreUser);
 
           await loadUsers();
@@ -108,29 +173,15 @@ export function AuthProvider({ children }) {
       const credentials = await loginWithEmail(email, password);
       const foundUser = await getUserFromFirestore(credentials.user.uid);
 
-      if (!foundUser) {
-        return {
-          success: false,
-          error: "User profile not found.",
-        };
-      }
+      const status = checkAccountStatus(foundUser);
 
-      if (foundUser.banned) {
-        return {
-          success: false,
-          error: "Your account has been suspended. Contact support.",
-        };
-      }
-
-      if (
-        foundUser.role === "farmer" &&
-        foundUser.verificationStatus === "rejected"
-      ) {
-        return {
-          success: false,
-          error:
-            "Your farmer application was rejected. Please contact support.",
-        };
+      if (!status.ok) {
+        // Firebase Auth already has a live session for this account at
+        // this point (loginWithEmail succeeded) — sign it back out so a
+        // banned/rejected account can't just refresh the page to bypass
+        // this check via the session-restore path.
+        await logoutUser();
+        return { success: false, error: status.error };
       }
 
       setUser(foundUser);
@@ -181,11 +232,30 @@ export function AuthProvider({ children }) {
         await saveUserToFirestore(existingUser);
       }
 
+      const status = checkAccountStatus(existingUser);
+
+      if (!status.ok) {
+        await logoutUser();
+        return { success: false, error: status.error };
+      }
+
       setUser(existingUser);
+      setUsers((prevUsers) => [
+        ...prevUsers.filter((u) => u.id !== existingUser.id),
+        existingUser,
+      ]);
+
+      // Parity with email login: keep the shared directory fresh and make
+      // sure this user's orders are pulled into the local cache.
+      refreshUsers();
+      initializeOrders(existingUser.id, existingUser.role).catch((error) => {
+        console.error("Failed to initialize orders:", error);
+      });
 
       return {
         success: true,
         role: existingUser.role,
+        verificationStatus: existingUser.verificationStatus || "pending",
       };
     } catch (error) {
       return {
@@ -323,37 +393,22 @@ export function AuthProvider({ children }) {
     [],
   );
 
-  const value = useMemo(
-    () => ({
-      user,
-      users,
-      loading,
-      usersLoading,
-      usersError,
-      isAuthenticated,
-      login,
-      register,
-      signInWithGoogle,
-      updateUser,
-      logout,
-      getAllUsers,
-      updateUserInList,
-      refreshUsers,
-    }),
-    [
-      user,
-      users,
-      loading,
-      usersLoading,
-      usersError,
-      isAuthenticated,
-      updateUser,
-      logout,
-      getAllUsers,
-      updateUserInList,
-      refreshUsers,
-    ],
-  );
+  const value = {
+  user,
+  users,
+  loading,
+  usersLoading,
+  usersError,
+  isAuthenticated,
+  login,
+  register,
+  signInWithGoogle,
+  updateUser,
+  logout,
+  getAllUsers,
+  updateUserInList,
+  refreshUsers,
+};
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

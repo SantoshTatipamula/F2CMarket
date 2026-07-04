@@ -4,8 +4,8 @@ import { Lock, Mail, ShieldCheck } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 export default function AdminLogin() {
-  const navigate    = useNavigate();
-  const { login }   = useAuth();
+  const navigate       = useNavigate();
+  const { login, logout } = useAuth();
 
   const [form,    setForm]    = useState({ email: "", password: "" });
   const [error,   setError]   = useState("");
@@ -19,19 +19,35 @@ export default function AdminLogin() {
     if (error) setError("");
   };
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     if (!isValid || loading) return;
     setLoading(true);
-    setTimeout(() => {
-      const result = login(form.email.trim(), form.password);
-      if (!result.success) { setError(result.error); setLoading(false); return; }
-      if (result.role !== "admin") {
-        setError("This portal is for admins only.");
-        setLoading(false);
+    setError("");
+
+    try {
+      const result = await login(form.email.trim(), form.password);
+
+      if (!result.success) {
+        setError(result.error || "Invalid email or password.");
         return;
       }
+
+      if (result.role !== "admin") {
+        // login() already established a session for this (non-admin)
+        // account — undo it so nobody ends up signed in via the wrong
+        // portal, then send them back to the main site.
+        await logout();
+        setError("This portal is for admins only. Use the main login instead.");
+        return;
+      }
+
       navigate("/admin/dashboard", { replace: true });
-    }, 500);
+    } catch (err) {
+      console.error("Admin login error:", err);
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleKeyDown = (e) => { if (e.key === "Enter") handleLogin(); };

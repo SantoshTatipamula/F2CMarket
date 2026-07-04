@@ -8,6 +8,7 @@ import {
   updatePassword,
   EmailAuthProvider,
   reauthenticateWithCredential,
+  signInAnonymously,
 } from "firebase/auth";
 
 import { auth } from "@/config/firebase";
@@ -23,6 +24,8 @@ export const loginWithEmail = (email, password) =>
 export const loginWithGoogle = () => signInWithPopup(auth, googleProvider);
 
 export const logoutUser = () => signOut(auth);
+
+export const signInAsGuest = () => signInAnonymously(auth);
 
 export { onAuthStateChanged };
 

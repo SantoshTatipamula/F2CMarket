@@ -1,8 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 
 import { useLocation } from "@/context/LocationContext";
 import LocationSearch from "@/components/common/location/LocationSearch";
 import { isServiceableLocation } from "@/utils/locationValidator";
+
+// Leaflet + react-leaflet are ~240KB — lazy-load so they're only fetched
+// when this dialog is actually opened, instead of bundled into every page.
+const MapView = lazy(() => import("@/components/map/MapView"));
 
 import {
   Dialog,
@@ -12,7 +16,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import MapView from "@/components/map/MapView";
 
 export default function LocationDialog({
   open,
@@ -105,11 +108,17 @@ export default function LocationDialog({
 
             {selectedLocation?.latitude != null &&
   selectedLocation?.longitude != null && (
-    <MapView
-      latitude={selectedLocation.latitude}
-      longitude={selectedLocation.longitude}
-      onLocationChange={setLocalSelectedLocation}
-    />
+    <Suspense
+      fallback={
+        <div className="h-64 w-full animate-pulse rounded-xl bg-[var(--surface-2)]" />
+      }
+    >
+      <MapView
+        latitude={selectedLocation.latitude}
+        longitude={selectedLocation.longitude}
+        onLocationChange={setLocalSelectedLocation}
+      />
+    </Suspense>
   )}
 
             <div className="rounded-xl bg-[var(--surface)] p-4">

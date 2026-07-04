@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MapContainer, Marker, Popup, TileLayer, useMap } from "react-leaflet";
+import "@/utils/leafletConfig";
 
 /* Keeps the map centered whenever position changes */
 function RecenterMap({ position }) {

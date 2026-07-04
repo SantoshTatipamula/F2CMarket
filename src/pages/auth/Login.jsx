@@ -14,7 +14,6 @@ function getRoleRedirect(result) {
   const map = {
     consumer: "/",
     farmer: "/farmer/dashboard",
-    admin: "/admin/dashboard",
   };
   return map[result.role] || "/";
 }
@@ -22,7 +21,7 @@ function getRoleRedirect(result) {
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signInWithGoogle } = useAuth();
+  const { login, signInWithGoogle, logout } = useAuth();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -81,6 +80,14 @@ export default function Login() {
         return;
       }
 
+      if (result.role === "admin") {
+        // login() already signed this account in — undo it. Admins must
+        // use the dedicated Admin Portal, not this form.
+        await logout();
+        setError("Admin accounts must sign in through the Admin Portal.");
+        return;
+      }
+
       navigate(from || getRoleRedirect(result), { replace: true });
     } catch (error) {
   switch (error.code) {
@@ -127,6 +134,12 @@ export default function Login() {
 
       if (!result.success) {
         setError(result.error);
+        return;
+      }
+
+      if (result.role === "admin") {
+        await logout();
+        setError("Admin accounts must sign in through the Admin Portal.");
         return;
       }
 
