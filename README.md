@@ -237,7 +237,7 @@ Add screenshots of:
 
 **Santosh Tatipamula**
 MCA Student
-Satavahana University, Telangana
+JNTUH University, Telangana
 GitHub: https://github.com/SantoshTatipamula
 
 ---
